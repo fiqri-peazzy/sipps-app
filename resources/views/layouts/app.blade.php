@@ -1,100 +1,36 @@
-<!doctype html>
-<html lang="en">
-<!-- [Head] start -->
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<head>
-    <title>{{ config('app.name') }} - @yield('pageTitle', 'Dashboard')</title>
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- [Meta] -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="description"
-        content="Berry is trending dashboard template made using Bootstrap 5 design framework. Berry is available in Bootstrap, React, CodeIgniter, Angular,  and .net Technologies." />
-    <meta name="keywords"
-        content="Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard" />
-    <meta name="author" content="codedthemes" />
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- [Favicon] icon -->
-    <link rel="icon" href="{{ asset('backend/assets/images/favicon.svg') }}" type="image/x-icon" />
-    <!-- [Google Font] Family -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-        id="main-font-link" />
-    <!-- [phosphor Icons] https://phosphoricons.com/ -->
-    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/phosphor/duotone/style.css') }}" />
-    <!-- [Tabler Icons] https://tablericons.com -->
-    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/tabler-icons.min.css') }}" />
-    <!-- [Feather Icons] https://feathericons.com -->
-    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/feather.css') }}" />
-    <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
-    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/fontawesome.css') }}" />
-    <!-- [Material Icons] https://fonts.google.com/icons -->
-    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/material.css') }}" />
-    <!-- [Template CSS Files] -->
-    <link rel="stylesheet" href=" {{ asset('backend/assets/css/style.css') }}" id="main-style-link" />
-    <link rel="stylesheet" href=" {{ asset('backend/assets/css/style-preset.css') }}" />
-    @stack('styles')
-</head>
-<!-- [Head] end -->
-<!-- [Body] Start -->
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            <livewire:layout.navigation />
 
-<body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="ltr"
-    data-pc-theme="light">
-    <!-- [ Pre-loader ] start -->
-    <div class="loader-bg">
-        <div class="loader-track">
-            <div class="loader-fill"></div>
+            <!-- Page Heading -->
+            @if (isset($header))
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
+
+            <!-- Page Content -->
+            <main>
+                {{ $slot }}
+            </main>
         </div>
-    </div>
-    <!-- [ Pre-loader ] End -->
-    @include('layouts.sidebar')
-
-    @include('layouts.navbar')
-
-
-    <!-- [ Main Content ] start -->
-    <div class="pc-container">
-        <div class="pc-content">
-            @yield('content')
-        </div>
-    </div>
-    @include('layouts.footer')
-    <!-- Required Js -->
-    <script src="{{ asset('backend/assets/js/plugins/popper.min.js') }}"></script>
-    <script src="{{ asset('backend/assets/js/plugins/simplebar.min.js') }}"></script>
-    <script src="{{ asset('backend/assets/js/plugins/bootstrap.min.js') }}"></script>
-    {{-- <script src="{{ asset('backend/assets/js/icon/custom-font.js') }}"></script> --}}
-    <script src="{{ asset('backend/assets/js/script.js') }}"></script>
-    <script src="{{ asset('backend/assets/js/theme.js') }}"></script>
-    <script src="{{ asset('backend/assets/js/plugins/feather.min.js') }}"></script>
-
-
-    <script>
-        layout_change('light');
-    </script>
-
-    <script>
-        font_change('Roboto');
-    </script>
-
-    <script>
-        change_box_container('false');
-    </script>
-
-    <script>
-        layout_caption_change('true');
-    </script>
-
-    <script>
-        layout_rtl_change('false');
-    </script>
-
-    <script>
-        preset_change('preset-1');
-    </script>
-    @stack('scripts')
-
-</body>
-<!-- [Body] end -->
-
+    </body>
 </html>
