@@ -2,7 +2,7 @@
 <nav class="pc-sidebar">
     <div class="navbar-wrapper">
         <div class="m-header">
-            <a href="{{ route('admin.dashboard') }}" class="b-brand text-primary">
+            <a href="{{ route('dashboard') }}" class="b-brand text-primary">
                 <!-- ========   Change your logo from here   ============ -->
                 <img src="{{ asset('backend/assets/images/logo.svg') }}" alt="" class="logo logo-lg" />
             </a>

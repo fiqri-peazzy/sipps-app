@@ -1,36 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <title>{{ config('app.name') }} - @yield('title', 'Dashboard')</title>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            <livewire:layout.navigation />
+    <link rel="icon" href="{{ asset('backend/assets/images/favicon.svg') }}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+        id="main-font-link" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/phosphor/duotone/style.css') }}" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/tabler-icons.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/feather.css') }}" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/fontawesome.css') }}" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/material.css') }}" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/css/style.css') }}" id="main-style-link" />
+    <link rel="stylesheet" href="{{ asset('backend/assets/css/style-preset.css') }}" />
 
-            <!-- Page Heading -->
+    @stack('styles')
+</head>
+
+<body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="ltr"
+    data-pc-theme="light">
+
+    <div class="loader-bg">
+        <div class="loader-track">
+            <div class="loader-fill"></div>
+        </div>
+    </div>
+
+    @include('layouts.sidebar')
+
+    @include('layouts.navbar')
+
+    <div class="pc-container">
+        <div class="pc-content">
+
             @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                <div class="page-header">
+                    <div class="page-block">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                {{ $header }}
+                            </div>
+                        </div>
                     </div>
-                </header>
+                </div>
             @endif
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+            {{ $slot }}
+
         </div>
-    </body>
+    </div>
+
+    @include('layouts.footer')
+
+    <script src="{{ asset('backend/assets/js/plugins/popper.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/plugins/simplebar.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/plugins/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/fonts/custom-font.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/script.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/theme.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/plugins/feather.min.js') }}"></script>
+
+    <script>
+        layout_change('light');
+        font_change('Roboto');
+        change_box_container('false');
+        layout_caption_change('true');
+        layout_rtl_change('false');
+        preset_change('preset-1');
+    </script>
+
+    @stack('scripts')
+</body>
+
 </html>
