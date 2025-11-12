@@ -17,10 +17,18 @@
     <link rel="stylesheet" href="{{ asset('backend/assets/fonts/feather.css') }}" />
     <link rel="stylesheet" href="{{ asset('backend/assets/fonts/fontawesome.css') }}" />
     <link rel="stylesheet" href="{{ asset('backend/assets/fonts/material.css') }}" />
+
+    <link href="
+https://cdn.jsdelivr.net/npm/sweetalert2@11.26.3/dist/sweetalert2.min.css
+" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ asset('backend/assets/css/style.css') }}" id="main-style-link" />
     <link rel="stylesheet" href="{{ asset('backend/assets/css/style-preset.css') }}" />
 
+
     @stack('styles')
+    @livewireStyles
+
 </head>
 
 <body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="ltr"
@@ -57,7 +65,7 @@
     </div>
 
     @include('layouts.footer')
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.3/dist/sweetalert2.all.min.js"></script>
     <script src="{{ asset('backend/assets/js/plugins/popper.min.js') }}"></script>
     <script src="{{ asset('backend/assets/js/plugins/simplebar.min.js') }}"></script>
     <script src="{{ asset('backend/assets/js/plugins/bootstrap.min.js') }}"></script>
@@ -65,7 +73,8 @@
     <script src="{{ asset('backend/assets/js/script.js') }}"></script>
     <script src="{{ asset('backend/assets/js/theme.js') }}"></script>
     <script src="{{ asset('backend/assets/js/plugins/feather.min.js') }}"></script>
-
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script>
         layout_change('light');
         font_change('Roboto');
@@ -74,8 +83,9 @@
         layout_rtl_change('false');
         preset_change('preset-1');
     </script>
-
     @stack('scripts')
+    @livewireScripts
+
 </body>
 
 </html>

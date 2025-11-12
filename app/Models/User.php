@@ -14,8 +14,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
         'google_id',
         'avatar',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -29,5 +31,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Helper methods untuk cek role
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
     }
 }

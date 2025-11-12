@@ -46,7 +46,11 @@ class GoogleAuthController extends Controller
 
             Auth::login($user);
 
-            return redirect()->intended(route('dashboard'));
+            if ($user->isAdmin()) {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+
+            return redirect()->intended(route('customer.dashboard'));
         } catch (\Exception $e) {
             return redirect()->route('login')->withErrors(['email' => 'Failed to authenticate with Google. Please try again.']);
         }

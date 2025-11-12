@@ -1,15 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <div class="page-header-title">
+            <h5 class="m-b-10">Dashboard</h5>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Welcome to Dashboard</h5>
+                </div>
+                <div class="card-body">
+                    <p>You're logged in as <strong>{{ Auth::user()->name }}</strong></p>
+                    <p>Email: {{ Auth::user()->email }}</p>
                 </div>
             </div>
         </div>

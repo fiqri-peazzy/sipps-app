@@ -8,8 +8,13 @@ class AdminController extends Controller
 {
     //
 
-    public function index()
+    public function dashboard()
     {
         return view('admin.dashboard');
+    }
+
+    public function manageProduk()
+    {
+        return view('admin.manajemen-produk');
     }
 }

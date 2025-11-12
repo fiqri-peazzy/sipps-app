@@ -2,7 +2,7 @@
 <nav class="pc-sidebar">
     <div class="navbar-wrapper">
         <div class="m-header">
-            <a href="{{ route('dashboard') }}" class="b-brand text-primary">
+            <a href="{{ route('admin.dashboard') }}" class="b-brand text-primary">
                 <!-- ========   Change your logo from here   ============ -->
                 <img src="{{ asset('backend/assets/images/logo.svg') }}" alt="" class="logo logo-lg" />
             </a>
@@ -14,30 +14,18 @@
                     <i class="ti ti-dashboard"></i>
                 </li>
                 <li class="pc-item">
-                    <a href="../dashboard/index.html" class="pc-link"><span class="pc-micon"><i
+                    <a href="{{ route('admin.dashboard') }}" class="pc-link"><span class="pc-micon"><i
                                 class="ti ti-dashboard"></i></span><span class="pc-mtext">Default</span></a>
                 </li>
 
                 <li class="pc-item pc-caption">
-                    <label>Elements</label>
+                    <label>Manajemen Produksi</label>
                     <i class="ti ti-apps"></i>
                 </li>
                 <li class="pc-item">
-                    <a href="../elements/bc_typography.html" class="pc-link">
+                    <a href="{{ route('admin.produk.index') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-typography"></i></span>
-                        <span class="pc-mtext">Typography</span>
-                    </a>
-                </li>
-                <li class="pc-item">
-                    <a href="../elements/bc_color.html" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
-                        <span class="pc-mtext">Color</span>
-                    </a>
-                </li>
-                <li class="pc-item">
-                    <a href="../elements/icon-tabler.html" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-plant-2"></i></span>
-                        <span class="pc-mtext">Icons</span>
+                        <span class="pc-mtext">Data Produksi</span>
                     </a>
                 </li>
 
