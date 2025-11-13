@@ -27,9 +27,17 @@ Route::prefix('customer')
     ->middleware(['auth', 'verified', 'role:customer'])
     ->group(function () {
         Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [CustomerController::class, 'profile'])->name('profile');
+        Route::get('/orders', [CustomerController::class, 'orders'])->name('orders.index');
+        Route::get('/orders/create', [CustomerController::class, 'createOrder'])->name('order.create');
     });
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
+Route::prefix('api')
+    ->name('api.')
+    ->group(function () {
+        Route::get('/jenis-sablon{id}', [HomeController::class, 'show'])->name('jenis-sablon');
+    });
 require __DIR__ . '/auth.php';

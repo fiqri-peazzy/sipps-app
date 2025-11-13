@@ -3,314 +3,445 @@
 @section('title', 'Beranda')
 
 @section('content')
-    <!-- Hero Section -->
-    <div class="hero-section hero-style-2">
+    <style>
+        .hero-banner {
+            background: linear-gradient(135deg, #6366F1 0%, #F97316 100%);
+            padding: 80px 0;
+            margin-bottom: 50px;
+        }
+
+        .hero-content h1 {
+            color: white;
+            font-weight: 800;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero-content p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .btn-hero {
+            background: white;
+            color: #6366F1;
+            padding: 12px 35px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+
+        .btn-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-weight: 700;
+            font-size: 36px;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        .section-title p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366F1 0%, #F97316 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .service-icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .service-card h4 {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        .service-card p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .portfolio-card {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .portfolio-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .portfolio-card:hover .portfolio-img {
+            transform: scale(1.1);
+        }
+
+        .portfolio-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            padding: 25px;
+            color: white;
+        }
+
+        .portfolio-category {
+            background: #F97316;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .portfolio-overlay h5 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .portfolio-overlay p {
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366F1 0%, #F97316 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .testimonial-info h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .testimonial-rating {
+            color: #fbbf24;
+        }
+
+        .testimonial-text {
+            color: #64748b;
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #6366F1 0%, #F97316 100%);
+            padding: 80px 0;
+            margin-top: 80px;
+            text-align: center;
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-weight: 700;
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .btn-cta {
+            background: white;
+            color: #6366F1;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <div class="hero-content-wrapper">
-                        <h4 class="wow fadeInUp" data-wow-delay=".2s">Selamat Datang di</h4>
-                        <h2 class="mb-30 wow fadeInUp" data-wow-delay=".4s">NNClothing Sablon Profesional</h2>
-                        <p class="mb-50 wow fadeInUp" data-wow-delay=".6s" style="font-size: 18px; color: #64748b;">Layanan
-                            sablon berkualitas tinggi dengan berbagai teknik modern. DTF, Manual, Polyflex, dan Sublim untuk
-                            hasil terbaik pesanan Anda.</p>
-                        <div class="buttons">
-                            <a href="#harga" class="button button-lg radius-10 wow fadeInUp" data-wow-delay=".7s">Lihat
-                                Harga</a>
-                            <a href="#layanan" class="button button-lg button-outline radius-10 wow fadeInUp ms-3"
-                                data-wow-delay=".8s">Layanan Kami</a>
-                        </div>
-                        <div class="mt-4 wow fadeInUp" data-wow-delay=".9s">
-                            @auth
-                                <a href="{{ route('customer.order.create') }}" class="text-primary"
-                                    style="font-size: 16px; font-weight: 600;">
-                                    <i class="lni lni-shopping-basket"></i> Buat Pesanan Sekarang →
-                                </a>
-                            @else
-                                <p style="color: #64748b; font-size: 14px;">
-                                    <i class="lni lni-information"></i> Login untuk mulai memesan
-                                </p>
-                            @endauth
-                        </div>
+                    <div class="hero-content">
+                        <h1 class="wow fadeInUp" data-wow-delay=".2s">Jasa Sablon Profesional untuk Semua Kebutuhan Anda</h1>
+                        <p class="wow fadeInUp" data-wow-delay=".4s">Layanan sablon berkualitas tinggi dengan berbagai teknik
+                            modern. DTF, Manual, Polyflex, dan Sublim dengan hasil terbaik dan harga terjangkau.</p>
+                        <a href="#layanan" class="btn-hero wow fadeInUp" data-wow-delay=".6s">Lihat Layanan Kami</a>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="hero-image">
-                        <img src="{{ asset('frontend/assets/img/hero/sablon-hero.svg') }}" alt="Sablon NNClothing"
-                            class="wow fadeInRight" data-wow-delay=".2s">
+                <div class="col-lg-6 text-center">
+                    {{-- <img src="https://images.pexels.com/photos/6214452/pexels-photo-6214452.jpeg" alt="Sablon NNClothing"
+                        class="img-fluid wow fadeInRight" data-wow-delay=".2s"> --}}
+                    <img src="{{ asset('backend/assets/images/a124572d-dcd5-407d-96b7-d315f0876e18.jpg') }}"
+                        alt="Sablon NNClothing" class="img-fluid wow fadeInRight" data-wow-delay=".2s">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Layanan Section -->
+    <section id="layanan" class="py-5">
+        <div class="container">
+            <div class="section-title">
+                <h2 class="wow fadeInUp" data-wow-delay=".2s">Layanan Sablon Kami</h2>
+                <p class="wow fadeInUp" data-wow-delay=".4s">Berbagai teknik sablon profesional untuk memenuhi kebutuhan
+                    Anda</p>
+            </div>
+            <div class="row">
+                @foreach ($jenisSablons as $index => $jenis)
+                    <div class="col-lg-3 col-md-6">
+                        <div class="service-card wow fadeInUp" data-wow-delay="{{ 0.2 + $index * 0.1 }}s"
+                            onclick="showServiceModal({{ $jenis->id }})">
+                            <div class="service-icon">
+                                <i class="lni lni-brush"></i>
+                            </div>
+                            <h4>{{ $jenis->nama }}</h4>
+                            <p>{{ Str::limit($jenis->deskripsi, 100) }}</p>
+                            <small style="color: #6366F1; font-weight: 600;">{{ $jenis->produks_count }} Varian
+                                Tersedia</small>
+                        </div>
                     </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-5" style="background: #f8fafc;">
+        <div class="container">
+            <div class="section-title">
+                <h2 class="wow fadeInUp" data-wow-delay=".2s">Portfolio Karya Kami</h2>
+                <p class="wow fadeInUp" data-wow-delay=".4s">Hasil sablon yang telah kami kerjakan dengan kualitas terbaik
+                </p>
+            </div>
+            <div class="row">
+                @foreach ($portfolios as $index => $portfolio)
+                    <div class="col-lg-3 col-md-6">
+                        <div class="portfolio-card wow fadeInUp" data-wow-delay="{{ 0.2 + $index * 0.1 }}s">
+                            <img src="{{ $portfolio['image'] }}" alt="{{ $portfolio['title'] }}" class="portfolio-img">
+                            <div class="portfolio-overlay">
+                                <span class="portfolio-category">{{ $portfolio['category'] }}</span>
+                                <h5>{{ $portfolio['title'] }}</h5>
+                                <p>{{ $portfolio['description'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section id="testimonial" class="py-5">
+        <div class="container">
+            <div class="section-title">
+                <h2 class="wow fadeInUp" data-wow-delay=".2s">Testimoni Pelanggan</h2>
+                <p class="wow fadeInUp" data-wow-delay=".4s">Apa kata mereka yang telah menggunakan layanan kami</p>
+            </div>
+            <div class="row">
+                @foreach ($testimonials as $index => $testimonial)
+                    <div class="col-lg-4 col-md-6">
+                        <div class="testimonial-card wow fadeInUp" data-wow-delay="{{ 0.2 + $index * 0.1 }}s">
+                            <div class="testimonial-header">
+                                <div class="testimonial-avatar">
+                                    {{ substr($testimonial['name'], 0, 1) }}
+                                </div>
+                                <div class="testimonial-info">
+                                    <h5>{{ $testimonial['name'] }}</h5>
+                                    <div class="testimonial-rating">
+                                        @for ($i = 0; $i < $testimonial['rating']; $i++)
+                                            <i class="lni lni-star-filled"></i>
+                                        @endfor
+                                    </div>
+                                    <small style="color: #94a3b8;">{{ $testimonial['date'] }}</small>
+                                </div>
+                            </div>
+                            <p class="testimonial-text">"{{ $testimonial['text'] }}"</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="wow fadeInUp" data-wow-delay=".2s">Siap Memesan Sablon?</h2>
+            <p class="wow fadeInUp" data-wow-delay=".4s">Dapatkan hasil sablon berkualitas dengan harga terjangkau</p>
+            @auth
+                <a href="{{ route('customer.order.create') }}" class="btn-cta wow fadeInUp" data-wow-delay=".6s">Buat Pesanan
+                    Sekarang</a>
+            @else
+                <a href="{{ route('login') }}" class="btn-cta wow fadeInUp" data-wow-delay=".6s">Login untuk Memesan</a>
+            @endauth
+        </div>
+    </section>
+
+    <!-- Modal Detail Layanan -->
+    <div class="modal fade" id="serviceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serviceModalTitle">Detail Layanan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="serviceModalBody">
+                    Loading...
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Layanan Section -->
-    <section id="layanan" class="feature-section feature-style-2 pt-100 pb-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="row justify-content-center">
-                        <div class="col-xl-6 col-lg-8 col-md-9">
-                            <div class="section-title text-center mb-60">
-                                <h3 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Jenis Layanan Sablon Kami</h3>
-                                <p class="wow fadeInUp" data-wow-delay=".4s">Kami menyediakan berbagai teknik sablon
-                                    profesional untuk memenuhi kebutuhan Anda</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @foreach ($jenisSablons as $index => $jenis)
-                            <div class="col-lg-6 col-md-6">
-                                <div class="single-feature wow fadeInUp" data-wow-delay="{{ 0.2 + $index * 0.2 }}s">
-                                    <div class="icon">
-                                        <i class="lni lni-brush"></i>
-                                    </div>
-                                    <div class="content">
-                                        <h5 class="mb-25">{{ $jenis->nama }}</h5>
-                                        <p>{{ $jenis->deskripsi }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Harga Section -->
-    <section id="harga" class="pricing-section pricing-style-1 bg-white pt-100 pb-100">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-10">
-                    <div class="section-title text-center mb-60">
-                        <h3 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Paket Layanan Kami</h3>
-                        <p class="wow fadeInUp" data-wow-delay=".4s">Pilih paket layanan yang sesuai dengan kebutuhan Anda.
-                            Harga transparan dan kualitas terjamin!</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-6 col-md-8">
-                    <div class="single-pricing wow fadeInUp" data-wow-delay=".2s">
-                        <div class="icon mb-4">
-                            <i class="lni lni-timer" style="font-size: 48px; color: #22c55e;"></i>
-                        </div>
-                        <h6 style="color: #22c55e; font-weight: 600;">Layanan</h6>
-                        <h4 style="font-weight: 700;">Regular</h4>
-                        <h5 class="mb-3" style="color: #64748b;">Estimasi 2 Hari Kerja</h5>
-                        <ul>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #22c55e;"></i>
-                                Kualitas Terjamin</li>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #22c55e;"></i>
-                                Harga Terjangkau</li>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #22c55e;"></i>
-                                Cocok untuk pesanan tidak mendesak</li>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #22c55e;"></i>
-                                Gratis Konsultasi Desain</li>
-                        </ul>
-                        <div class="mt-4 mb-3">
-                            <span style="font-size: 14px; color: #64748b;">Mulai dari</span>
-                            <h3 style="color: #22c55e; font-weight: 700;">Rp 35.000</h3>
-                        </div>
-                        <a href="#kontak" class="button radius-30" style="width: 100%;">Pesan Sekarang</a>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-8">
-                    <div class="single-pricing active wow fadeInUp" data-wow-delay=".4s">
-                        <span class="button button-sm radius-30 popular-badge"
-                            style="background: linear-gradient(135deg, #6366F1 0%, #F97316 100%); position: absolute; top: -15px; right: 20px;">Populer</span>
-                        <div class="icon mb-4">
-                            <i class="lni lni-bolt" style="font-size: 48px; color: #ef4444;"></i>
-                        </div>
-                        <h6 style="color: #ef4444; font-weight: 600;">Layanan</h6>
-                        <h4 style="font-weight: 700;">Express</h4>
-                        <h5 class="mb-3" style="color: #64748b;">Estimasi 1 Hari Kerja</h5>
-                        <ul>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #ef4444;"></i>
-                                Prioritas Tertinggi</li>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #ef4444;"></i>
-                                Pengerjaan Cepat</li>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #ef4444;"></i>
-                                Cocok untuk pesanan mendesak</li>
-                            <li style="color: #64748b;"> <i class="lni lni-checkmark-circle" style="color: #ef4444;"></i>
-                                Gratis Konsultasi Desain</li>
-                        </ul>
-                        <div class="mt-4 mb-3">
-                            <span style="font-size: 14px; color: #64748b;">Mulai dari</span>
-                            <h3 style="color: #ef4444; font-weight: 700;">Rp 52.500</h3>
-                        </div>
-                        <a href="#kontak" class="button radius-30" style="width: 100%;">Pesan Sekarang</a>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-center mt-4">
-                <div class="col-lg-10 text-center">
-                    <p class="text-muted wow fadeInUp" data-wow-delay=".6s">
-                        *Harga dapat bervariasi tergantung jenis sablon, ukuran, dan tingkat kerumitan desain.
-                        <a href="#kontak" class="text-primary">Hubungi kami</a> untuk informasi detail.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tentang Section -->
-    <section id="tentang" class="about-section about-style-3 pt-100 pb-100">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <div class="about-image wow fadeInLeft" data-wow-delay=".2s">
-                        <img src="{{ asset('frontend/assets/img/about/about-nn.jpg') }}" alt="Tentang NNClothing">
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="about-content-wrapper">
-                        <div class="section-title mb-40">
-                            <h3 class="mb-25 wow fadeInUp" data-wow-delay=".2s">Mengapa Memilih NNClothing?</h3>
-                            <p class="wow fadeInUp" data-wow-delay=".4s">
-                                NNClothing adalah penyedia jasa sablon profesional yang berpengalaman dengan komitmen
-                                memberikan hasil terbaik untuk setiap pesanan. Kami menggunakan teknologi modern dan bahan
-                                berkualitas tinggi untuk memastikan kepuasan pelanggan.
-                            </p>
-                        </div>
-                        <div class="counter-up-wrapper mb-40 wow fadeInUp" data-wow-delay=".6s">
-                            <div class="single-counter">
-                                <h4 class="countup" id="secondo1" cup-end="500" cup-append="+">500+</h4>
-                                <h6>Pelanggan Puas</h6>
-                            </div>
-                            <div class="single-counter">
-                                <h4 class="countup" id="secondo2" cup-end="1000" cup-append="+">1000+</h4>
-                                <h6>Pesanan Selesai</h6>
-                            </div>
-                            <div class="single-counter">
-                                <h4 class="countup" id="secondo3" cup-end="5" cup-append=" Tahun">5 Tahun</h4>
-                                <h6>Pengalaman</h6>
-                            </div>
-                        </div>
-                        <a href="#kontak" class="button button-lg radius-3 wow fadeInUp" data-wow-delay=".7s">Hubungi
-                            Kami</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Kontak Section -->
-    <section id="kontak" class="contact-section contact-style-6 pt-100 pb-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-7">
-                    <div class="contact-form-wrapper">
-                        <div class="section-title mb-40">
-                            <h3 class="mb-15">Hubungi Kami</h3>
-                            <p>Punya pertanyaan atau ingin konsultasi? Kirim pesan kepada kami dan tim kami akan segera
-                                merespons!</p>
-                        </div>
-                        <form action="{{ route('contact.store') }}" method="POST">
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="single-input">
-                                        <label for="name">Nama Lengkap</label>
-                                        <input type="text" id="name" name="name" class="form-input"
-                                            placeholder="Nama Anda" required>
-                                        <i class="lni lni-user"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="single-input">
-                                        <label for="email">Email</label>
-                                        <input type="email" id="email" name="email" class="form-input"
-                                            placeholder="Email Anda" required>
-                                        <i class="lni lni-envelope"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="single-input">
-                                        <label for="phone">Nomor WhatsApp</label>
-                                        <input type="text" id="phone" name="phone" class="form-input"
-                                            placeholder="08xx xxxx xxxx" required>
-                                        <i class="lni lni-phone"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="single-input">
-                                        <label for="subject">Subjek</label>
-                                        <input type="text" id="subject" name="subject" class="form-input"
-                                            placeholder="Subjek Pesan" required>
-                                        <i class="lni lni-text-format"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="single-input">
-                                        <label for="message">Pesan</label>
-                                        <textarea name="message" id="message" class="form-input" placeholder="Tulis pesan Anda..." rows="6"
-                                            required></textarea>
-                                        <i class="lni lni-comments-alt"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-button">
-                                        <button type="submit" class="button radius-10">Kirim Pesan <i
-                                                class="lni lni-telegram-original"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-lg-5 order-first order-lg-last">
-                    <div class="left-wrapper">
-                        <div class="section-title mb-40">
-                            <h3 class="mb-15">Informasi Kontak</h3>
-                            <p>Jangan ragu untuk menghubungi kami kapan saja. Kami siap membantu kebutuhan sablon Anda!</p>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 col-md-6">
-                                <div class="single-item">
-                                    <div class="icon">
-                                        <i class="lni lni-phone"></i>
-                                    </div>
-                                    <div class="text">
-                                        <p>+62 812-3456-7890</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 col-md-6">
-                                <div class="single-item">
-                                    <div class="icon">
-                                        <i class="lni lni-envelope"></i>
-                                    </div>
-                                    <div class="text">
-                                        <p>info@nnclothing.com</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 col-md-6">
-                                <div class="single-item">
-                                    <div class="icon">
-                                        <i class="lni lni-whatsapp"></i>
-                                    </div>
-                                    <div class="text">
-                                        <p>WhatsApp: +62 812-3456-7890</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 col-md-6">
-                                <div class="single-item">
-                                    <div class="icon">
-                                        <i class="lni lni-map-marker"></i>
-                                    </div>
-                                    <div class="text">
-                                        <p>Manado, Sulawesi Utara, Indonesia</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 @endsection
+
+@push('scripts')
+    <script>
+        function showServiceModal(jenisId) {
+            var url = "{{ route('api.jenis-sablon', ['id' => 'JENIS_ID']) }}".replace('JENIS_ID', encodeURIComponent(
+                jenisId));
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // judul + deskripsi
+                    document.getElementById('serviceModalTitle').textContent = data.nama || data.title || '';
+                    // build HTML utama dan tabel rows
+                    var bodyHtml = `
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <h6>Deskripsi</h6>
+                        <p>${data.deskripsi ?? ''}</p>
+                    </div>
+                    <div class="col-12">
+                        <h6>Pilihan Layanan</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Ukuran</th>
+                                        <th>Regular</th>
+                                        <th>Express</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="priceTable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-12 text-center mt-3">
+                        <a id="orderNowBtn" href="{{ route('customer.order.create') }}?jenis=${jenisId}" class="btn btn-primary">Pesan Sekarang</a>
+                    </div>
+                </div>
+            `;
+                    document.getElementById('serviceModalBody').innerHTML = bodyHtml;
+
+                    // populate priceTable
+                    var tbody = document.getElementById('priceTable');
+                    if (tbody && Array.isArray(data.priceTable)) {
+                        var rows = '';
+                        data.priceTable.forEach(item => {
+                            rows += `
+                        <tr>
+                            <td>${item.ukuran ?? ''}</td>
+                            <td>${item.regular ?? ''}</td>
+                            <td>${item.express ?? ''}</td>
+                        </tr>
+                    `;
+                        });
+                        tbody.innerHTML = rows;
+                    } else {
+                        if (tbody) tbody.innerHTML =
+                            '<tr><td colspan="3" class="text-center">Tidak ada data harga</td></tr>';
+                    }
+
+                    // pastikan tombol Pesan mengarah ke url dengan query yang benar (escape)
+                    var orderBtn = document.getElementById('orderNowBtn');
+                    if (orderBtn) {
+                        var href = "{{ route('customer.order.create') }}" + '?jenis=' + encodeURIComponent(jenisId);
+                        orderBtn.setAttribute('href', href);
+                    }
+
+                    var myModal = new bootstrap.Modal(document.getElementById('serviceModal'));
+                    myModal.show();
+                })
+                .catch(err => {
+                    console.error('Error fetching service detail:', err);
+                    // optional: tampilkan pesan ke user
+                });
+        }
+    </script>
+@endpush
