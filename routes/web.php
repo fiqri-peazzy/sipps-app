@@ -4,8 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
 use App\Livewire\Admin\ManajemenProduk;
+use App\Http\Controllers\HomeController;
 
-Route::view('/', 'welcome');
+
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::post('/contact', [HomeController::class, 'contact'])->name('contact.store');
+
 
 Route::prefix('admin')
     ->name('admin.')
