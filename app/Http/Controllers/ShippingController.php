@@ -22,14 +22,10 @@ class ShippingController extends Controller
     {
         $provinces = $this->rajaOngkir->getProvinces();
 
-        echo "<pre>";
-        print_r($provinces);
-        echo "</pre>";
-
-        // return response()->json([
-        //     'success' => true,
-        //     'data' => $provinces
-        // ]);
+        return response()->json([
+            'success' => true,
+            'data' => $provinces
+        ]);
     }
 
     /**

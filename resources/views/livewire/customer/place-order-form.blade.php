@@ -399,12 +399,12 @@
                             select.empty().append('<option value="">Pilih Provinsi</option>');
 
                             $.each(response.data, function(index, provinsi) {
-                                select.append('<option value="' + provinsi.province_id + '" data-name="' +
-                                    provinsi.province + '">' + provinsi.province + '</option>');
+                                select.append('<option value="' + provinsi.id + '" data-name="' +
+                                    provinsi.name + '">' + provinsi.name + '</option>');
                             });
 
                             // Set default Gorontalo if exists
-                            @this.set('provinsi', 'Gorontalo');
+                            // @this.set('provinsi', 'Gorontalo');
                         }
                     },
                     error: function() {
@@ -418,10 +418,10 @@
                 var provinceId = $(this).val();
                 var provinceName = $(this).find(':selected').data('name');
 
-                @this.set('provinsi_id', provinceId);
-                @this.set('provinsi', provinceName);
-                @this.set('kota_id', null);
-                @this.set('kota', '');
+                // @this.set('provinsi_id', provinceId);
+                // @this.set('provinsi', provinceName);
+                // @this.set('kota_id', null);
+                // @this.set('kota', '');
 
                 $('#kota-select').empty().append('<option value="">Pilih Kota</option>').prop('disabled', true);
                 $('#courier-selection-container').hide();
@@ -446,9 +446,9 @@
                             select.empty().append('<option value="">Pilih Kota</option>');
 
                             $.each(response.data, function(index, city) {
-                                var cityLabel = city.type + ' ' + city.city_name;
-                                select.append('<option value="' + city.city_id + '" data-name="' +
-                                    cityLabel + '">' + cityLabel + '</option>');
+                                // var cityLabel = city.type + ' ' + city.city_name;
+                                select.append('<option value="' + city.id + '" data-name="' +
+                                    city.name + '">' + city.name + '</option>');
                             });
 
                             select.prop('disabled', false);
@@ -502,7 +502,7 @@
 
                                 $('#shipping-type-info').html(
                                     '<i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br><small>Ongkir: Rp 10.000 (Estimasi: 1-2 hari)</small>'
-                                    ).removeClass('alert-info alert-danger').addClass('alert-success');
+                                ).removeClass('alert-info alert-danger').addClass('alert-success');
                                 $('#courier-selection-container').hide();
                                 $('#ongkir-display').text('Rp 10.000');
                                 $('#btn-submit-order').prop('disabled', false);
@@ -515,11 +515,11 @@
                                     displayCourierOptions(courierOptions);
                                     $('#shipping-type-info').html(
                                         '<i class="lni lni-truck"></i> <strong>Pengiriman Antar Kota</strong><br><small>Pilih layanan pengiriman di bawah</small>'
-                                        ).removeClass('alert-info alert-danger').addClass('alert-success');
+                                    ).removeClass('alert-info alert-danger').addClass('alert-success');
                                 } else {
                                     $('#shipping-type-info').html(
                                         '<i class="lni lni-warning"></i> Tidak ada layanan pengiriman tersedia untuk kota tujuan'
-                                        ).removeClass('alert-info alert-success').addClass('alert-danger');
+                                    ).removeClass('alert-info alert-success').addClass('alert-danger');
                                     $('#btn-submit-order').prop('disabled', true);
                                 }
                             }

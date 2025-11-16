@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
+
 class RajaOngkirService
 {
     protected $apiKey;
@@ -24,15 +25,15 @@ class RajaOngkirService
         return Cache::remember('rajaongkir_provinces', 86400, function () {
             try {
                 $response = Http::withHeaders([
-                    'key' => $this->apiKey
+                    'key' => $this->apiKey,
+                    'accept' => 'application/json',
                 ])->get($this->baseUrl . '/destination/province');
 
-
-                if ($response->successful() && $response->json('rajaongkir.status.code') == 200) {
-                    return $response->json('rajaongkir.results');
+                if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                    return $response->json('data');
                 }
 
-                return $response;
+                return [];
             } catch (\Exception $e) {
                 Log::error('RajaOngkir Get Provinces Error: ' . $e->getMessage());
                 return [];
@@ -49,17 +50,18 @@ class RajaOngkirService
 
         return Cache::remember($cacheKey, 86400, function () use ($provinceId) {
             try {
-                $url = $this->baseUrl . '/city';
+                $url = $this->baseUrl . '/destination/city';
                 if ($provinceId) {
-                    $url .= '?province=' . $provinceId;
+                    $url .= '/' . urlencode($provinceId);
                 }
 
                 $response = Http::withHeaders([
-                    'key' => $this->apiKey
+                    'key' => $this->apiKey,
+                    'accept' => 'application/json',
                 ])->get($url);
 
-                if ($response->successful() && $response->json('rajaongkir.status.code') == 200) {
-                    return $response->json('rajaongkir.results');
+                if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                    return $response->json('data');
                 }
 
                 return [];
