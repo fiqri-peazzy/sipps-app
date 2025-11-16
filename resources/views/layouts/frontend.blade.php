@@ -9,7 +9,7 @@
         content="NNClothing - Jasa Sablon Profesional dengan berbagai pilihan teknik sablon DTF, Manual, Polyflex, dan Sublim" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" href="{{ asset('frontend/assets/img/logo/logo-nn.png') }}" type="image/png" />
+    <link rel="icon" href="{{ asset('frontend/assets/img/logo/logo.svg') }}" type="image/png" />
 
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/bootstrap-5.0.0-alpha-2.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/LineIcons.2.0.css') }}" />
@@ -247,7 +247,11 @@
             }
         }
     </style>
+
+    @livewireStyles
+
     @stack('styles')
+
 </head>
 
 <body>
@@ -257,7 +261,7 @@
             <div class="row align-items-center">
                 <div class="col-auto">
                     <a href="{{ route('home') }}" class="navbar-brand">
-                        <img src="{{ asset('frontend/assets/img/logo/logo-nn.png') }}" alt="NNClothing Logo" />
+                        <img src="{{ asset('frontend/assets/img/logo/logo.svg') }}" alt="NNClothing Logo" />
                     </a>
                 </div>
                 <div class="col">
@@ -318,8 +322,7 @@
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="footer-widget">
-                        <img src="{{ asset('frontend/assets/img/logo/logo-nn.png') }}" alt="NNClothing"
-                            style="max-height: 50px; margin-bottom: 20px;">
+                        <img src="" alt="NNClothing" style="max-height: 50px; margin-bottom: 20px;">
                         <p style="color: rgba(255,255,255,0.7); margin-top: 15px;">NNClothing menyediakan jasa sablon
                             berkualitas dengan berbagai teknik modern untuk hasil terbaik pesanan Anda.</p>
                         <div class="footer-socials">
@@ -367,6 +370,7 @@
             </div>
         </div>
     </footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script src="{{ asset('frontend/assets/js/bootstrap.5.0.0.alpha-2-min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/wow.min.js') }}"></script>
@@ -382,6 +386,14 @@
                 document.getElementById('userMenu').style.display = 'none';
             }
         });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+    @livewireScripts
+    <!-- Test jQuery dan Fabric -->
+    <script>
+        console.log('jQuery loaded:', typeof jQuery);
+        console.log('Fabric loaded:', typeof fabric);
     </script>
     @stack('scripts')
 </body>

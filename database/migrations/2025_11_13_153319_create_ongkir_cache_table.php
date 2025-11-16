@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create('ongkir_cache', function (Blueprint $table) {
             $table->id();
-            $table->string('origin'); // Kota asal (Gorontalo)
-            $table->string('destination'); // Kota tujuan
-            $table->string('kurir'); // JNE, JNT, dll
-            $table->string('service'); // REG, YES, OKE
+            $table->string('origin', 10); // Kota asal (Gorontalo)
+            $table->string('destination', 10); // Kota tujuan
+            $table->string('kurir', 50); // JNE, JNT, dll
+            $table->string('service', 25); // REG, YES, OKE
             $table->decimal('cost', 12, 2);
             $table->integer('estimasi_hari');
             $table->timestamp('expired_at'); // Cache expired setelah X hari
