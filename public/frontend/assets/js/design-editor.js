@@ -198,36 +198,48 @@
             });
         },
 
-        addImageToCanvas: function (response, area) {
+        addImageToCanvas: function (imageUrl, area, metadata) {
             const canvas = this.canvases[area];
             if (!canvas) {
                 console.error('Canvas not found for area:', area);
                 return;
             }
 
-            fabric.Image.fromURL(response.url, function (img) {
+            const self = this;
+            const fullUrl = imageUrl.startsWith('http')
+                ? imageUrl
+                : window.location.origin + imageUrl;
+
+            // Set default metadata jika undefined
+            metadata = metadata || {};
+
+            fabric.Image.fromURL(fullUrl, function (img) {
+                if (!img || !img.width) {
+                    console.error('Failed to load image');
+                    self.showAlert('Gagal memuat gambar ke canvas', 'danger');
+                    return;
+                }
+
                 const scale = Math.min(300 / img.width, 300 / img.height);
                 img.scale(scale);
-
                 img.set({
                     left: canvas.width / 2 - (img.width * scale) / 2,
                     top: canvas.height / 2 - (img.height * scale) / 2,
                     angle: 0,
-                    // TAMBAHKAN: Metadata file original
-                    originalFilePath: response.original_path,
-                    originalFileName: response.original_name,
-                    originalFileSize: response.file_size,
-                    originalExtension: response.extension
+                    originalFilePath: metadata.original_path || '',
+                    originalFileName: metadata.original_name || '',
+                    originalFileSize: metadata.file_size || 0,
+                    originalExtension: metadata.extension || ''
                 });
 
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
-
-                DesignEditor.updateSummary();
+                self.updateSummary();
+            }, {
+                crossOrigin: 'anonymous'
             });
         },
-
         addText: function () {
             const text = $('#text-input').val().trim();
 

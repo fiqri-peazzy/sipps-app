@@ -138,7 +138,7 @@
                 <div class="section-header mt-5">
                     <h4><i class="lni lni-map-marker"></i> Alamat Pengiriman</h4>
                 </div>
-                {{-- <div class="row" wire:ignore> --}}
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nama Penerima</label>
@@ -148,6 +148,7 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
+
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">No. Telepon</label>
                         <input type="text" class="form-control" wire:model="penerima_telepon"
@@ -157,49 +158,78 @@
                         @enderror
                     </div>
 
-                    <!-- RAJAONGKIR: Provinsi Autocomplete -->
+                    <!-- Provinsi -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Provinsi <span class="text-danger">*</span></label>
-                        <select class="form-control" id="provinsi-select" wire:model="provinsi_id">
+                        <select class="form-control" wire:model.live="provinsi_id">
                             <option value="">Pilih Provinsi</option>
+                            @foreach ($provinces as $province)
+                                <option value="{{ $province['id'] }}">{{ $province['name'] }}</option>
+                            @endforeach
                         </select>
-                        <input type="hidden" wire:model="provinsi">
                         @error('provinsi')
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
 
-                    <!-- RAJAONGKIR: Kota Autocomplete -->
+                    <!-- Kota/Kabupaten -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kota/Kabupaten <span class="text-danger">*</span></label>
-                        <select class="form-control" id="kota-select" wire:model="kota_id" disabled>
-                            <option value="">Pilih Kota</option>
+                        <select class="form-control" wire:model.live="kota_id"
+                            {{ empty($cities) ? 'disabled' : '' }}>
+                            <option value="">
+                                @if ($loadingCities)
+                                    Memuat kota...
+                                @else
+                                    Pilih Kota
+                                @endif
+                            </option>
+                            @foreach ($cities as $city)
+                                <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
+                            @endforeach
                         </select>
-                        <input type="hidden" wire:model="kota">
                         @error('kota')
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
 
-                    <!-- RAJAONGKIR: Kecamatan -->
+                    <!-- Kecamatan -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kecamatan <span class="text-danger">*</span></label>
-                        <select class="form-control" id="kecamatan-select" wire:model="district_id" disabled>
-                            <option value="">Pilih Kecamatan</option>
+                        <select class="form-control" wire:model.live="district_id"
+                            {{ empty($districts) ? 'disabled' : '' }}>
+                            <option value="">
+                                @if ($loadingDistricts)
+                                    Memuat kecamatan...
+                                @else
+                                    Pilih Kecamatan
+                                @endif
+                            </option>
+                            @foreach ($districts as $district)
+                                <option value="{{ $district['id'] }}">{{ $district['name'] }}</option>
+                            @endforeach
                         </select>
-                        <input type="hidden" wire:model="kecamatan">
                         @error('district_id')
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
 
-                    <!-- RAJAONGKIR: Kelurahan (Optional for intercity) -->
+                    <!-- Kelurahan (Optional) -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kelurahan/Desa</label>
-                        <select class="form-control" id="kelurahan-select" wire:model="subdistrict_id" disabled>
-                            <option value="">Pilih Kelurahan</option>
+                        <select class="form-control" wire:model.live="subdistrict_id"
+                            {{ empty($subdistricts) ? 'disabled' : '' }}>
+                            <option value="">
+                                @if ($loadingSubdistricts)
+                                    Memuat kelurahan...
+                                @else
+                                    Pilih Kelurahan
+                                @endif
+                            </option>
+                            @foreach ($subdistricts as $subdistrict)
+                                <option value="{{ $subdistrict['id'] }}">{{ $subdistrict['name'] }}</option>
+                            @endforeach
                         </select>
-                        <input type="hidden" wire:model="kelurahan">
                     </div>
 
                     <div class="col-12 mb-3">
@@ -216,40 +246,141 @@
                         <input type="text" class="form-control" wire:model="kode_pos" placeholder="96xxx">
                     </div>
 
-                    <!-- Tipe Pengiriman & Pilihan Kurir -->
+                    <!-- Tipe Pengiriman Info -->
                     <div class="col-12 mb-3">
                         <label class="form-label fw-bold">Tipe Pengiriman</label>
-                        <div id="shipping-type-info" class="alert alert-info">
-                            <i class="lni lni-information"></i> Pilih kota tujuan terlebih dahulu
-                        </div>
-                        <input type="hidden" wire:model="tipe_pengiriman" id="tipe-pengiriman-hidden">
+
+                        @if ($loadingShippingCost)
+                            <div class="alert alert-info">
+                                <i class="lni lni-spinner-arrow spinning"></i> Menghitung ongkos kirim...
+                            </div>
+                        @elseif($tipe_pengiriman === 'dalam_kota')
+                            <div class="alert alert-success">
+                                <i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br>
+                                <small>Ongkir: Rp {{ number_format($ongkir, 0, ',', '.') }} (Estimasi:
+                                    {{ $kurir_etd }})</small>
+                            </div>
+                        @elseif($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
+                            <div class="alert alert-success">
+                                <i class="lni lni-truck"></i> <strong>Pengiriman Antar Kota</strong><br>
+                                <small>Pilih layanan pengiriman di bawah</small>
+                            </div>
+                        @else
+                            <div class="alert alert-info">
+                                <i class="lni lni-information"></i> Pilih kota tujuan terlebih dahulu
+                            </div>
+                        @endif
                     </div>
 
-                    <!-- Container untuk Pilihan Kurir (hanya muncul untuk antar kota) -->
-                    <div class="col-12 mb-3" id="courier-selection-container" style="display: none;">
-                        <label class="form-label fw-bold">Pilih Layanan Pengiriman <span
-                                class="text-danger">*</span></label>
-                        <div id="courier-options-loading" class="text-center py-3">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                    <!-- Pilihan Kurir (Antar Kota) -->
+                    @if ($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Pilih Layanan Pengiriman <span
+                                    class="text-danger">*</span></label>
+
+                            <div class="row g-2">
+                                @foreach ($courierOptions as $index => $courier)
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="courier-option-card {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'border-primary' : '' }}"
+                                            wire:click="selectCourier({{ $index }})" style="cursor: pointer;">
+                                            <input type="radio" name="courier_option" value="{{ $index }}"
+                                                {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'checked' : '' }}>
+                                            <label style="pointer-events: none;">
+                                                <div class="courier-name">{{ $courier['name'] }}</div>
+                                                <div class="courier-service">{{ $courier['service'] }} -
+                                                    {{ $courier['description'] }}</div>
+                                                <div class="courier-cost">Rp
+                                                    {{ number_format($courier['cost'], 0, ',', '.') }}</div>
+                                                <div class="courier-etd"><i class="lni lni-timer"></i>
+                                                    {{ $courier['etd'] }}</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-                            <p class="mt-2">Menghitung ongkos kirim...</p>
+
+                            @error('kurir_code')
+                                <small class="text-danger d-block mt-2">{{ $message }}</small>
+                            @enderror
                         </div>
-                        <div id="courier-options-list" class="row g-2"></div>
-                        <input type="hidden" wire:model="kurir_code" id="selected-kurir-code">
-                        <input type="hidden" wire:model="kurir_service" id="selected-kurir-service">
-                        <input type="hidden" wire:model="kurir_etd" id="selected-kurir-etd">
-                        <input type="hidden" wire:model="kurir_name" id="selected-kurir-name">
-                        @error('kurir_code')
-                            <small class="text-danger d-block mt-2">{{ $message }}</small>
-                        @enderror
-                    </div>
+                    @endif
 
                     <div class="col-12">
                         <label class="form-label fw-bold">Catatan Tambahan (Optional)</label>
                         <textarea class="form-control" wire:model="catatan" rows="2" placeholder="Catatan untuk pesanan Anda"></textarea>
                     </div>
                 </div>
+
+                <style>
+                    .spinning {
+                        animation: spin 1s linear infinite;
+                    }
+
+                    @keyframes spin {
+                        from {
+                            transform: rotate(0deg);
+                        }
+
+                        to {
+                            transform: rotate(360deg);
+                        }
+                    }
+
+                    .courier-option-card {
+                        border: 2px solid #dee2e6;
+                        border-radius: 8px;
+                        padding: 15px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        position: relative;
+                    }
+
+                    .courier-option-card:hover {
+                        border-color: #0d6efd;
+                        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+                    }
+
+                    .courier-option-card.border-primary {
+                        border-color: #0d6efd !important;
+                        background-color: #f8f9ff;
+                    }
+
+                    .courier-option-card input[type="radio"] {
+                        position: absolute;
+                        opacity: 0;
+                    }
+
+                    .courier-option-card label {
+                        cursor: pointer;
+                        margin: 0;
+                        width: 100%;
+                    }
+
+                    .courier-name {
+                        font-weight: bold;
+                        font-size: 1rem;
+                        color: #212529;
+                        margin-bottom: 5px;
+                    }
+
+                    .courier-service {
+                        font-size: 0.85rem;
+                        color: #6c757d;
+                        margin-bottom: 8px;
+                    }
+
+                    .courier-cost {
+                        font-size: 1.1rem;
+                        font-weight: bold;
+                        color: #0d6efd;
+                        margin-bottom: 5px;
+                    }
+
+                    .courier-etd {
+                        font-size: 0.85rem;
+                        color: #6c757d;
+                    }
+                </style>
             </div>
 
             <!-- Right Column - Price Summary -->
@@ -294,6 +425,7 @@
                 </div>
             </div>
         </div>
+
     </form>
 
     <!-- Bootstrap Modal untuk Design Editor -->
@@ -394,464 +526,6 @@
                             '<i class="lni lni-save"></i> Simpan Desain');
                     });
             });
-            // ===== RAJAONGKIR INTEGRATION =====
-            var selectedProvinceId = null;
-            var selectedProvinceName = '';
-            var selectedCityId = null;
-            var selectedCityName = '';
-            var selectedDistrictId = null;
-            var selectedDistrictName = '';
-            var selectedSubdistrictId = null;
-            var selectedSubdistrictName = '';
-            var selectedKurirCode = '';
-            var selectedKurirName = '';
-            var selectedKurirService = '';
-            var selectedKurirEtd = '';
-            var selectedOngkir = 0;
-            var selectedTipePengiriman = '';
-
-
-            // State management untuk menyimpan options yang sudah di-load
-            var loadedProvinces = [];
-            var loadedCities = [];
-            var loadedDistricts = [];
-            var loadedSubDistricts = [];
-
-            // Livewire hook - dipanggil setiap kali Livewire selesai update DOM
-            document.addEventListener('livewire:initialized', () => {
-                Livewire.hook('morph.updated', ({
-                    el,
-                    component
-                }) => {
-                    // Re-populate select options setelah Livewire update
-                    repopulateShippingSelects();
-                });
-            });
-            // Load provinces on page load
-            $(document).ready(function() {
-                loadProvinces();
-            });
-
-            function loadProvinces() {
-                $.ajax({
-                    url: '{{ route('customer.shipping.provinces') }}',
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.success && response.data) {
-                            loadedProvinces = response.data; // Simpan data
-                            populateProvinceSelect(response.data, selectedProvinceId);
-                        }
-                    },
-                    error: function() {
-                        alert('Gagal memuat data provinsi');
-                    }
-                });
-            }
-
-            function populateProvinceSelect(provinces, selectedId = null) {
-                var select = $('#provinsi-select');
-                select.empty().append('<option value="">Pilih Provinsi</option>');
-                $.each(provinces, function(index, provinsi) {
-                    var isSelected = selectedId == provinsi.id ? 'selected' : '';
-                    select.append('<option value="' + provinsi.id + '" data-name="' +
-                        provinsi.name + '" ' + isSelected + '>' + provinsi.name + '</option>');
-                });
-            }
-
-            // Handle province selection
-            $('#provinsi-select').on('change', function() {
-                var provinceId = $(this).val();
-                var provinceName = $(this).find(':selected').data('name');
-
-                selectedProvinceId = provinceId;
-                selectedProvinceName = provinceName || '';
-
-                // Reset dependent fields
-                selectedCityId = null;
-                selectedCityName = '';
-                selectedDistrictId = null;
-                selectedDistrictName = '';
-                selectedSubdistrictId = null;
-                selectedSubdistrictName = '';
-                selectedOngkir = 0;
-                selectedTipePengiriman = '';
-
-                $('#kota-select').empty().append('<option value="">Pilih Kota</option>').prop('disabled', true);
-                $('#kecamatan-select').empty().append('<option value="">Pilih Kecamatan</option>').prop('disabled',
-                    true);
-                $('#kelurahan-select').empty().append('<option value="">Pilih Kelurahan</option>').prop('disabled',
-                    true);
-                $('#courier-selection-container').hide();
-                $('#shipping-type-info').html('<i class="lni lni-information"></i> Pilih kota tujuan terlebih dahulu')
-                    .removeClass('alert-success').addClass('alert-info');
-
-                updateOngkirDisplay();
-
-                if (provinceId) {
-                    loadCities(provinceId);
-                }
-            });
-
-            function loadCities(provinceId) {
-                $.ajax({
-                    url: '{{ route('customer.shipping.cities') }}',
-                    type: 'GET',
-                    data: {
-                        province_id: provinceId
-                    },
-                    success: function(response) {
-                        if (response.success && response.data) {
-                            loadedCities = response.data; // Simpan data
-                            populateCitySelect(response.data, selectedCityId);
-                        }
-                    }
-                });
-            }
-
-            function populateCitySelect(cities, selectedId = null) {
-                var select = $('#kota-select');
-                select.empty().append('<option value="">Pilih Kota</option>');
-                $.each(cities, function(index, city) {
-                    var isSelected = selectedId == city.id ? 'selected' : '';
-                    select.append('<option value="' + city.id + '" data-name="' +
-                        city.name + '" ' + isSelected + '>' + city.name + '</option>');
-                });
-                select.prop('disabled', false);
-            }
-
-            // Handle city selection
-            $('#kota-select').on('change', function() {
-                var cityId = $(this).val();
-                var cityName = $(this).find(':selected').data('name');
-
-                if (!cityId) return;
-
-                selectedCityId = cityId;
-                selectedCityName = cityName || '';
-
-                // Reset dependent fields
-                selectedDistrictId = null;
-                selectedDistrictName = '';
-                selectedSubdistrictId = null;
-                selectedSubdistrictName = '';
-                selectedOngkir = 0;
-
-                $('#kecamatan-select').empty().append('<option value="">Pilih Kecamatan</option>').prop('disabled',
-                    true);
-                $('#kelurahan-select').empty().append('<option value="">Pilih Kelurahan</option>').prop('disabled',
-                    true);
-                $('#courier-selection-container').hide();
-
-                updateOngkirDisplay();
-
-                // Load districts
-                loadDistricts(cityId);
-            });
-
-            function loadDistricts(cityId) {
-                $.ajax({
-                    url: '{{ route('customer.shipping.districts') }}',
-                    type: 'GET',
-                    data: {
-                        city_id: cityId
-                    },
-                    success: function(response) {
-                        if (response.success && response.data) {
-                            loadedDistricts = response.data; // Simpan data
-                            populateDistrictSelect(response.data, selectedDistrictId);
-                        }
-                    }
-                });
-            }
-
-            function populateDistrictSelect(districts, selectedId = null) {
-                var select = $('#kecamatan-select');
-                select.empty().append('<option value="">Pilih Kecamatan</option>');
-                $.each(districts, function(index, district) {
-                    var isSelected = selectedId == district.id ? 'selected' : '';
-                    select.append('<option value="' + district.id + '" data-name="' +
-                        district.name + '" ' + isSelected + '>' + district.name + '</option>');
-                });
-                select.prop('disabled', false);
-            }
-
-            function loadSubDistricts(districtId) {
-                $.ajax({
-                    url: '{{ route('customer.shipping.subdistricts') }}',
-                    type: 'GET',
-                    data: {
-                        district_id: districtId
-                    },
-                    success: function(response) {
-                        if (response.success && response.data) {
-                            loadedSubDistricts = response.data; // Simpan data
-                            populateSubDistrictSelect(response.data, selectedSubdistrictId);
-                        }
-                    }
-                });
-            }
-
-            function populateSubDistrictSelect(subdistricts, selectedId = null) {
-                var select = $('#kelurahan-select');
-                select.empty().append('<option value="">Pilih Kelurahan</option>');
-                $.each(subdistricts, function(index, subdistrict) {
-                    var isSelected = selectedId == subdistrict.id ? 'selected' : '';
-                    select.append('<option value="' + subdistrict.id + '" data-name="' +
-                        subdistrict.name + '" ' + isSelected + '>' + subdistrict.name + '</option>');
-                });
-                select.prop('disabled', false);
-            }
-
-            // Handle district (kecamatan) selection
-            $(document).on('change', '#kecamatan-select', function() {
-                var districtId = $(this).val();
-                var districtName = $(this).find(':selected').data('name');
-
-                if (!districtId) return;
-
-                selectedDistrictId = districtId;
-                selectedDistrictName = districtName || '';
-
-                // Reset subdistrict
-                selectedSubdistrictId = null;
-                selectedSubdistrictName = '';
-
-                $('#kelurahan-select').empty().append('<option value="">Pilih Kelurahan</option>').prop('disabled',
-                    true);
-
-                // Calculate shipping cost
-                calculateShippingCost(selectedCityId, districtId);
-            });
-
-            // Handle subdistrict (kelurahan) selection
-            $(document).on('change', '#kelurahan-select', function() {
-                var subdistrictId = $(this).val();
-                var subdistrictName = $(this).find(':selected').data('name');
-
-                if (subdistrictId) {
-                    selectedSubdistrictId = subdistrictId;
-                    selectedSubdistrictName = subdistrictName || '';
-                }
-            });
-
-            function calculateShippingCost(destinationCityId, destinationDistrictId) {
-                // Show loading
-                $('#shipping-type-info').html('<i class="lni lni-spinner-arrow spinning"></i> Menghitung ongkos kirim...')
-                    .removeClass('alert-success alert-danger').addClass('alert-info');
-                $('#courier-selection-container').hide();
-                $('#btn-submit-order').prop('disabled', true);
-
-                $.ajax({
-                    url: '{{ route('customer.shipping.calculate-cost') }}',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    data: {
-                        destination_city_id: destinationCityId,
-                        destination_district_id: destinationDistrictId,
-                        weight: totalWeight
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            if (response.is_same_city) {
-                                // Dalam kota Gorontalo
-                                selectedTipePengiriman = 'dalam_kota';
-                                selectedOngkir = 6000;
-                                selectedKurirCode = 'local';
-                                selectedKurirName = 'Pengiriman Dalam Kota';
-                                selectedKurirService = 'FLAT';
-                                selectedKurirEtd = '1 hari';
-
-                                $('#shipping-type-info').html(
-                                    '<i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br><small>Ongkir: Rp 6.000 (Estimasi: 1 hari)</small>'
-                                ).removeClass('alert-info alert-danger').addClass('alert-success');
-                                $('#courier-selection-container').hide();
-
-                                updateOngkirDisplay();
-                                $('#btn-submit-order').prop('disabled', false);
-                            } else {
-                                // Antar kota
-                                selectedTipePengiriman = 'antar_kota';
-                                courierOptions = response.data;
-
-                                if (courierOptions.length > 0) {
-                                    displayCourierOptions(courierOptions);
-                                    $('#shipping-type-info').html(
-                                        '<i class="lni lni-truck"></i> <strong>Pengiriman Antar Kota</strong><br><small>Pilih layanan pengiriman di bawah</small>'
-                                    ).removeClass('alert-info alert-danger').addClass('alert-success');
-                                } else {
-                                    $('#shipping-type-info').html(
-                                        '<i class="lni lni-warning"></i> Tidak ada layanan pengiriman tersedia untuk kota tujuan'
-                                    ).removeClass('alert-info alert-success').addClass('alert-danger');
-                                    $('#btn-submit-order').prop('disabled', true);
-                                }
-                            }
-                        } else {
-                            $('#shipping-type-info').html('<i class="lni lni-warning"></i> ' + (response.message ||
-                                'Gagal menghitung ongkir')).removeClass('alert-info alert-success').addClass(
-                                'alert-danger');
-                            $('#btn-submit-order').prop('disabled', true);
-                        }
-                    },
-                    error: function() {
-                        $('#shipping-type-info').html(
-                                '<i class="lni lni-warning"></i> Terjadi kesalahan saat menghitung ongkir')
-                            .removeClass('alert-info alert-success').addClass('alert-danger');
-                        $('#btn-submit-order').prop('disabled', true);
-                    }
-                });
-            }
-
-            function displayCourierOptions(options) {
-                var container = $('#courier-options-list');
-                container.empty();
-                $('#courier-options-loading').hide();
-                $('#courier-selection-container').show();
-
-                // Select cheapest by default
-                var cheapest = options[0];
-
-                $.each(options, function(index, option) {
-                    var isChecked = index === 0 ? 'checked' : '';
-                    var cardClass = index === 0 ? 'border-primary' : '';
-
-                    var card = `
-            <div class="col-md-6 col-lg-4">
-                <div class="courier-option-card ${cardClass}">
-                    <input type="radio" class="courier-radio" name="courier_option" value="${index}" ${isChecked}
-                        data-code="${option.code}"
-                        data-name="${option.name}"
-                        data-service="${option.service}"
-                        data-cost="${option.cost}"
-                        data-etd="${option.etd}">
-                    <label>
-                        <div class="courier-name">${option.name}</div>
-                        <div class="courier-service">${option.service} - ${option.description}</div>
-                        <div class="courier-cost">Rp ${formatNumber(option.cost)}</div>
-                        <div class="courier-etd"><i class="lni lni-timer"></i> ${option.etd}</div>
-                    </label>
-                </div>
-            </div>
-        `;
-                    container.append(card);
-                });
-
-                // Set default values
-                setSelectedCourier(cheapest);
-
-                // Handle courier selection
-                $('.courier-radio').on('change', function() {
-                    var index = $(this).val();
-                    var selected = courierOptions[index];
-                    setSelectedCourier(selected);
-
-                    $('.courier-option-card').removeClass('border-primary');
-                    $(this).closest('.courier-option-card').addClass('border-primary');
-                });
-
-                $('#btn-submit-order').prop('disabled', false);
-            }
-
-            function setSelectedCourier(courier) {
-                selectedKurirCode = courier.code;
-                selectedKurirName = courier.name;
-                selectedKurirService = courier.service;
-                selectedKurirEtd = courier.etd;
-                selectedOngkir = courier.cost;
-
-                updateOngkirDisplay();
-            }
-
-            function updateOngkirDisplay() {
-                $('#ongkir-display').text('Rp ' + formatNumber(selectedOngkir));
-
-                // Update total
-                var subtotal = {{ $subtotal }};
-                var total = subtotal + selectedOngkir;
-                $('.price-row.total strong').text('Rp ' + formatNumber(total));
-            }
-
-            function formatNumber(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
-
-            // Sebelum submit, update semua nilai ke Livewire
-            $('form').on('submit', function(e) {
-                // Set nilai ke wire:model via JavaScript
-                Livewire.find('{{ $_instance->getId() }}').set('provinsi_id', selectedProvinceId);
-                Livewire.find('{{ $_instance->getId() }}').set('provinsi', selectedProvinceName);
-                Livewire.find('{{ $_instance->getId() }}').set('kota_id', selectedCityId);
-                Livewire.find('{{ $_instance->getId() }}').set('kota', selectedCityName);
-                Livewire.find('{{ $_instance->getId() }}').set('district_id', selectedDistrictId);
-                Livewire.find('{{ $_instance->getId() }}').set('kecamatan', selectedDistrictName);
-                Livewire.find('{{ $_instance->getId() }}').set('subdistrict_id', selectedSubdistrictId);
-                Livewire.find('{{ $_instance->getId() }}').set('kelurahan', selectedSubdistrictName);
-                Livewire.find('{{ $_instance->getId() }}').set('tipe_pengiriman', selectedTipePengiriman);
-                Livewire.find('{{ $_instance->getId() }}').set('kurir_code', selectedKurirCode);
-                Livewire.find('{{ $_instance->getId() }}').set('kurir_name', selectedKurirName);
-                Livewire.find('{{ $_instance->getId() }}').set('kurir_service', selectedKurirService);
-                Livewire.find('{{ $_instance->getId() }}').set('kurir_etd', selectedKurirEtd);
-                Livewire.find('{{ $_instance->getId() }}').set('ongkir', selectedOngkir);
-
-                // Biarkan form submit secara normal setelah set values
-            });
-
-            function repopulateShippingSelects() {
-                // Re-populate provinces jika sudah di-load
-                if (loadedProvinces.length > 0) {
-                    populateProvinceSelect(loadedProvinces, selectedProvinceId);
-                }
-
-                // Re-populate cities jika ada provinsi terpilih dan data sudah di-load
-                if (selectedProvinceId && loadedCities.length > 0) {
-                    populateCitySelect(loadedCities, selectedCityId);
-                }
-
-                // Re-populate districts jika ada kota terpilih dan data sudah di-load
-                if (selectedCityId && loadedDistricts.length > 0) {
-                    populateDistrictSelect(loadedDistricts, selectedDistrictId);
-                }
-
-                // Re-populate subdistricts jika ada district terpilih dan data sudah di-load
-                if (selectedDistrictId && loadedSubDistricts.length > 0) {
-                    populateSubDistrictSelect(loadedSubDistricts, selectedSubdistrictId);
-                }
-
-                // Re-populate courier options jika sudah ada
-                if (courierOptions.length > 0 && selectedTipePengiriman === 'antar_kota') {
-                    displayCourierOptions(courierOptions);
-                    // Re-select courier yang sudah dipilih
-                    if (selectedKurirCode) {
-                        var selectedIndex = courierOptions.findIndex(c => c.code === selectedKurirCode && c.service ===
-                            selectedKurirService);
-                        if (selectedIndex >= 0) {
-                            $('.courier-radio[value="' + selectedIndex + '"]').prop('checked', true);
-                            $('.courier-option-card').removeClass('border-primary');
-                            $('.courier-radio[value="' + selectedIndex + '"]').closest('.courier-option-card').addClass(
-                                'border-primary');
-                        }
-                    }
-                }
-
-                // Update shipping info display jika sudah ada tipe pengiriman
-                if (selectedTipePengiriman === 'dalam_kota') {
-                    $('#shipping-type-info').html(
-                        '<i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br><small>Ongkir: Rp 6.000 (Estimasi: 1 hari)</small>'
-                    ).removeClass('alert-info alert-danger').addClass('alert-success');
-                    $('#courier-selection-container').hide();
-                } else if (selectedTipePengiriman === 'antar_kota' && courierOptions.length > 0) {
-                    $('#shipping-type-info').html(
-                        '<i class="lni lni-truck"></i> <strong>Pengiriman Antar Kota</strong><br><small>Pilih layanan pengiriman di bawah</small>'
-                    ).removeClass('alert-info alert-danger').addClass('alert-success');
-                    $('#courier-selection-container').show();
-                }
-
-                // Update ongkir display
-                if (selectedOngkir > 0) {
-                    updateOngkirDisplay();
-                }
-            }
         </script>
     @endpush
 

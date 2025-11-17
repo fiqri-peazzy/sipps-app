@@ -108,7 +108,7 @@ class RajaOngkirService
 
         return Cache::remember($cacheKey, 86400, function () use ($districtId) {
             try {
-                $url = $this->baseUrl . '/destination/subdistrict/' . urlencode($districtId);
+                $url = $this->baseUrl . '/destination/sub-district/' . urlencode($districtId);
 
                 $response = Http::withHeaders([
                     'key' => $this->apiKey,

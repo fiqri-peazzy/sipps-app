@@ -7,6 +7,8 @@ use App\Models\Ukuran;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ShippingTracking;
+use App\Models\PaymentHistory;
 
 class CustomerController extends Controller
 {
@@ -71,7 +73,7 @@ class CustomerController extends Controller
             abort(403);
         }
 
-        $order->load(['items.produk.jenisSablon', 'paymentHistories', 'shippingTracking']);
+        $order->load(['items.produk.jenisSablon', 'paymentHistories', 'shippingTrackings']);
 
         return view('customer.orders.show', compact('order'));
     }

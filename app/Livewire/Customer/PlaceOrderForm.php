@@ -6,6 +6,7 @@ use App\Models\JenisSablon;
 use App\Models\Produk;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\RajaOngkirService; // TAMBAHKAN
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +43,19 @@ class PlaceOrderForm extends Component
     public $kurir_service;
     public $kurir_name;
     public $kurir_etd;
-    public $kecamatan_id; // Alias untuk district_id
+
+    // TAMBAHKAN: Data untuk populate select options
+    public $provinces = [];
+    public $cities = [];
+    public $districts = [];
+    public $subdistricts = [];
+    public $courierOptions = [];
+
+    // TAMBAHKAN: Loading states
+    public $loadingCities = false;
+    public $loadingDistricts = false;
+    public $loadingSubdistricts = false;
+    public $loadingShippingCost = false;
 
     // Additional
     public $catatan;
@@ -51,9 +64,8 @@ class PlaceOrderForm extends Component
     public $subtotal = 0;
     public $ongkir = 0;
     public $total = 0;
-    public $totalWeight = 0; // Berat total dalam gram
+    public $totalWeight = 0;
 
-    // Berat 1 kaos katun kombet 24s dalam gram
     const WEIGHT_PER_ITEM = 180;
 
     protected $rules = [
@@ -106,7 +118,236 @@ class PlaceOrderForm extends Component
 
         // Calculate initial weight
         $this->calculateTotalWeight();
+
+        // TAMBAHKAN: Load provinces on mount
+        $this->loadProvinces();
     }
+    
+    // ==================== RAJAONGKIR METHODS ====================
+
+    /**
+     * Load provinces
+     */
+    public function loadProvinces()
+    {
+        $rajaOngkir = app(RajaOngkirService::class);
+        $this->provinces = $rajaOngkir->getProvinces();
+    }
+
+    /**
+     * Updated hook untuk provinsi_id
+     */
+    public function updatedProvinsiId($value)
+    {
+        if (!$value) return;
+
+        // Reset dependent fields
+        $this->kota_id = null;
+        $this->kota = '';
+        $this->district_id = null;
+        $this->kecamatan = '';
+        $this->subdistrict_id = null;
+        $this->kelurahan = '';
+        $this->cities = [];
+        $this->districts = [];
+        $this->subdistricts = [];
+        $this->courierOptions = [];
+        $this->ongkir = 0;
+        $this->tipe_pengiriman = '';
+
+        // Get province name
+        $province = collect($this->provinces)->firstWhere('id', $value);
+        if ($province) {
+            $this->provinsi = $province['name'];
+        }
+
+        // Load cities
+        $this->loadCities($value);
+
+        $this->calculateTotal();
+    }
+
+    /**
+     * Load cities by province
+     */
+    public function loadCities($provinceId)
+    {
+        $this->loadingCities = true;
+
+        $rajaOngkir = app(RajaOngkirService::class);
+        $this->cities = $rajaOngkir->getCities($provinceId);
+
+        $this->loadingCities = false;
+    }
+
+    /**
+     * Updated hook untuk kota_id
+     */
+    public function updatedKotaId($value)
+    {
+        if (!$value) return;
+
+        // Reset dependent fields
+        $this->district_id = null;
+        $this->kecamatan = '';
+        $this->subdistrict_id = null;
+        $this->kelurahan = '';
+        $this->districts = [];
+        $this->subdistricts = [];
+        $this->courierOptions = [];
+        $this->ongkir = 0;
+
+        // Get city name
+        $city = collect($this->cities)->firstWhere('id', $value);
+        if ($city) {
+            $this->kota = $city['name'];
+        }
+
+        // Load districts
+        $this->loadDistricts($value);
+
+        $this->calculateTotal();
+    }
+
+    /**
+     * Load districts by city
+     */
+    public function loadDistricts($cityId)
+    {
+        $this->loadingDistricts = true;
+
+        $rajaOngkir = app(RajaOngkirService::class);
+        $this->districts = $rajaOngkir->getDistricts($cityId);
+
+        $this->loadingDistricts = false;
+    }
+
+    /**
+     * Updated hook untuk district_id
+     */
+    public function updatedDistrictId($value)
+    {
+        if (!$value) return;
+
+        // Reset dependent fields
+        $this->subdistrict_id = null;
+        $this->kelurahan = '';
+        $this->subdistricts = [];
+        $this->courierOptions = [];
+        $this->ongkir = 0;
+
+        // Get district name
+        $district = collect($this->districts)->firstWhere('id', $value);
+        if ($district) {
+            $this->kecamatan = $district['name'];
+        }
+
+        // Load subdistricts (optional, karena bisa langsung calculate)
+        $this->loadSubDistricts($value);
+
+        // Calculate shipping cost
+        $this->calculateShippingCost();
+    }
+
+    /**
+     * Load subdistricts by district (optional)
+     */
+    public function loadSubDistricts($districtId)
+    {
+        $this->loadingSubdistricts = true;
+
+        $rajaOngkir = app(RajaOngkirService::class);
+        $this->subdistricts = $rajaOngkir->getSubDistricts($districtId);
+
+        $this->loadingSubdistricts = false;
+    }
+
+    /**
+     * Updated hook untuk subdistrict_id (optional)
+     */
+    public function updatedSubdistrictId($value)
+    {
+        if (!$value) return;
+
+        // Get subdistrict name
+        $subdistrict = collect($this->subdistricts)->firstWhere('id', $value);
+        if ($subdistrict) {
+            $this->kelurahan = $subdistrict['name'];
+        }
+    }
+
+    /**
+     * Calculate shipping cost
+     */
+    public function calculateShippingCost()
+    {
+        if (!$this->kota_id || !$this->district_id) {
+            return;
+        }
+
+        $this->loadingShippingCost = true;
+        $this->courierOptions = [];
+
+        $rajaOngkir = app(RajaOngkirService::class);
+        $originCityId = $rajaOngkir->getOriginCityId();
+
+        // Check if same city
+        if ($rajaOngkir->isSameCity($originCityId, $this->kota_id)) {
+            // Dalam kota Gorontalo
+            $this->tipe_pengiriman = 'dalam_kota';
+            $this->ongkir = 6000;
+            $this->kurir_code = 'local';
+            $this->kurir_name = 'Pengiriman Dalam Kota';
+            $this->kurir_service = 'FLAT';
+            $this->kurir_etd = '1 hari';
+            $this->courierOptions = [];
+        } else {
+            // Antar kota - calculate via RajaOngkir
+            $this->tipe_pengiriman = 'antar_kota';
+
+            $originDistrictId = $rajaOngkir->getGorontaloOriginDistrictId();
+            $result = $rajaOngkir->calculateCost(
+                $originDistrictId,
+                $this->district_id,
+                $this->totalWeight
+            );
+
+            if ($result['success'] && !empty($result['data'])) {
+                $this->courierOptions = $result['data'];
+
+                // Set default: pilih yang termurah (index 0)
+                $cheapest = $this->courierOptions[0];
+                $this->selectCourier(0);
+            } else {
+                session()->flash('error', 'Tidak ada layanan pengiriman tersedia untuk tujuan ini');
+                $this->ongkir = 0;
+            }
+        }
+
+        $this->calculateTotal();
+        $this->loadingShippingCost = false;
+    }
+
+    /**
+     * Select courier option
+     */
+    public function selectCourier($index)
+    {
+        if (!isset($this->courierOptions[$index])) {
+            return;
+        }
+
+        $courier = $this->courierOptions[$index];
+        $this->kurir_code = $courier['code'];
+        $this->kurir_name = $courier['name'];
+        $this->kurir_service = $courier['service'];
+        $this->kurir_etd = $courier['etd'];
+        $this->ongkir = $courier['cost'];
+
+        $this->calculateTotal();
+    }
+
+    // ==================== EXISTING METHODS ====================
 
     public function addItem()
     {
@@ -134,6 +375,11 @@ class PlaceOrderForm extends Component
 
         $this->calculateTotal();
         $this->calculateTotalWeight();
+
+        // Recalculate shipping jika ada perubahan berat
+        if ($this->district_id) {
+            $this->calculateShippingCost();
+        }
     }
 
     public function handleDesignConfigSaved($itemIndex, $designConfig)
@@ -149,7 +395,6 @@ class PlaceOrderForm extends Component
             $this->orderItems[$itemIndex]['ukuran_kaos'] = $designConfig['ukuran_kaos'];
         }
 
-        // Save to session
         $sessionKey = 'order_designs_' . Auth::id();
         $sessionData = session($sessionKey, []);
         $sessionData[$itemIndex] = $designConfig;
@@ -176,6 +421,11 @@ class PlaceOrderForm extends Component
         if ($field === 'quantity' && $index !== null) {
             $this->orderItems[$index]['subtotal'] = ($this->orderItems[$index]['harga_satuan'] ?? 0) * $value;
             $this->calculateTotalWeight();
+
+            // Recalculate shipping jika ada perubahan quantity
+            if ($this->district_id) {
+                $this->calculateShippingCost();
+            }
         }
 
         $this->calculateTotal();
@@ -185,7 +435,6 @@ class PlaceOrderForm extends Component
     {
         $totalQty = collect($this->orderItems)->sum('quantity');
         $this->totalWeight = $totalQty * self::WEIGHT_PER_ITEM;
-
         return $this->totalWeight;
     }
 
@@ -193,15 +442,6 @@ class PlaceOrderForm extends Component
     {
         $this->subtotal = collect($this->orderItems)->sum('subtotal');
         $this->total = $this->subtotal + $this->ongkir;
-    }
-
-    public function updatedTipePengiriman()
-    {
-        // Recalculate if needed
-        if ($this->tipe_pengiriman === 'dalam_kota') {
-            $this->ongkir = 10000;
-            $this->calculateTotal();
-        }
     }
 
     public function submit()
@@ -222,6 +462,7 @@ class PlaceOrderForm extends Component
         }
 
         DB::beginTransaction();
+
         try {
             $order = Order::create([
                 'order_number' => Order::generateOrderNumber(),
@@ -291,7 +532,6 @@ class PlaceOrderForm extends Component
         if (isset($this->orderItems[$itemIndex])) {
             $this->orderItems[$itemIndex]['design_config'] = null;
 
-            // Clear from session
             $sessionKey = 'order_designs_' . Auth::id();
             $sessionData = session($sessionKey, []);
             unset($sessionData[$itemIndex]);

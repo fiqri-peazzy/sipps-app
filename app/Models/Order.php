@@ -43,6 +43,13 @@ class Order extends Model
         'completed_at',
         'cancelled_at',
         'cancel_reason',
+        'berat_total',      // Berat total pesanan (gram)
+        'province_id',      // ID provinsi RajaOngkir
+        'city_id',          // ID kota RajaOngkir
+        'district_id',      // ID kecamatan/district RajaOngkir
+        'subdistrict_id',   // ID kelurahan/subdistrict RajaOngkir (nullable)
+        'kota_id',          // Duplikat city_id untuk backward compatibility
+        'provinsi_id',      // Duplikat province_id untuk backward compatibility
     ];
 
     protected $casts = [
