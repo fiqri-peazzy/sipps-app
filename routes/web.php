@@ -67,6 +67,8 @@ Route::prefix('customer')
         Route::get('/shipping/provinces', [ShippingController::class, 'getProvinces'])->name('shipping.provinces');
         Route::get('/shipping/cities', [ShippingController::class, 'getCities'])->name('shipping.cities');
         Route::get('/shipping/search-city', [ShippingController::class, 'searchCity'])->name('shipping.search-city');
+        Route::get('/shipping/districts', [ShippingController::class, 'getDistricts'])->name('shipping.districts');
+        Route::get('/shipping/subdistricts', [ShippingController::class, 'getSubdistricts'])->name('shipping.subdistricts');
         Route::post('/shipping/calculate-cost', [ShippingController::class, 'calculateCost'])->name('shipping.calculate-cost');
     });
 

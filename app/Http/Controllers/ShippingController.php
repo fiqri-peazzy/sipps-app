@@ -43,6 +43,52 @@ class ShippingController extends Controller
     }
 
     /**
+     * Get districts by city
+     */
+    public function getDistricts(Request $request)
+    {
+        $cityId = $request->get('city_id');
+
+        if (!$cityId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'City ID is required',
+                'data' => []
+            ], 400);
+        }
+
+        $districts = $this->rajaOngkir->getDistricts($cityId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $districts
+        ]);
+    }
+
+    /**
+     * Get subdistricts by district
+     */
+    public function getSubDistricts(Request $request)
+    {
+        $districtId = $request->get('district_id');
+
+        if (!$districtId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'District ID is required',
+                'data' => []
+            ], 400);
+        }
+
+        $subdistricts = $this->rajaOngkir->getSubDistricts($districtId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $subdistricts
+        ]);
+    }
+
+    /**
      * Search city by keyword
      */
     public function searchCity(Request $request)
@@ -71,24 +117,18 @@ class ShippingController extends Controller
     public function calculateCost(Request $request)
     {
         $request->validate([
+            // 'destination_subdistrict_id' => 'required|integer',
             'destination_city_id' => 'required|integer',
+            'destination_district_id' => 'required|integer',
             'weight' => 'required|integer|min:1',
         ]);
 
-        $originCityId = $this->rajaOngkir->getGorontaloCityId();
-
-        if (!$originCityId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Origin city (Gorontalo) not found'
-            ], 500);
-        }
-
-        $destinationCityId = $request->destination_city_id;
+        $originCity = $this->rajaOngkir->getOriginCityId();
+        $destinationCity = $request->destination_city_id;
         $weight = $request->weight;
 
         // Check if same city (dalam kota)
-        if ($originCityId == $destinationCityId) {
+        if ($this->rajaOngkir->isSameCity($originCity, $destinationCity)) {
             return response()->json([
                 'success' => true,
                 'is_same_city' => true,
@@ -97,20 +137,22 @@ class ShippingController extends Controller
                         'name' => 'Pengiriman Dalam Kota',
                         'code' => 'local',
                         'service' => 'FLAT',
-                        'description' => 'Pengiriman Dalam Kota Gorontalo',
-                        'cost' => 10000,
-                        'etd' => '1-2 hari',
+                        'description' => 'Pengiriman Dalam Kota/Kabupaten Gorontalo',
+                        'cost' => 6000,
+                        'etd' => '1 hari',
                     ]
                 ]
             ]);
         }
 
+        $originDistrictId = $this->rajaOngkir->getGorontaloOriginDistrictId();
+        $destinationDistrictId = $request->destination_district_id;
+
         // Calculate using RajaOngkir for antar kota
         $result = $this->rajaOngkir->calculateCost(
-            $originCityId,
-            $destinationCityId,
-            $weight,
-            'all' // Get all couriers
+            $originDistrictId,
+            $destinationDistrictId,
+            $weight
         );
 
         return response()->json($result);

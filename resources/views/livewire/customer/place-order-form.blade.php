@@ -138,6 +138,7 @@
                 <div class="section-header mt-5">
                     <h4><i class="lni lni-map-marker"></i> Alamat Pengiriman</h4>
                 </div>
+                {{-- <div class="row" wire:ignore> --}}
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nama Penerima</label>
@@ -180,6 +181,27 @@
                         @enderror
                     </div>
 
+                    <!-- RAJAONGKIR: Kecamatan -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Kecamatan <span class="text-danger">*</span></label>
+                        <select class="form-control" id="kecamatan-select" wire:model="district_id" disabled>
+                            <option value="">Pilih Kecamatan</option>
+                        </select>
+                        <input type="hidden" wire:model="kecamatan">
+                        @error('district_id')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+
+                    <!-- RAJAONGKIR: Kelurahan (Optional for intercity) -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Kelurahan/Desa</label>
+                        <select class="form-control" id="kelurahan-select" wire:model="subdistrict_id" disabled>
+                            <option value="">Pilih Kelurahan</option>
+                        </select>
+                        <input type="hidden" wire:model="kelurahan">
+                    </div>
+
                     <div class="col-12 mb-3">
                         <label class="form-label fw-bold">Alamat Lengkap</label>
                         <textarea class="form-control" wire:model="alamat_lengkap" rows="3"
@@ -189,16 +211,6 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Kelurahan/Desa</label>
-                        <input type="text" class="form-control" wire:model="kelurahan"
-                            placeholder="Nama kelurahan">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Kecamatan</label>
-                        <input type="text" class="form-control" wire:model="kecamatan"
-                            placeholder="Nama kecamatan">
-                    </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Kode Pos</label>
                         <input type="text" class="form-control" wire:model="kode_pos" placeholder="96xxx">
@@ -227,6 +239,7 @@
                         <input type="hidden" wire:model="kurir_code" id="selected-kurir-code">
                         <input type="hidden" wire:model="kurir_service" id="selected-kurir-service">
                         <input type="hidden" wire:model="kurir_etd" id="selected-kurir-etd">
+                        <input type="hidden" wire:model="kurir_name" id="selected-kurir-name">
                         @error('kurir_code')
                             <small class="text-danger d-block mt-2">{{ $message }}</small>
                         @enderror
@@ -381,9 +394,39 @@
                             '<i class="lni lni-save"></i> Simpan Desain');
                     });
             });
-
             // ===== RAJAONGKIR INTEGRATION =====
+            var selectedProvinceId = null;
+            var selectedProvinceName = '';
+            var selectedCityId = null;
+            var selectedCityName = '';
+            var selectedDistrictId = null;
+            var selectedDistrictName = '';
+            var selectedSubdistrictId = null;
+            var selectedSubdistrictName = '';
+            var selectedKurirCode = '';
+            var selectedKurirName = '';
+            var selectedKurirService = '';
+            var selectedKurirEtd = '';
+            var selectedOngkir = 0;
+            var selectedTipePengiriman = '';
 
+
+            // State management untuk menyimpan options yang sudah di-load
+            var loadedProvinces = [];
+            var loadedCities = [];
+            var loadedDistricts = [];
+            var loadedSubDistricts = [];
+
+            // Livewire hook - dipanggil setiap kali Livewire selesai update DOM
+            document.addEventListener('livewire:initialized', () => {
+                Livewire.hook('morph.updated', ({
+                    el,
+                    component
+                }) => {
+                    // Re-populate select options setelah Livewire update
+                    repopulateShippingSelects();
+                });
+            });
             // Load provinces on page load
             $(document).ready(function() {
                 loadProvinces();
@@ -395,16 +438,8 @@
                     type: 'GET',
                     success: function(response) {
                         if (response.success && response.data) {
-                            var select = $('#provinsi-select');
-                            select.empty().append('<option value="">Pilih Provinsi</option>');
-
-                            $.each(response.data, function(index, provinsi) {
-                                select.append('<option value="' + provinsi.id + '" data-name="' +
-                                    provinsi.name + '">' + provinsi.name + '</option>');
-                            });
-
-                            // Set default Gorontalo if exists
-                            // @this.set('provinsi', 'Gorontalo');
+                            loadedProvinces = response.data; // Simpan data
+                            populateProvinceSelect(response.data, selectedProvinceId);
                         }
                     },
                     error: function() {
@@ -413,20 +448,44 @@
                 });
             }
 
+            function populateProvinceSelect(provinces, selectedId = null) {
+                var select = $('#provinsi-select');
+                select.empty().append('<option value="">Pilih Provinsi</option>');
+                $.each(provinces, function(index, provinsi) {
+                    var isSelected = selectedId == provinsi.id ? 'selected' : '';
+                    select.append('<option value="' + provinsi.id + '" data-name="' +
+                        provinsi.name + '" ' + isSelected + '>' + provinsi.name + '</option>');
+                });
+            }
+
             // Handle province selection
             $('#provinsi-select').on('change', function() {
                 var provinceId = $(this).val();
                 var provinceName = $(this).find(':selected').data('name');
 
-                // @this.set('provinsi_id', provinceId);
-                // @this.set('provinsi', provinceName);
-                // @this.set('kota_id', null);
-                // @this.set('kota', '');
+                selectedProvinceId = provinceId;
+                selectedProvinceName = provinceName || '';
+
+                // Reset dependent fields
+                selectedCityId = null;
+                selectedCityName = '';
+                selectedDistrictId = null;
+                selectedDistrictName = '';
+                selectedSubdistrictId = null;
+                selectedSubdistrictName = '';
+                selectedOngkir = 0;
+                selectedTipePengiriman = '';
 
                 $('#kota-select').empty().append('<option value="">Pilih Kota</option>').prop('disabled', true);
+                $('#kecamatan-select').empty().append('<option value="">Pilih Kecamatan</option>').prop('disabled',
+                    true);
+                $('#kelurahan-select').empty().append('<option value="">Pilih Kelurahan</option>').prop('disabled',
+                    true);
                 $('#courier-selection-container').hide();
                 $('#shipping-type-info').html('<i class="lni lni-information"></i> Pilih kota tujuan terlebih dahulu')
                     .removeClass('alert-success').addClass('alert-info');
+
+                updateOngkirDisplay();
 
                 if (provinceId) {
                     loadCities(provinceId);
@@ -442,19 +501,22 @@
                     },
                     success: function(response) {
                         if (response.success && response.data) {
-                            var select = $('#kota-select');
-                            select.empty().append('<option value="">Pilih Kota</option>');
-
-                            $.each(response.data, function(index, city) {
-                                // var cityLabel = city.type + ' ' + city.city_name;
-                                select.append('<option value="' + city.id + '" data-name="' +
-                                    city.name + '">' + city.name + '</option>');
-                            });
-
-                            select.prop('disabled', false);
+                            loadedCities = response.data; // Simpan data
+                            populateCitySelect(response.data, selectedCityId);
                         }
                     }
                 });
+            }
+
+            function populateCitySelect(cities, selectedId = null) {
+                var select = $('#kota-select');
+                select.empty().append('<option value="">Pilih Kota</option>');
+                $.each(cities, function(index, city) {
+                    var isSelected = selectedId == city.id ? 'selected' : '';
+                    select.append('<option value="' + city.id + '" data-name="' +
+                        city.name + '" ' + isSelected + '>' + city.name + '</option>');
+                });
+                select.prop('disabled', false);
             }
 
             // Handle city selection
@@ -464,16 +526,115 @@
 
                 if (!cityId) return;
 
-                @this.set('kota_id', cityId);
-                @this.set('kota', cityName);
-
                 selectedCityId = cityId;
+                selectedCityName = cityName || '';
 
-                // Calculate shipping cost
-                calculateShippingCost(cityId);
+                // Reset dependent fields
+                selectedDistrictId = null;
+                selectedDistrictName = '';
+                selectedSubdistrictId = null;
+                selectedSubdistrictName = '';
+                selectedOngkir = 0;
+
+                $('#kecamatan-select').empty().append('<option value="">Pilih Kecamatan</option>').prop('disabled',
+                    true);
+                $('#kelurahan-select').empty().append('<option value="">Pilih Kelurahan</option>').prop('disabled',
+                    true);
+                $('#courier-selection-container').hide();
+
+                updateOngkirDisplay();
+
+                // Load districts
+                loadDistricts(cityId);
             });
 
-            function calculateShippingCost(destinationCityId) {
+            function loadDistricts(cityId) {
+                $.ajax({
+                    url: '{{ route('customer.shipping.districts') }}',
+                    type: 'GET',
+                    data: {
+                        city_id: cityId
+                    },
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            loadedDistricts = response.data; // Simpan data
+                            populateDistrictSelect(response.data, selectedDistrictId);
+                        }
+                    }
+                });
+            }
+
+            function populateDistrictSelect(districts, selectedId = null) {
+                var select = $('#kecamatan-select');
+                select.empty().append('<option value="">Pilih Kecamatan</option>');
+                $.each(districts, function(index, district) {
+                    var isSelected = selectedId == district.id ? 'selected' : '';
+                    select.append('<option value="' + district.id + '" data-name="' +
+                        district.name + '" ' + isSelected + '>' + district.name + '</option>');
+                });
+                select.prop('disabled', false);
+            }
+
+            function loadSubDistricts(districtId) {
+                $.ajax({
+                    url: '{{ route('customer.shipping.subdistricts') }}',
+                    type: 'GET',
+                    data: {
+                        district_id: districtId
+                    },
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            loadedSubDistricts = response.data; // Simpan data
+                            populateSubDistrictSelect(response.data, selectedSubdistrictId);
+                        }
+                    }
+                });
+            }
+
+            function populateSubDistrictSelect(subdistricts, selectedId = null) {
+                var select = $('#kelurahan-select');
+                select.empty().append('<option value="">Pilih Kelurahan</option>');
+                $.each(subdistricts, function(index, subdistrict) {
+                    var isSelected = selectedId == subdistrict.id ? 'selected' : '';
+                    select.append('<option value="' + subdistrict.id + '" data-name="' +
+                        subdistrict.name + '" ' + isSelected + '>' + subdistrict.name + '</option>');
+                });
+                select.prop('disabled', false);
+            }
+
+            // Handle district (kecamatan) selection
+            $(document).on('change', '#kecamatan-select', function() {
+                var districtId = $(this).val();
+                var districtName = $(this).find(':selected').data('name');
+
+                if (!districtId) return;
+
+                selectedDistrictId = districtId;
+                selectedDistrictName = districtName || '';
+
+                // Reset subdistrict
+                selectedSubdistrictId = null;
+                selectedSubdistrictName = '';
+
+                $('#kelurahan-select').empty().append('<option value="">Pilih Kelurahan</option>').prop('disabled',
+                    true);
+
+                // Calculate shipping cost
+                calculateShippingCost(selectedCityId, districtId);
+            });
+
+            // Handle subdistrict (kelurahan) selection
+            $(document).on('change', '#kelurahan-select', function() {
+                var subdistrictId = $(this).val();
+                var subdistrictName = $(this).find(':selected').data('name');
+
+                if (subdistrictId) {
+                    selectedSubdistrictId = subdistrictId;
+                    selectedSubdistrictName = subdistrictName || '';
+                }
+            });
+
+            function calculateShippingCost(destinationCityId, destinationDistrictId) {
                 // Show loading
                 $('#shipping-type-info').html('<i class="lni lni-spinner-arrow spinning"></i> Menghitung ongkos kirim...')
                     .removeClass('alert-success alert-danger').addClass('alert-info');
@@ -488,27 +649,30 @@
                     },
                     data: {
                         destination_city_id: destinationCityId,
+                        destination_district_id: destinationDistrictId,
                         weight: totalWeight
                     },
                     success: function(response) {
                         if (response.success) {
                             if (response.is_same_city) {
                                 // Dalam kota Gorontalo
-                                @this.set('tipe_pengiriman', 'dalam_kota');
-                                @this.set('ongkir', 10000);
-                                @this.set('kurir_code', 'local');
-                                @this.set('kurir_service', 'FLAT');
-                                @this.set('kurir_etd', '1-2 hari');
+                                selectedTipePengiriman = 'dalam_kota';
+                                selectedOngkir = 6000;
+                                selectedKurirCode = 'local';
+                                selectedKurirName = 'Pengiriman Dalam Kota';
+                                selectedKurirService = 'FLAT';
+                                selectedKurirEtd = '1 hari';
 
                                 $('#shipping-type-info').html(
-                                    '<i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br><small>Ongkir: Rp 10.000 (Estimasi: 1-2 hari)</small>'
+                                    '<i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br><small>Ongkir: Rp 6.000 (Estimasi: 1 hari)</small>'
                                 ).removeClass('alert-info alert-danger').addClass('alert-success');
                                 $('#courier-selection-container').hide();
-                                $('#ongkir-display').text('Rp 10.000');
+
+                                updateOngkirDisplay();
                                 $('#btn-submit-order').prop('disabled', false);
                             } else {
                                 // Antar kota
-                                @this.set('tipe_pengiriman', 'antar_kota');
+                                selectedTipePengiriman = 'antar_kota';
                                 courierOptions = response.data;
 
                                 if (courierOptions.length > 0) {
@@ -542,7 +706,6 @@
             function displayCourierOptions(options) {
                 var container = $('#courier-options-list');
                 container.empty();
-
                 $('#courier-options-loading').hide();
                 $('#courier-selection-container').show();
 
@@ -554,23 +717,23 @@
                     var cardClass = index === 0 ? 'border-primary' : '';
 
                     var card = `
-                        <div class="col-md-6 col-lg-4">
-                            <div class="courier-option-card ${cardClass}">
-                                <input type="radio" class="courier-radio" name="courier_option" value="${index}" ${isChecked}
-                                    data-code="${option.code}"
-                                    data-service="${option.service}"
-                                    data-cost="${option.cost}"
-                                    data-etd="${option.etd}">
-                                <label>
-                                    <div class="courier-name">${option.name}</div>
-                                    <div class="courier-service">${option.service} - ${option.description}</div>
-                                    <div class="courier-cost">Rp ${formatNumber(option.cost)}</div>
-                                    <div class="courier-etd"><i class="lni lni-timer"></i> ${option.etd}</div>
-                                </label>
-                            </div>
-                        </div>
-                    `;
-
+            <div class="col-md-6 col-lg-4">
+                <div class="courier-option-card ${cardClass}">
+                    <input type="radio" class="courier-radio" name="courier_option" value="${index}" ${isChecked}
+                        data-code="${option.code}"
+                        data-name="${option.name}"
+                        data-service="${option.service}"
+                        data-cost="${option.cost}"
+                        data-etd="${option.etd}">
+                    <label>
+                        <div class="courier-name">${option.name}</div>
+                        <div class="courier-service">${option.service} - ${option.description}</div>
+                        <div class="courier-cost">Rp ${formatNumber(option.cost)}</div>
+                        <div class="courier-etd"><i class="lni lni-timer"></i> ${option.etd}</div>
+                    </label>
+                </div>
+            </div>
+        `;
                     container.append(card);
                 });
 
@@ -591,19 +754,103 @@
             }
 
             function setSelectedCourier(courier) {
-                @this.set('kurir_code', courier.code);
-                @this.set('kurir_service', courier.service);
-                @this.set('kurir_etd', courier.etd);
-                @this.set('ongkir', courier.cost);
+                selectedKurirCode = courier.code;
+                selectedKurirName = courier.name;
+                selectedKurirService = courier.service;
+                selectedKurirEtd = courier.etd;
+                selectedOngkir = courier.cost;
 
-                $('#selected-kurir-code').val(courier.code);
-                $('#selected-kurir-service').val(courier.service);
-                $('#selected-kurir-etd').val(courier.etd);
-                $('#ongkir-display').text('Rp ' + formatNumber(courier.cost));
+                updateOngkirDisplay();
+            }
+
+            function updateOngkirDisplay() {
+                $('#ongkir-display').text('Rp ' + formatNumber(selectedOngkir));
+
+                // Update total
+                var subtotal = {{ $subtotal }};
+                var total = subtotal + selectedOngkir;
+                $('.price-row.total strong').text('Rp ' + formatNumber(total));
             }
 
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            // Sebelum submit, update semua nilai ke Livewire
+            $('form').on('submit', function(e) {
+                // Set nilai ke wire:model via JavaScript
+                Livewire.find('{{ $_instance->getId() }}').set('provinsi_id', selectedProvinceId);
+                Livewire.find('{{ $_instance->getId() }}').set('provinsi', selectedProvinceName);
+                Livewire.find('{{ $_instance->getId() }}').set('kota_id', selectedCityId);
+                Livewire.find('{{ $_instance->getId() }}').set('kota', selectedCityName);
+                Livewire.find('{{ $_instance->getId() }}').set('district_id', selectedDistrictId);
+                Livewire.find('{{ $_instance->getId() }}').set('kecamatan', selectedDistrictName);
+                Livewire.find('{{ $_instance->getId() }}').set('subdistrict_id', selectedSubdistrictId);
+                Livewire.find('{{ $_instance->getId() }}').set('kelurahan', selectedSubdistrictName);
+                Livewire.find('{{ $_instance->getId() }}').set('tipe_pengiriman', selectedTipePengiriman);
+                Livewire.find('{{ $_instance->getId() }}').set('kurir_code', selectedKurirCode);
+                Livewire.find('{{ $_instance->getId() }}').set('kurir_name', selectedKurirName);
+                Livewire.find('{{ $_instance->getId() }}').set('kurir_service', selectedKurirService);
+                Livewire.find('{{ $_instance->getId() }}').set('kurir_etd', selectedKurirEtd);
+                Livewire.find('{{ $_instance->getId() }}').set('ongkir', selectedOngkir);
+
+                // Biarkan form submit secara normal setelah set values
+            });
+
+            function repopulateShippingSelects() {
+                // Re-populate provinces jika sudah di-load
+                if (loadedProvinces.length > 0) {
+                    populateProvinceSelect(loadedProvinces, selectedProvinceId);
+                }
+
+                // Re-populate cities jika ada provinsi terpilih dan data sudah di-load
+                if (selectedProvinceId && loadedCities.length > 0) {
+                    populateCitySelect(loadedCities, selectedCityId);
+                }
+
+                // Re-populate districts jika ada kota terpilih dan data sudah di-load
+                if (selectedCityId && loadedDistricts.length > 0) {
+                    populateDistrictSelect(loadedDistricts, selectedDistrictId);
+                }
+
+                // Re-populate subdistricts jika ada district terpilih dan data sudah di-load
+                if (selectedDistrictId && loadedSubDistricts.length > 0) {
+                    populateSubDistrictSelect(loadedSubDistricts, selectedSubdistrictId);
+                }
+
+                // Re-populate courier options jika sudah ada
+                if (courierOptions.length > 0 && selectedTipePengiriman === 'antar_kota') {
+                    displayCourierOptions(courierOptions);
+                    // Re-select courier yang sudah dipilih
+                    if (selectedKurirCode) {
+                        var selectedIndex = courierOptions.findIndex(c => c.code === selectedKurirCode && c.service ===
+                            selectedKurirService);
+                        if (selectedIndex >= 0) {
+                            $('.courier-radio[value="' + selectedIndex + '"]').prop('checked', true);
+                            $('.courier-option-card').removeClass('border-primary');
+                            $('.courier-radio[value="' + selectedIndex + '"]').closest('.courier-option-card').addClass(
+                                'border-primary');
+                        }
+                    }
+                }
+
+                // Update shipping info display jika sudah ada tipe pengiriman
+                if (selectedTipePengiriman === 'dalam_kota') {
+                    $('#shipping-type-info').html(
+                        '<i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br><small>Ongkir: Rp 6.000 (Estimasi: 1 hari)</small>'
+                    ).removeClass('alert-info alert-danger').addClass('alert-success');
+                    $('#courier-selection-container').hide();
+                } else if (selectedTipePengiriman === 'antar_kota' && courierOptions.length > 0) {
+                    $('#shipping-type-info').html(
+                        '<i class="lni lni-truck"></i> <strong>Pengiriman Antar Kota</strong><br><small>Pilih layanan pengiriman di bawah</small>'
+                    ).removeClass('alert-info alert-danger').addClass('alert-success');
+                    $('#courier-selection-container').show();
+                }
+
+                // Update ongkir display
+                if (selectedOngkir > 0) {
+                    updateOngkirDisplay();
+                }
             }
         </script>
     @endpush

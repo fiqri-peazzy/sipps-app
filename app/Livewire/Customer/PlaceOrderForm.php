@@ -36,9 +36,13 @@ class PlaceOrderForm extends Component
     // RajaOngkir Fields
     public $provinsi_id;
     public $kota_id;
+    public $district_id;
+    public $subdistrict_id;
     public $kurir_code;
     public $kurir_service;
+    public $kurir_name;
     public $kurir_etd;
+    public $kecamatan_id; // Alias untuk district_id
 
     // Additional
     public $catatan;
@@ -63,12 +67,14 @@ class PlaceOrderForm extends Component
         'provinsi' => 'required|string',
         'kota' => 'required|string',
         'kota_id' => 'required|integer',
+        'district_id' => 'required|integer',
         'tipe_pengiriman' => 'required|in:dalam_kota,antar_kota',
     ];
 
     protected $messages = [
         'kota_id.required' => 'Kota tujuan harus dipilih',
         'provinsi.required' => 'Provinsi harus dipilih',
+        'district_id.required' => 'Kecamatan harus dipilih',
     ];
 
     public function mount($jenisSablons, $ukurans, $selectedJenis = null)
@@ -228,9 +234,13 @@ class PlaceOrderForm extends Component
                 'berat_total' => $this->totalWeight,
                 'catatan' => $this->catatan,
                 'tipe_pengiriman' => $this->tipe_pengiriman,
-                'kurir_code' => $this->kurir_code,
-                'kurir_service' => $this->kurir_service,
-                'kurir_etd' => $this->kurir_etd,
+                'kurir' => $this->kurir_name ?? $this->kurir_code,
+                'service_kurir' => $this->kurir_service,
+                'estimasi_pengiriman' => $this->kurir_etd,
+                'province_id' => $this->provinsi_id,
+                'city_id' => $this->kota_id,
+                'district_id' => $this->district_id,
+                'subdistrict_id' => $this->subdistrict_id,
                 'penerima_nama' => $this->penerima_nama,
                 'penerima_telepon' => $this->penerima_telepon,
                 'alamat_lengkap' => $this->alamat_lengkap,

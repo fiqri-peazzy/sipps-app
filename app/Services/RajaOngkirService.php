@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-
 class RajaOngkirService
 {
     protected $apiKey;
@@ -73,74 +72,121 @@ class RajaOngkirService
     }
 
     /**
-     * Get city detail by ID
+     * Get list district by city
      */
-    public function getCityById($cityId)
+    public function getDistricts($cityId)
     {
-        $cacheKey = "rajaongkir_city_{$cityId}";
+        $cacheKey = "rajaongkir_districts_{$cityId}";
 
         return Cache::remember($cacheKey, 86400, function () use ($cityId) {
             try {
-                $response = Http::withHeaders([
-                    'key' => $this->apiKey
-                ])->get($this->baseUrl . '/city', [
-                    'id' => $cityId
-                ]);
+                $url = $this->baseUrl . '/destination/district/' . urlencode($cityId);
 
-                if ($response->successful() && $response->json('rajaongkir.status.code') == 200) {
-                    return $response->json('rajaongkir.results');
+                $response = Http::withHeaders([
+                    'key' => $this->apiKey,
+                    'accept' => 'application/json',
+                ])->get($url);
+
+                if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                    return $response->json('data');
                 }
 
-                return null;
+                return [];
             } catch (\Exception $e) {
-                Log::error('RajaOngkir Get City By ID Error: ' . $e->getMessage());
-                return null;
+                Log::error('RajaOngkir Get Districts Error: ' . $e->getMessage());
+                return [];
             }
         });
     }
 
     /**
-     * Calculate shipping cost
+     * Get list subdistrict by district
      */
-    public function calculateCost($origin, $destination, $weight, $courier = 'all')
+    public function getSubDistricts($districtId)
+    {
+        $cacheKey = "rajaongkir_subdistricts_{$districtId}";
+
+        return Cache::remember($cacheKey, 86400, function () use ($districtId) {
+            try {
+                $url = $this->baseUrl . '/destination/subdistrict/' . urlencode($districtId);
+
+                $response = Http::withHeaders([
+                    'key' => $this->apiKey,
+                    'accept' => 'application/json',
+                ])->get($url);
+
+                if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                    return $response->json('data');
+                }
+
+                return [];
+            } catch (\Exception $e) {
+                Log::error('RajaOngkir Get SubDistricts Error: ' . $e->getMessage());
+                return [];
+            }
+        });
+    }
+
+    /**
+     * Search city by keyword
+     */
+    public function searchCity($keyword)
+    {
+        $cities = $this->getCities();
+
+        return array_filter($cities, function ($city) use ($keyword) {
+            $cityName = strtolower($city['name'] ?? '');
+            $searchTerm = strtolower($keyword);
+
+            return strpos($cityName, $searchTerm) !== false;
+        });
+    }
+
+    /**
+     * Calculate shipping cost
+     * 
+     * @param int $originDistrictId Origin subdistrict ID
+     * @param int $destinationDistrictId Destination subdistrict ID
+     * @param int $weight Weight in grams
+     * @param string $courier Courier code or 'all'
+     */
+    public function calculateCost($originDistrictId, $destinationDistrictId, $weight)
     {
         try {
             $response = Http::withHeaders([
-                'key' => $this->apiKey
-            ])->post($this->baseUrl . '/cost', [
-                'origin' => $origin,
-                'originType' => 'city',
-                'destination' => $destination,
-                'destinationType' => 'city',
-                'weight' => $weight,
-                'courier' => $courier
+                'key' => $this->apiKey,
+                'accept' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ])->asForm()->post($this->baseUrl . '/calculate/district/domestic-cost', [
+                'origin' => (string) $originDistrictId,
+                'destination' => (string) $destinationDistrictId,
+                'weight' => (int) $weight,
+                'courier' => 'jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse',
+                'price' => 'lowest',
             ]);
 
             Log::info('RajaOngkir Calculate Cost Request', [
-                'origin' => $origin,
-                'destination' => $destination,
+                'origin' => $originDistrictId,
+                'destination' => $destinationDistrictId,
                 'weight' => $weight,
-                'courier' => $courier
+                'response' => $response->json()
             ]);
 
-            if ($response->successful() && $response->json('rajaongkir.status.code') == 200) {
-                $results = $response->json('rajaongkir.results');
+            if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                $results = $response->json('data');
 
-                // Format response untuk kemudahan penggunaan
+                // Format response
                 $formattedResults = [];
-
-                foreach ($results as $courierData) {
-                    if (isset($courierData['costs']) && is_array($courierData['costs'])) {
-                        foreach ($courierData['costs'] as $service) {
-                            $formattedResults[] = [
-                                'name' => $courierData['name'],
-                                'code' => $courierData['code'],
-                                'service' => $service['service'],
-                                'description' => $service['description'],
-                                'cost' => $service['cost'][0]['value'] ?? 0,
-                                'etd' => $service['cost'][0]['etd'] ?? '',
-                            ];
-                        }
+                if (isset($results) && is_array($results)) {
+                    foreach ($results as $courierData) {
+                        $formattedResults[] = [
+                            'name' => $courierData['name'] ?? '',
+                            'code' => $courierData['code'] ?? '',
+                            'service' => $courierData['service'] ?? '',
+                            'description' => $courierData['description'] ?? '',
+                            'cost' => $courierData['cost'] ?? 0,
+                            'etd' => $courierData['etd'] ?? '',
+                        ];
                     }
                 }
 
@@ -165,12 +211,11 @@ class RajaOngkirService
 
             return [
                 'success' => false,
-                'message' => 'Gagal menghitung ongkir',
+                'message' => $response->json('meta.message') ?? 'Gagal menghitung ongkir',
                 'data' => []
             ];
         } catch (\Exception $e) {
             Log::error('RajaOngkir Calculate Cost Error: ' . $e->getMessage());
-
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -180,38 +225,29 @@ class RajaOngkirService
     }
 
     /**
-     * Search city by name
+     * Get Gorontalo Kota Subdistrict ID (untuk origin)
+     * Sesuaikan dengan subdistrict ID lokasi toko Anda
      */
-    public function searchCity($keyword)
+    public function getGorontaloOriginDistrictId()
     {
-        $cities = $this->getCities();
-
-        return array_filter($cities, function ($city) use ($keyword) {
-            $cityName = strtolower($city['city_name']);
-            $type = strtolower($city['type']);
-            $searchTerm = strtolower($keyword);
-
-            return strpos($cityName, $searchTerm) !== false ||
-                strpos($type, $searchTerm) !== false;
-        });
+        return 2430; // Contoh ID, sesuaikan dengan data real Anda
     }
 
-    /**
-     * Get Gorontalo city ID
-     */
-    public function getGorontaloCityId()
+    public function getOriginCityId()
     {
-        $cities = $this->getCities();
-
-        foreach ($cities as $city) {
-            if (
-                strtolower($city['city_name']) == 'gorontalo' &&
-                strtolower($city['type']) == 'kota'
-            ) {
-                return $city['city_id'];
-            }
+        // Gorontalo City ID
+        return 251;
+    }
+    /**
+     * Check if destination is in same city as origin
+     */
+    public function isSameCity($originCityId, $destinationCityId)
+    {
+        // Jika subdistrict ID sama, pasti satu kota
+        if ($originCityId == $destinationCityId) {
+            return true;
         }
 
-        return null;
+        return false;
     }
 }
