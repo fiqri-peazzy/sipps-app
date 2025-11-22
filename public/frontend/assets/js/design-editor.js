@@ -181,7 +181,15 @@
                 },
                 success: function (response) {
                     if (response.success) {
-                        self.addImageToCanvas(response.url, self.currentArea);
+                        // PERBAIKAN: Kirim metadata lengkap ke addImageToCanvas
+                        const metadata = {
+                            original_path: response.original_path,
+                            original_name: response.original_name,
+                            file_size: response.file_size,
+                            extension: response.extension
+                        };
+
+                        self.addImageToCanvas(response.url, self.currentArea, metadata);
                         self.showAlert('Gambar berhasil ditambahkan', 'success');
                         fileInput.value = '';
                     } else {
@@ -210,8 +218,13 @@
                 ? imageUrl
                 : window.location.origin + imageUrl;
 
-            // Set default metadata jika undefined
-            metadata = metadata || {};
+            // PERBAIKAN: Set default metadata dengan data lengkap
+            metadata = metadata || {
+                original_path: '',
+                original_name: '',
+                file_size: 0,
+                extension: ''
+            };
 
             fabric.Image.fromURL(fullUrl, function (img) {
                 if (!img || !img.width) {
@@ -222,24 +235,33 @@
 
                 const scale = Math.min(300 / img.width, 300 / img.height);
                 img.scale(scale);
+
+                // PERBAIKAN: Set semua custom properties dengan benar
                 img.set({
                     left: canvas.width / 2 - (img.width * scale) / 2,
                     top: canvas.height / 2 - (img.height * scale) / 2,
                     angle: 0,
-                    originalFilePath: metadata.original_path || '',
-                    originalFileName: metadata.original_name || '',
-                    originalFileSize: metadata.file_size || 0,
-                    originalExtension: metadata.extension || ''
+                    originalFilePath: metadata.original_path,
+                    originalFileName: metadata.original_name,
+                    originalFileSize: metadata.file_size,
+                    originalExtension: metadata.extension
                 });
 
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
                 self.updateSummary();
+
+                console.log('Image added with metadata:', {
+                    path: metadata.original_path,
+                    name: metadata.original_name
+                });
             }, {
                 crossOrigin: 'anonymous'
             });
         },
+
+
         addText: function () {
             const text = $('#text-input').val().trim();
 
@@ -345,46 +367,60 @@
 
         getDesignConfig: function () {
             const canvasData = {};
-            const fileMetadata = {}; // TAMBAHAN: Simpan metadata file
+            const fileMetadata = {};
             const self = this;
 
             Object.keys(this.canvases).forEach(function (area) {
                 const canvas = self.canvases[area];
                 if (canvas) {
-                    // Simpan canvas JSON
-                    canvasData[area] = JSON.stringify(canvas.toJSON(['originalFilePath', 'originalFileName', 'originalFileSize', 'originalExtension']));
+                    // Simpan canvas JSON dengan custom properties
+                    canvasData[area] = JSON.stringify(canvas.toJSON([
+                        'originalFilePath',
+                        'originalFileName',
+                        'originalFileSize',
+                        'originalExtension'
+                    ]));
 
                     // Extract file metadata dari objects
                     const objects = canvas.getObjects();
                     fileMetadata[area] = [];
 
-                    objects.forEach(function (obj) {
-                        if (obj.type === 'image' && obj.originalFilePath) {
-                            fileMetadata[area].push({
+                    objects.forEach(function (obj, index) {
+                        if (obj.type === 'image') {
+                            // PERBAIKAN: Pastikan property ada sebelum push
+                            const imgMetadata = {
                                 type: 'image',
-                                original_path: obj.originalFilePath,
-                                original_name: obj.originalFileName,
-                                file_size: obj.originalFileSize,
-                                extension: obj.originalExtension,
+                                original_path: obj.originalFilePath || obj.get('originalFilePath') || '',
+                                original_name: obj.originalFileName || obj.get('originalFileName') || 'unknown.jpg',
+                                file_size: obj.originalFileSize || obj.get('originalFileSize') || 0,
+                                extension: obj.originalExtension || obj.get('originalExtension') || 'jpg',
                                 position: {
-                                    left: obj.left,
-                                    top: obj.top,
-                                    scaleX: obj.scaleX,
-                                    scaleY: obj.scaleY,
-                                    angle: obj.angle
+                                    left: Math.round(obj.left || 0),
+                                    top: Math.round(obj.top || 0),
+                                    scaleX: obj.scaleX || 1,
+                                    scaleY: obj.scaleY || 1,
+                                    angle: obj.angle || 0
                                 }
-                            });
+                            };
+
+                            // VALIDASI: Hanya push jika ada original_path
+                            if (imgMetadata.original_path) {
+                                fileMetadata[area].push(imgMetadata);
+                                console.log('Metadata extracted for ' + area + ' #' + index + ':', imgMetadata);
+                            } else {
+                                console.warn('Image object missing originalFilePath:', obj);
+                            }
                         } else if (obj.type === 'text') {
                             fileMetadata[area].push({
                                 type: 'text',
-                                text: obj.text,
-                                fontFamily: obj.fontFamily,
-                                fontSize: obj.fontSize,
-                                fill: obj.fill,
+                                text: obj.text || '',
+                                fontFamily: obj.fontFamily || 'Arial',
+                                fontSize: obj.fontSize || 16,
+                                fill: obj.fill || '#000000',
                                 position: {
-                                    left: obj.left,
-                                    top: obj.top,
-                                    angle: obj.angle
+                                    left: Math.round(obj.left || 0),
+                                    top: Math.round(obj.top || 0),
+                                    angle: obj.angle || 0
                                 }
                             });
                         }
@@ -392,11 +428,11 @@
                 }
             });
 
-            return {
+            const config = {
                 ukuran_kaos: this.ukuranKaos,
                 warna_kaos: this.warnaKaos,
                 canvas_data: canvasData,
-                file_metadata: fileMetadata, // PENTING: Metadata file original
+                file_metadata: fileMetadata,
                 has_design: {
                     front: this.canvases.front?.getObjects().length > 0 || false,
                     back: this.canvases.back?.getObjects().length > 0 || false,
@@ -404,7 +440,12 @@
                     right_sleeve: this.canvases.right_sleeve?.getObjects().length > 0 || false
                 }
             };
+
+            console.log('Final design config:', config);
+            return config;
         },
+
+
         loadExistingDesign: function (config) {
             if (!config) return;
 

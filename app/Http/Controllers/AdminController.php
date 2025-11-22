@@ -17,4 +17,13 @@ class AdminController extends Controller
     {
         return view('admin.manajemen-produk');
     }
+    public function dataPesanan()
+    {
+        return view('admin.data-pesanan');
+    }
+
+    public function detailPesanan($id)
+    {
+        return view('admin.detail-pesanan', compact('id'));
+    }
 }

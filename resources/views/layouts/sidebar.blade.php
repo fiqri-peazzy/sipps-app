@@ -3,7 +3,6 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="{{ route('admin.dashboard') }}" class="b-brand text-primary">
-                <!-- ========   Change your logo from here   ============ -->
                 <img src="{{ asset('backend/assets/images/logo.svg') }}" alt="" class="logo logo-lg" />
             </a>
         </div>
@@ -14,101 +13,69 @@
                     <i class="ti ti-dashboard"></i>
                 </li>
                 <li class="pc-item">
-                    <a href="{{ route('admin.dashboard') }}" class="pc-link"><span class="pc-micon"><i
-                                class="ti ti-dashboard"></i></span><span class="pc-mtext">Default</span></a>
+                    <a href="{{ route('admin.dashboard') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+                        <span class="pc-mtext">Dashboard Admin</span>
+                    </a>
+                </li>
+
+                <li class="pc-item pc-caption">
+                    <label>Manajemen Pesanan</label>
+                    <i class="ti ti-shopping-cart"></i>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('admin.data.pesanan') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-file-text"></i></span>
+                        <span class="pc-mtext">Data Pesanan</span>
+                    </a>
                 </li>
 
                 <li class="pc-item pc-caption">
                     <label>Manajemen Produksi</label>
-                    <i class="ti ti-apps"></i>
+                    <i class="ti ti-tools"></i>
                 </li>
                 <li class="pc-item">
                     <a href="{{ route('admin.produk.index') }}" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-typography"></i></span>
+                        <span class="pc-micon"><i class="ti ti-package"></i></span>
                         <span class="pc-mtext">Data Produksi</span>
                     </a>
                 </li>
-
-                <li class="pc-item pc-caption">
-                    <label>Pages</label>
-                    <i class="ti ti-news"></i>
-                </li>
                 <li class="pc-item">
-                    <a class="pc-link" target="_blank" href="../pages/login-v3.html">
-                        <span class="pc-micon"><i class="ti ti-lock"></i></span>
-                        <span class="pc-mtext">Login</span>
-                    </a>
-                </li>
-                <li class="pc-item">
-                    <a href="../pages/register-v3.html" target="_blank" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
-                        <span class="pc-mtext">Register</span>
+                    <a href="#" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-calendar-time"></i></span>
+                        <span class="pc-mtext">Penjadwalan dan Prioritas</span>
                     </a>
                 </li>
 
                 <li class="pc-item pc-caption">
-                    <label>Other</label>
-                    <i class="ti ti-brand-chrome"></i>
-                </li>
-                <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link"><span class="pc-micon"><i class="ti ti-menu"></i></span><span
-                            class="pc-mtext">Menu levels</span><span class="pc-arrow"><i
-                                data-feather="chevron-right"></i></span></a>
-                    <ul class="pc-submenu">
-                        <li class="pc-item"><a class="pc-link" href="#!">Level 2.1</a></li>
-                        <li class="pc-item pc-hasmenu">
-                            <a href="#!" class="pc-link">Level 2.2<span class="pc-arrow"><i
-                                        data-feather="chevron-right"></i></span></a>
-                            <ul class="pc-submenu">
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.1</a></li>
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.2</a></li>
-                                <li class="pc-item pc-hasmenu">
-                                    <a href="#!" class="pc-link">Level 3.3<span class="pc-arrow"><i
-                                                data-feather="chevron-right"></i></span></a>
-                                    <ul class="pc-submenu">
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.1</a></li>
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.2</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="pc-item pc-hasmenu">
-                            <a href="#!" class="pc-link">Level 2.3<span class="pc-arrow"><i
-                                        data-feather="chevron-right"></i></span></a>
-                            <ul class="pc-submenu">
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.1</a></li>
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.2</a></li>
-                                <li class="pc-item pc-hasmenu">
-                                    <a href="#!" class="pc-link">Level 3.3<span class="pc-arrow"><i
-                                                data-feather="chevron-right"></i></span></a>
-                                    <ul class="pc-submenu">
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.1</a></li>
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.2</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <label>Pengiriman</label>
+                    <i class="ti ti-truck-delivery"></i>
                 </li>
                 <li class="pc-item">
-                    <a href="../other/sample-page.html" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-brand-chrome"></i></span>
-                        <span class="pc-mtext">Sample page</span>
+                    <a href="#" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-truck"></i></span>
+                        <span class="pc-mtext">Proses Pengiriman</span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a href="#" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-refresh"></i></span>
+                        <span class="pc-mtext">Return Barang</span>
+                    </a>
+                </li>
+
+                <li class="pc-item pc-caption">
+                    <label>Laporan</label>
+                    <i class="ti ti-file-analytics"></i>
+                </li>
+                <li class="pc-item">
+                    <a href="#" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-chart-bar"></i></span>
+                        <span class="pc-mtext">Laporan</span>
                     </a>
                 </li>
 
             </ul>
-            <div class="pc-navbar-card bg-primary rounded">
-                <h4 class="text-white">Explore full code</h4>
-                <p class="text-white opacity-75">Buy now to get full access of code files</p>
-                <a href="https://codedthemes.com/item/berry-bootstrap-5-admin-template/" target="_blank"
-                    class="btn btn-light text-primary">
-                    Buy Now
-                </a>
-            </div>
-            <div class="w-100 text-center">
-                <div class="badge theme-version badge rounded-pill bg-light text-dark f-12"></div>
-            </div>
         </div>
     </div>
 </nav>

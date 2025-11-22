@@ -29,6 +29,7 @@ class OrderItem extends Model
         'subtotal' => 'decimal:2',
         'deadline' => 'datetime',
         'design_config' => 'array', // Cast to array
+        'quantity' => 'integer',
     ];
 
     // Helper methods

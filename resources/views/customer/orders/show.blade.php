@@ -1,9 +1,121 @@
 @extends('layouts.frontend')
 
 @section('title', 'Detail Pesanan #' . $order->order_number)
+@push('styles')
+    <style>
+        /* Existing styles... */
 
+        /* Loading overlay untuk payment */
+        .payment-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .payment-loading.active {
+            display: flex;
+        }
+
+        .payment-loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .payment-loading-content .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <!-- Midtrans Snap.js -->
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+    <!-- Ganti dengan production URL jika sudah production: https://app.midtrans.com/snap/snap.js -->
+@endpush
 @section('content')
     <style>
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .payment-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .payment-loading.active {
+            display: flex;
+        }
+
+        .payment-loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .payment-loading-content .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .order-detail-container {
             background: white;
             border-radius: 20px;
@@ -281,9 +393,33 @@
                         <h5><i class="lni lni-cog"></i> Aksi</h5>
 
                         @if ($order->status == 'pending_payment')
-                            <a href="#" class="btn-action w-100 mb-2">
-                                <i class="lni lni-credit-cards"></i> Bayar Sekarang
-                            </a>
+                            @if ($order->payment_expired_at && now()->greaterThan($order->payment_expired_at))
+                                <div class="alert alert-danger">
+                                    <i class="lni lni-warning"></i> Waktu pembayaran telah habis. Silakan buat pesanan baru.
+                                </div>
+                            @else
+                                <button type="button" id="btn-pay-now" class="btn-action w-100 mb-2">
+                                    <i class="lni lni-credit-cards"></i> Bayar Sekarang
+                                </button>
+
+                                @if ($order->payment_expired_at)
+                                    <div class="alert alert-warning mt-2">
+                                        <small>
+                                            <i class="lni lni-timer"></i>
+                                            Bayar sebelum:
+                                            <strong>{{ $order->payment_expired_at->format('d M Y, H:i') }}</strong>
+                                        </small>
+                                    </div>
+                                @endif
+                            @endif
+                        @endif
+
+                        @if ($order->payment_status == 'pending')
+                            <div class="alert alert-info mt-2">
+                                <i class="lni lni-information"></i>
+                                <small>Pembayaran sedang diproses. Halaman akan otomatis refresh saat pembayaran
+                                    berhasil.</small>
+                            </div>
                         @endif
 
                         @if (in_array($order->status, ['paid', 'verified', 'in_production']))
@@ -314,3 +450,214 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            console.log('=== SNAP CHECK ===');
+            console.log('Snap object:', typeof snap);
+            console.log('Client Key:', '{{ config('services.midtrans.client_key') }}');
+
+            if (typeof snap === 'undefined') {
+                console.error('ERROR: Midtrans Snap.js not loaded!');
+            } else {
+                console.log('SUCCESS: Midtrans Snap.js loaded');
+            }
+
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            var orderId = {{ $order->id }};
+            var orderNumber = '{{ $order->order_number }}';
+            var uniqueOrderId = ''; // Akan diisi dari response initiate
+
+            // Handle Bayar Sekarang button
+            $('#btn-pay-now').on('click', function(e) {
+                e.preventDefault();
+
+                var $btn = $(this);
+                var originalHtml = $btn.html();
+
+                $btn.prop('disabled', true).html(
+                    '<i class="lni lni-spinner-arrow spinning"></i> Memproses...');
+                showPaymentLoading('Menyiapkan pembayaran...');
+
+                // Request snap token
+                $.ajax({
+                    url: '/customer/payment/initiate/' + orderId,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        console.log('=== PAYMENT INITIATE RESPONSE ===');
+                        console.log('Success:', response.success);
+                        console.log('Snap Token:', response.snap_token);
+                        console.log('Unique Order ID:', response.unique_order_id);
+                        console.log('Client Key:', response.client_key);
+
+                        hidePaymentLoading();
+
+                        if (response.success) {
+                            // Validasi snap token
+                            if (!response.snap_token) {
+                                alert('Snap token tidak ditemukan');
+                                $btn.prop('disabled', false).html(originalHtml);
+                                return;
+                            }
+
+                            // Validasi snap object
+                            if (typeof snap === 'undefined') {
+                                alert('Midtrans Snap belum ter-load. Refresh halaman.');
+                                $btn.prop('disabled', false).html(originalHtml);
+                                return;
+                            }
+
+                            // PENTING: Simpan unique_order_id dari response
+                            uniqueOrderId = response.unique_order_id;
+
+                            console.log('=== CALLING SNAP.PAY ===');
+                            console.log('Snap Token:', response.snap_token);
+                            console.log('Unique Order ID untuk callback:', uniqueOrderId);
+
+                            // Open Midtrans Snap popup
+                            try {
+                                snap.pay(response.snap_token, {
+                                    onSuccess: function(result) {
+                                        console.log('=== PAYMENT SUCCESS ===');
+                                        console.log('Result:', result);
+
+                                        showPaymentLoading(
+                                            'Pembayaran berhasil! Mengalihkan...'
+                                        );
+
+                                        // PERBAIKAN: Gunakan uniqueOrderId, bukan orderNumber
+                                        setTimeout(function() {
+                                            window.location.href =
+                                                '/customer/payment/finish?order_id=' +
+                                                uniqueOrderId;
+                                        }, 1500);
+                                    },
+                                    onPending: function(result) {
+                                        console.log('=== PAYMENT PENDING ===');
+                                        console.log('Result:', result);
+
+                                        showPaymentLoading(
+                                            'Menunggu pembayaran...');
+
+                                        // PERBAIKAN: Gunakan uniqueOrderId, bukan orderNumber
+                                        setTimeout(function() {
+                                            window.location.href =
+                                                '/customer/payment/finish?order_id=' +
+                                                uniqueOrderId;
+                                        }, 1500);
+                                    },
+                                    onError: function(result) {
+                                        console.error(
+                                            '=== PAYMENT ERROR CALLBACK ===');
+                                        console.error('Result:', result);
+
+                                        var errorMsg =
+                                            'Terjadi kesalahan pada pembayaran.';
+                                        if (result) {
+                                            if (result.status_message) {
+                                                errorMsg = result.status_message;
+                                            }
+                                            if (result.error_messages && Array
+                                                .isArray(result.error_messages)) {
+                                                errorMsg += '\n' + result
+                                                    .error_messages.join('\n');
+                                            }
+                                            if (result.message) {
+                                                errorMsg = result.message;
+                                            }
+                                        }
+
+                                        hidePaymentLoading();
+                                        alert(errorMsg);
+                                        $btn.prop('disabled', false).html(
+                                            originalHtml);
+                                    },
+                                    onClose: function() {
+                                        console.log('=== PAYMENT POPUP CLOSED ===');
+                                        hidePaymentLoading();
+                                        $btn.prop('disabled', false).html(
+                                            originalHtml);
+                                    }
+                                });
+                            } catch (snapError) {
+                                console.error('=== SNAP.PAY EXCEPTION ===');
+                                console.error('Exception:', snapError);
+
+                                hidePaymentLoading();
+                                alert('Error memanggil Snap: ' + snapError.message);
+                                $btn.prop('disabled', false).html(originalHtml);
+                            }
+                        } else {
+                            alert(response.message || 'Gagal memproses pembayaran');
+                            $btn.prop('disabled', false).html(originalHtml);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('=== AJAX ERROR ===');
+                        console.error('Status:', xhr.status);
+                        console.error('Response:', xhr.responseJSON);
+
+                        hidePaymentLoading();
+
+                        var message = 'Terjadi kesalahan saat memproses pembayaran';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        alert(message);
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            });
+
+            // Check payment status untuk auto-refresh
+            @if ($order->status == 'pending_payment' && $order->payment_status == 'pending' && $order->transaction_id)
+                var checkStatusInterval = setInterval(function() {
+                    $.ajax({
+                        url: '/customer/payment/check-status/' + orderId,
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.success) {
+                                var status = response.data.transaction_status;
+                                console.log('Auto-check status:', status);
+
+                                if (status === 'settlement' || status === 'capture') {
+                                    clearInterval(checkStatusInterval);
+                                    console.log('Payment confirmed, reloading page...');
+                                    location.reload();
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error checking payment status:', xhr.status);
+                        }
+                    });
+                }, 10000); // Check setiap 10 detik
+            @endif
+
+            // Helper functions
+            function showPaymentLoading(message) {
+                var html = `
+                    <div class="payment-loading-content">
+                        <div class="spinner"></div>
+                        <h5 class="mt-3">${message}</h5>
+                    </div>
+                `;
+
+                if ($('.payment-loading').length === 0) {
+                    $('body').append('<div class="payment-loading"></div>');
+                }
+
+                $('.payment-loading').html(html).addClass('active');
+            }
+
+            function hidePaymentLoading() {
+                $('.payment-loading').removeClass('active');
+            }
+        });
+    </script>
+@endpush

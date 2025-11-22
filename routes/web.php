@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DesignEditorController;
 use App\Http\Controllers\DesignFileController;
 use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/contact', [HomeController::class, 'contact'])->name('contact.store');
@@ -18,34 +19,14 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/produk', ManajemenProduk::class)->name('produk.index');
+        Route::get('/pesanan', [AdminController::class, 'dataPesanan'])->name('data.pesanan');
+        Route::get('/detail-pesanan/{id}', [AdminController::class, 'detailPesanan'])->name('detail.pesanan');
 
-        // Download single file
-        Route::get(
-            '/orders/{orderId}/items/{itemId}/design/{area}/file/{fileIndex}',
-            [DesignFileController::class, 'downloadSingleFile']
-        )
-            ->name('order.design.download-file');
-
-        // Download semua files dari 1 area
-        Route::get(
-            '/orders/{orderId}/items/{itemId}/design/{area}/download',
-            [DesignFileController::class, 'downloadAreaFiles']
-        )
-            ->name('order.design.download-area');
-
-        // Download semua design dari 1 item
-        Route::get(
-            '/orders/{orderId}/items/{itemId}/design/download-all',
-            [DesignFileController::class, 'downloadItemDesigns']
-        )
-            ->name('order.design.download-item');
-
-        // Download semua design dari entire order
-        Route::get(
-            '/orders/{orderId}/design/download-complete',
-            [DesignFileController::class, 'downloadOrderDesigns']
-        )
-            ->name('order.design.download-complete');
+        // Download design files
+        Route::get('/order/{orderId}/item/{itemId}/design/{area}/file/{fileIndex}', [DesignFileController::class, 'downloadSingleFile'])->name('download.design.single');
+        Route::get('/order/{orderId}/item/{itemId}/design/{area}/download', [DesignFileController::class, 'downloadAreaFiles'])->name('download.design.area');
+        Route::get('/order/{orderId}/item/{itemId}/design/download-all', [DesignFileController::class, 'downloadItemDesigns'])->name('download.design.item');
+        Route::get('/order/{orderId}/design/download-all', [DesignFileController::class, 'downloadOrderDesigns'])->name('download.design.order');
     });
 
 // Customer routes group
@@ -63,14 +44,17 @@ Route::prefix('customer')
         Route::post('/design-editor/upload-image', [DesignEditorController::class, 'uploadImage'])->name('design-editor.upload');
         Route::post('/design-editor/delete-image', [DesignEditorController::class, 'deleteImage'])->name('design-editor.delete');
 
-        // Shipping API
-        // Route::get('/shipping/provinces', [ShippingController::class, 'getProvinces'])->name('shipping.provinces');
-        // Route::get('/shipping/cities', [ShippingController::class, 'getCities'])->name('shipping.cities');
-        // Route::get('/shipping/search-city', [ShippingController::class, 'searchCity'])->name('shipping.search-city');
-        // Route::get('/shipping/districts', [ShippingController::class, 'getDistricts'])->name('shipping.districts');
-        // Route::get('/shipping/subdistricts', [ShippingController::class, 'getSubdistricts'])->name('shipping.subdistricts');
-        // Route::post('/shipping/calculate-cost', [ShippingController::class, 'calculateCost'])->name('shipping.calculate-cost');
+        Route::prefix('payment')->name('payment.')->group(function () {
+            Route::post('/initiate/{order}', [PaymentController::class, 'initiatePayment'])->name('initiate');
+            Route::get('/finish', [PaymentController::class, 'finish'])->name('finish');
+            Route::get('/unfinish', [PaymentController::class, 'unfinish'])->name('unfinish');
+            Route::get('/error', [PaymentController::class, 'error'])->name('error');
+            Route::get('/check-status/{order}', [PaymentController::class, 'checkStatus'])->name('check-status');
+        });
     });
+// Midtrans callback 
+Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
+
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

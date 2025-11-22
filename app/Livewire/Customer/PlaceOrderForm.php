@@ -419,7 +419,10 @@ class PlaceOrderForm extends Component
         }
 
         if ($field === 'quantity' && $index !== null) {
-            $this->orderItems[$index]['subtotal'] = ($this->orderItems[$index]['harga_satuan'] ?? 0) * $value;
+            $qty = (int) $value;
+            $harga = (int) ($this->orderItems[$index]['harga_satuan'] ?? 0);
+
+            $this->orderItems[$index]['subtotal'] = $harga * $qty;
             $this->calculateTotalWeight();
 
             // Recalculate shipping jika ada perubahan quantity
@@ -522,7 +525,7 @@ class PlaceOrderForm extends Component
             return redirect()->route('customer.orders.show', $order->id);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Order Creation Error: ' . $e->getMessage());
+
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
