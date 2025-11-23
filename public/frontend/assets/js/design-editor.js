@@ -181,9 +181,9 @@
                 },
                 success: function (response) {
                     if (response.success) {
-                        // PERBAIKAN: Kirim metadata lengkap ke addImageToCanvas
+                        // PERBAIKAN: Gunakan temp_path untuk sementara
                         const metadata = {
-                            original_path: response.original_path,
+                            original_path: response.temp_path, // Sekarang pakai temp_path
                             original_name: response.original_name,
                             file_size: response.file_size,
                             extension: response.extension

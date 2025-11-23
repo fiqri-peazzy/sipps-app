@@ -10,6 +10,7 @@ use ZipArchive;
 
 class DesignFileController extends Controller
 {
+
     /**
      * Download single file dari specific area
      */
@@ -39,7 +40,10 @@ class DesignFileController extends Controller
             abort(404, 'File not found in storage');
         }
 
-        return Storage::disk('public')->download($filePath, $fileName);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        $storage = Storage::disk('public');
+
+        return $storage->download($filePath, $fileName);
     }
 
     /**
@@ -59,13 +63,11 @@ class DesignFileController extends Controller
             abort(404, 'No design files found for this area');
         }
 
-        // Jika hanya 1 file, download langsung
-        if (count($files) === 1) {
-            return Storage::disk('public')->download(
-                $files[0]['path'],
-                $files[0]['name']
-            );
-        }
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->download($files[0]['path'], $files[0]['name']);
+
 
         // Multiple files - buat ZIP
         $zipFiles = [];

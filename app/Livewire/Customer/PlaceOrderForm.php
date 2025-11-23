@@ -501,6 +501,11 @@ class PlaceOrderForm extends Component
                 $produk = Produk::find($item['produk_id']);
                 $designConfig = $item['design_config'];
 
+                // Pindahkan file dari temp ke permanent
+                if ($designConfig && isset($designConfig['file_metadata'])) {
+                    $designConfig = $this->moveTempFilesToPermanent($designConfig, $order->order_number);
+                }
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'produk_id' => $item['produk_id'],
@@ -525,14 +530,75 @@ class PlaceOrderForm extends Component
             return redirect()->route('customer.orders.show', $order->id);
         } catch (\Exception $e) {
             DB::rollBack();
-
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Pindahkan file dari folder temp ke permanent saat order di-submit
+     */
+    private function moveTempFilesToPermanent($designConfig, $orderNumber)
+    {
+        $fileMetadata = $designConfig['file_metadata'] ?? [];
+
+        foreach ($fileMetadata as $area => &$files) {
+            foreach ($files as &$file) {
+                if ($file['type'] === 'image' && isset($file['original_path'])) {
+                    $tempPath = $file['original_path'];
+
+                    // Cek apakah file dari folder temp
+                    if (strpos($tempPath, 'designs/temp/') !== false) {
+                        // Generate permanent path
+                        $fileName = basename($tempPath);
+                        $permanentPath = "designs/originals/{$orderNumber}/{$fileName}";
+
+                        // Move file dari temp ke permanent
+                        if (Storage::disk('public')->exists($tempPath)) {
+                            // Buat folder jika belum ada
+                            $permanentDir = dirname(Storage::disk('public')->path($permanentPath));
+                            if (!file_exists($permanentDir)) {
+                                mkdir($permanentDir, 0755, true);
+                            }
+
+                            // Copy file (bukan move, untuk jaga-jaga)
+                            Storage::disk('public')->copy($tempPath, $permanentPath);
+
+                            // Update path di metadata
+                            $file['original_path'] = $permanentPath;
+
+                            // Update canvas JSON jika ada
+                            if (isset($designConfig['canvas_data'][$area])) {
+                                $canvasJson = json_decode($designConfig['canvas_data'][$area], true);
+
+                                foreach ($canvasJson['objects'] as &$obj) {
+                                    if ($obj['type'] === 'image' && isset($obj['originalFilePath']) && $obj['originalFilePath'] === $tempPath) {
+                                        $obj['originalFilePath'] = $permanentPath;
+                                        $obj['src'] = Storage::url($permanentPath);
+                                    }
+                                }
+
+                                $designConfig['canvas_data'][$area] = json_encode($canvasJson);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $designConfig['file_metadata'] = $fileMetadata;
+        return $designConfig;
     }
 
     public function clearDesign($itemIndex)
     {
         if (isset($this->orderItems[$itemIndex])) {
+            $designConfig = $this->orderItems[$itemIndex]['design_config'];
+
+            // Hapus file temporary saat clear design
+            if ($designConfig && isset($designConfig['file_metadata'])) {
+                $this->deleteTempFiles($designConfig);
+            }
+
             $this->orderItems[$itemIndex]['design_config'] = null;
 
             $sessionKey = 'order_designs_' . Auth::id();
@@ -541,6 +607,29 @@ class PlaceOrderForm extends Component
             session([$sessionKey => $sessionData]);
 
             session()->flash('message', 'Desain berhasil dihapus!');
+        }
+    }
+
+    /**
+     * Hapus file temporary dari storage
+     */
+    private function deleteTempFiles($designConfig)
+    {
+        $fileMetadata = $designConfig['file_metadata'] ?? [];
+
+        foreach ($fileMetadata as $area => $files) {
+            foreach ($files as $file) {
+                if ($file['type'] === 'image' && isset($file['original_path'])) {
+                    $tempPath = $file['original_path'];
+
+                    // Hanya hapus jika dari folder temp
+                    if (strpos($tempPath, 'designs/temp/') !== false) {
+                        if (Storage::disk('public')->exists($tempPath)) {
+                            Storage::disk('public')->delete($tempPath);
+                        }
+                    }
+                }
+            }
         }
     }
 

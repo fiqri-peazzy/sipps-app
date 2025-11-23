@@ -3,7 +3,7 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="{{ route('admin.dashboard') }}" class="b-brand text-primary">
-                <img src="{{ asset('backend/assets/images/logo.svg') }}" alt="" class="logo logo-lg" />
+                <img src="{{ asset('backend/assets/images/logo.svg') }}" alt="" class="logo" />
             </a>
         </div>
         <div class="navbar-content">

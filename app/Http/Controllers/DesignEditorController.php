@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class DesignEditorController extends Controller
 {
@@ -15,7 +16,7 @@ class DesignEditorController extends Controller
     public function uploadImage(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,ai,pdf|max:51200', // 50MB untuk file mentah
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,ai,pdf|max:51200',
             'area' => 'required|in:front,back,left_sleeve,right_sleeve',
         ]);
 
@@ -34,20 +35,18 @@ class DesignEditorController extends Controller
             $extension = $file->getClientOriginalExtension();
             $fileSize = $file->getSize();
 
-            // Simpan file ORIGINAL (high-res) untuk produksi
-            $originalPath = $file->store('designs/originals', 'public');
+            // PERBAIKAN: Simpan ke folder TEMPORARY dulu
+            // Format: designs/temp/{user_id}/{timestamp}_{filename}
+            $userId = Auth::id();
+            $timestamp = time();
+            $tempPath = $file->store("designs/temp/{$userId}", 'public');
 
-            // Generate thumbnail untuk canvas preview (optional - kalau file terlalu besar)
-            // Ini opsional, bisa langsung pakai original juga
-            $previewPath = $originalPath; // Untuk sementara pakai original
-
-            $url = Storage::url($originalPath);
+            $url = Storage::url($tempPath);
 
             return response()->json([
                 'success' => true,
                 'url' => $url,
-                'original_path' => $originalPath,
-                'preview_path' => $previewPath,
+                'temp_path' => $tempPath, // Path temporary
                 'original_name' => $originalName,
                 'file_size' => $fileSize,
                 'extension' => $extension,

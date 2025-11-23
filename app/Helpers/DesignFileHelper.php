@@ -13,30 +13,29 @@ class DesignFileHelper
     public static function createZip(array $files, string $zipFileName)
     {
         $zip = new ZipArchive();
-        $zipPath = storage_path('app/temp/' . $zipFileName);
 
-        // Create temp directory if not exists
-        if (!file_exists(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0755, true);
+        // PERBAIKAN: Buat folder temp jika belum ada
+        $tempDir = storage_path('app/temp');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
         }
+
+        $zipPath = $tempDir . '/' . $zipFileName;
 
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
             foreach ($files as $file) {
                 $filePath = Storage::disk('public')->path($file['path']);
-
                 if (file_exists($filePath)) {
                     // Add file ke zip dengan nama yang jelas
                     $zip->addFile($filePath, $file['name_in_zip']);
                 }
             }
-
             $zip->close();
             return $zipPath;
         }
 
         return false;
     }
-
     /**
      * Extract files dari design config
      */
@@ -125,7 +124,13 @@ class DesignFileHelper
             }
         }
 
-        $tempPath = storage_path('app/temp/design-specs-' . time() . '.txt');
+        // PERBAIKAN: Buat folder temp jika belum ada
+        $tempDir = storage_path('app/temp');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $tempPath = $tempDir . '/design-specs-' . time() . '.txt';
         file_put_contents($tempPath, $content);
 
         return $tempPath;
