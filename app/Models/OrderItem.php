@@ -55,6 +55,50 @@ class OrderItem extends Model
         return $this->belongsTo(Produk::class);
     }
 
+    public function complexityLogs()
+    {
+        return $this->hasMany(ComplexityLog::class);
+    }
+
+    public function priorityLogs()
+    {
+        return $this->hasMany(PriorityLog::class);
+    }
+
+    public function returnRequests()
+    {
+        return $this->hasMany(ReturnRequest::class);
+    }
+
+    public function complexityReviewedBy()
+    {
+        return $this->belongsTo(User::class, 'complexity_reviewed_by');
+    }
+
+    // Helper method untuk cek apakah sudah direview
+    public function hasComplexityReview()
+    {
+        return !is_null($this->manual_complexity_score);
+    }
+
+    // Get latest complexity log
+    public function getLatestComplexityLog()
+    {
+        return $this->complexityLogs()->latest()->first();
+    }
+
+    // Get latest priority log
+    public function getLatestPriorityLog()
+    {
+        return $this->priorityLogs()->latest()->first();
+    }
+
+    // Check if has pending return request
+    public function hasPendingReturn()
+    {
+        return $this->returnRequests()->where('status', 'pending')->exists();
+    }
+
     // Accessors
     public function getFormattedSubtotalAttribute()
     {
