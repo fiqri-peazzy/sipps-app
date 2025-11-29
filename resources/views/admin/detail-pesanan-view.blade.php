@@ -1,7 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="page-header-title">
-            <h2 class="mb-0">Detail Pesanan</h2>
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="page-header-title">
+                <h5 class="m-b-10">Detail Pesanan</h5>
+            </div>
         </div>
         <ul class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>

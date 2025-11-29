@@ -300,7 +300,8 @@
         let previewCanvas = null;
 
         window.addEventListener('show-toast', event => {
-            const data = event.detail;
+            console.log('Toast event received:', event);
+            const data = event.detail[0];
             if (data.type === 'success') {
                 toastr.success(data.message);
             } else {
@@ -355,8 +356,7 @@
             Livewire.on('designModalOpened', (eventData) => {
                 console.log('Modal opened, event data received:', eventData);
 
-                const data = eventData[0]; // Livewire v3 format
-
+                const data = eventData[0];
                 setTimeout(() => {
                     renderDesignPreview(data);
                 }, 300);

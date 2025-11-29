@@ -41,9 +41,9 @@
                     </a>
                 </li>
                 <li class="pc-item">
-                    <a href="#" class="pc-link">
+                    <a href="{{ route('admin.penjadwalan.prioritas') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-calendar-time"></i></span>
-                        <span class="pc-mtext">Penjadwalan dan Prioritas</span>
+                        <span class="pc-mtext">Metode DPS</span>
                     </a>
                 </li>
 

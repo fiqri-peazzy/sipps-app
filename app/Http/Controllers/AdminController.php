@@ -24,6 +24,11 @@ class AdminController extends Controller
 
     public function detailPesanan($id)
     {
-        return view('admin.detail-pesanan', compact('id'));
+        return view('admin.detail-pesanan-view', compact('id'));
+    }
+
+    public function penjadwalan()
+    {
+        return view('admin.penjadwalan-prioritas-view');
     }
 }
