@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Services\PriorityCalculator;
 use App\Services\ComplexityCalculator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PenjadwalanPrioritas extends Component
 {
@@ -34,6 +35,8 @@ class PenjadwalanPrioritas extends Component
     public $stats = [];
 
     protected $listeners = ['refreshComponent' => '$refresh'];
+    protected $layout = 'layouts.app';
+
 
     public function mount()
     {
@@ -112,6 +115,12 @@ class PenjadwalanPrioritas extends Component
 
     public function saveComplexityReview()
     {
+        Log::info('saveComplexityReview called', [
+            'item_id' => $this->selectedItem->id,
+            'manual_score' => $this->manualComplexityScore,
+            'notes' => $this->complexityNotes
+        ]);
+
         $this->validate([
             'manualComplexityScore' => 'required|numeric|min:0|max:10',
             'complexityNotes' => 'nullable|string|max:500',
@@ -124,15 +133,21 @@ class PenjadwalanPrioritas extends Component
         try {
             DB::beginTransaction();
 
+            // Log::info('Before calculate complexity');
+
             // Calculate and save complexity
             ComplexityCalculator::calculateAndSave(
                 $this->selectedItem,
-                $this->manualComplexityScore,
+                floatval($this->manualComplexityScore),
                 $this->complexityNotes
             );
 
+            // Log::info('After calculate complexity, before priority');
+
             // Recalculate priority based on new complexity
-            PriorityCalculator::calculateAndSave($this->selectedItem, 'complexity_updated');
+            PriorityCalculator::calculateAndSave($this->selectedItem, 'manual_recalc');
+
+            // Log::info('After calculate priority');
 
             DB::commit();
 
@@ -140,10 +155,26 @@ class PenjadwalanPrioritas extends Component
             $this->selectedItem = null;
             $this->loadStatistics();
 
-            session()->flash('success', 'Penilaian kompleksitas berhasil disimpan dan prioritas telah diperbarui');
+            // Log::info('Transaction committed');
+
+            // session()->flash('success', 'Penilaian kompleksitas berhasil disimpan dan prioritas telah diperbarui');
+
+            $this->dispatch('show-alert', [
+                'type' => 'success',
+                'message' => 'Penilaian kompleksitas berhasil disimpan dan prioritas telah diperbarui'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error saving complexity', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             session()->flash('error', 'Gagal menyimpan: ' . $e->getMessage());
+
+            $this->dispatch('show-alert', [
+                'type' => 'error',
+                'message' => 'Gagal menyimpan: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -162,9 +193,17 @@ class PenjadwalanPrioritas extends Component
             PriorityCalculator::calculateAndSave($orderItem, 'manual_recalc');
 
             $this->loadStatistics();
-            session()->flash('success', 'Prioritas berhasil dihitung ulang');
+
+
+            $this->dispatch('show-alert', [
+                'type' => 'success',
+                'message' => 'Prioritas berhasil dihitung ulang'
+            ]);
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal menghitung prioritas: ' . $e->getMessage());
+            $this->dispatch('show-alert', [
+                'type' => 'error',
+                'message' => 'Gagal menghitung ulang prioritas: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -173,9 +212,15 @@ class PenjadwalanPrioritas extends Component
         try {
             $count = PriorityCalculator::recalculateAll('manual_recalc');
             $this->loadStatistics();
-            session()->flash('success', "Berhasil menghitung ulang {$count} item");
+            $this->dispatch('show-alert', [
+                'type' => 'success',
+                'message' => "Prioritas untuk {$count} item berhasil dihitung ulang"
+            ]);
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal menghitung prioritas: ' . $e->getMessage());
+            $this->dispatch('show-alert', [
+                'type' => 'error',
+                'message' => 'Gagal menghitung ulang semua prioritas: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -201,10 +246,16 @@ class PenjadwalanPrioritas extends Component
             DB::commit();
 
             $this->loadStatistics();
-            session()->flash('success', 'Produksi berhasil dimulai');
+            $this->dispatch('show-alert', [
+                'type' => 'success',
+                'message' => 'Produksi untuk item pesanan telah dimulai'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Gagal memulai produksi: ' . $e->getMessage());
+            $this->dispatch('show-alert', [
+                'type' => 'error',
+                'message' => 'Gagal memulai produksi: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -215,34 +266,31 @@ class PenjadwalanPrioritas extends Component
                 $q->whereIn('status', ['verified', 'in_production']);
             });
 
-        // Apply filters
         if ($this->filterStatus !== 'all') {
             $query->where('production_status', $this->filterStatus);
         }
 
         if ($this->filterJenisSablon) {
-            $query->whereHas('produk.jenisSablon', function ($q) {
-                $q->where('id', $this->filterJenisSablon);
-            });
+            $query->whereHas(
+                'produk.jenisSablon',
+                fn($q) =>
+                $q->where('id', $this->filterJenisSablon)
+            );
         }
 
         if ($this->searchOrder) {
-            $query->whereHas('order', function ($q) {
-                $q->where('order_number', 'like', '%' . $this->searchOrder . '%');
-            });
+            $query->whereHas(
+                'order',
+                fn($q) =>
+                $q->where('order_number', 'like', '%' . $this->searchOrder . '%')
+            );
         }
 
-        // Apply sorting
         $query->orderBy($this->sortBy, $this->sortDirection);
 
-        $orderItems = $query->paginate(20);
-
-        // Get jenis sablon for filter
-        $jenisSablonList = \App\Models\JenisSablon::all();
-
         return view('livewire.admin.penjadwalan-prioritas', [
-            'orderItems' => $orderItems,
-            'jenisSablonList' => $jenisSablonList,
-        ])->layout('layouts.app');
+            'orderItems' => $query->paginate(20),
+            'jenisSablonList' => \App\Models\JenisSablon::all(),
+        ]);
     }
 }

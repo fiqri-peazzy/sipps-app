@@ -86,17 +86,25 @@ class DetailPesanan extends Component
                 'verified_at' => now()
             ]);
 
+            foreach ($this->order->items as $item) {
+
+                \App\Services\ComplexityCalculator::calculateAndSave($item);
+
+                \App\Services\PriorityCalculator::calculateAndSave($item, 'order_verified');
+
+                $item->production_status = 'waiting';
+                $item->save();
+            }
+
             DB::commit();
 
             $this->loadOrder();
-
             $this->dispatch('show-toast', [
                 'type' => 'success',
-                'message' => 'Pesanan berhasil diverifikasi'
+                'message' => 'Pesanan berhasil diverifikasi dan prioritas telah dihitung'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-
             $this->dispatch('show-toast', [
                 'type' => 'error',
                 'message' => 'Gagal memverifikasi pesanan: ' . $e->getMessage()

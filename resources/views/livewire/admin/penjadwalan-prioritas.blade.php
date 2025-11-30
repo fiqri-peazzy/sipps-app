@@ -1,4 +1,5 @@
 <div>
+
     <!-- Statistics Cards -->
     <div class="row mb-3">
         <div class="col-md-3">
@@ -543,8 +544,8 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label class="form-label">Score Kompleksitas Manual (0-10)</label>
-                                    <input type="number" wire:model="manualComplexityScore" class="form-control"
-                                        min="0" max="10" step="0.1">
+                                    <input type="number" wire:model.defer="manualComplexityScore"
+                                        class="form-control" min="0" max="10" step="0.1">
                                     @error('manualComplexityScore')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -555,7 +556,7 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Catatan (Opsional)</label>
-                                    <textarea wire:model="complexityNotes" class="form-control" rows="3"
+                                    <textarea wire:model.defer="complexityNotes" class="form-control" rows="3"
                                         placeholder="Contoh: Desain full color dengan gradient, memerlukan perhatian khusus..."></textarea>
                                     @error('complexityNotes')
                                         <small class="text-danger">{{ $message }}</small>
@@ -576,8 +577,14 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             wire:click="closeComplexityModal">Batal</button>
-                        <button type="button" class="btn btn-warning" wire:click="saveComplexityReview">
-                            <i class="ti ti-device-floppy"></i> Simpan Penilaian
+                        <button type="button" class="btn btn-warning" wire:click.prevent="saveComplexityReview"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveComplexityReview">
+                                <i class="ti ti-device-floppy"></i> Simpan Penilaian
+                            </span>
+                            <span wire:loading wire:target="saveComplexityReview">
+                                <i class="ti ti-loader"></i> Menyimpan...
+                            </span>
                         </button>
                     </div>
                 </div>

@@ -16,20 +16,21 @@
         </div>
     </div>
 
-    <!-- Flash Messages -->
-    @if (session()->has('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-dismiss="alert"></button>
-        </div>
-    @endif
 
-    @if (session()->has('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-dismiss="alert"></button>
-        </div>
-    @endif
     @livewire('admin.penjadwalan-prioritas')
+    @push('styles')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    @endpush
 
+    @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        <script>
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('show-alert', (data) => {
+                    const alertData = data[0];
+                    toastr[alertData.type](alertData.message);
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>

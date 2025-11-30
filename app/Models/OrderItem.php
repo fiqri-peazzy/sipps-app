@@ -28,10 +28,11 @@ class OrderItem extends Model
         'harga_satuan' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'deadline' => 'datetime',
-        'design_config' => 'array', // Cast to array
-        'quantity' => 'integer',
+        'design_config' => 'array',
+        'complexity_reviewed_at' => 'datetime',
+        'production_started_at' => 'datetime',
+        'last_priority_calculated_at' => 'datetime',
     ];
-
     // Helper methods
     public function hasDesign($area)
     {
