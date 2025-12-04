@@ -44,7 +44,6 @@
                         @endif
                     </div>
                 </div>
-
                 <!-- Detail Item Pesanan -->
                 <div class="card mt-3">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -89,14 +88,12 @@
                                             <p class="mb-0"><strong>{{ $item->formatted_subtotal }}</strong></p>
                                         </div>
                                     </div>
-
                                     @if ($item->catatan_item)
                                         <div class="alert alert-info mb-3">
                                             <i class="ti ti-info-circle"></i> <strong>Catatan:</strong>
                                             {{ $item->catatan_item }}
                                         </div>
                                     @endif
-
                                     <!-- Preview Design Area -->
                                     <div class="row g-2">
                                         @php
@@ -110,7 +107,6 @@
                                                 ],
                                             ];
                                         @endphp
-
                                         @foreach ($areas as $areaKey => $areaData)
                                             @if ($this->hasDesignInArea($item->id, $areaKey))
                                                 <div class="col-md-3">
@@ -139,7 +135,6 @@
                                 </div>
                             </div>
                         @endforeach
-
                         <!-- Total -->
                         <div class="table-responsive mt-3">
                             <table class="table">
@@ -166,7 +161,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Sidebar Kanan -->
             <div class="col-md-4">
                 <!-- Informasi Customer -->
@@ -177,15 +171,12 @@
                     <div class="card-body">
                         <p class="mb-2"><strong>Nama:</strong></p>
                         <p class="text-muted">{{ $order->user->name }}</p>
-
                         <p class="mb-2 mt-3"><strong>Email:</strong></p>
                         <p class="text-muted">{{ $order->user->email }}</p>
-
                         <p class="mb-2 mt-3"><strong>Telepon:</strong></p>
                         <p class="text-muted">{{ $order->user->telepon ?? '-' }}</p>
                     </div>
                 </div>
-
                 <!-- Informasi Pengiriman -->
                 <div class="card mt-3">
                     <div class="card-header">
@@ -194,34 +185,28 @@
                     <div class="card-body">
                         <p class="mb-2"><strong>Penerima:</strong></p>
                         <p class="text-muted">{{ $order->penerima_nama }}</p>
-
                         <p class="mb-2 mt-3"><strong>Telepon:</strong></p>
                         <p class="text-muted">{{ $order->penerima_telepon }}</p>
-
                         <p class="mb-2 mt-3"><strong>Alamat:</strong></p>
                         <p class="text-muted">{{ $order->alamat_lengkap }}</p>
                         <p class="text-muted">
                             {{ $order->kelurahan }}, {{ $order->kecamatan }}<br>
                             {{ $order->kota }}, {{ $order->provinsi }} {{ $order->kode_pos }}
                         </p>
-
                         @if ($order->tipe_pengiriman)
                             <p class="mb-2 mt-3"><strong>Tipe Pengiriman:</strong></p>
                             <p class="text-muted">{{ ucwords(str_replace('_', ' ', $order->tipe_pengiriman)) }}</p>
                         @endif
-
                         @if ($order->kurir)
                             <p class="mb-2 mt-3"><strong>Kurir:</strong></p>
                             <p class="text-muted">{{ strtoupper($order->kurir) }} - {{ $order->service_kurir }}</p>
                         @endif
-
                         @if ($order->resi)
                             <p class="mb-2 mt-3"><strong>No. Resi:</strong></p>
                             <p class="text-muted">{{ $order->resi }}</p>
                         @endif
                     </div>
                 </div>
-
                 <!-- Aksi Verifikasi -->
                 @if ($order->status == 'paid')
                     <div class="card mt-3">
@@ -241,7 +226,6 @@
                 @endif
             </div>
         </div>
-
         <!-- Modal Preview Design -->
         @if ($showDesignModal && $selectedItem)
             <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
@@ -256,7 +240,7 @@
                             <div class="text-center">
                                 @if ($selectedItem)
                                     <div id="design-preview-container"
-                                        style="position: relative; width: 100%; max-width: 500px; margin: 0 auto;">
+                                        style="position: relative; width: 100%; min-height:600px; margin: 0 auto;">
                                         <canvas id="preview-canvas" width="500" height="600"
                                             style="border: 1px solid #ddd;"></canvas>
                                     </div>
@@ -293,12 +277,10 @@
         }
     </style>
 @endpush
-
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
     <script>
         let previewCanvas = null;
-
         window.addEventListener('show-toast', event => {
             console.log('Toast event received:', event);
             const data = event.detail[0];
@@ -350,12 +332,9 @@
                 }
             });
         }
-
         // Listen untuk event modal dibuka
         document.addEventListener('livewire:init', () => {
             Livewire.on('designModalOpened', (eventData) => {
-                console.log('Modal opened, event data received:', eventData);
-
                 const data = eventData[0];
                 setTimeout(() => {
                     renderDesignPreview(data);
@@ -364,37 +343,22 @@
         });
 
         function renderDesignPreview(data) {
-            console.log('=== START RENDER ===');
-            console.log('Data received:', {
-                area: data.area,
-                warna: data.warna,
-                hasCanvas: data.hasCanvas,
-                canvasJsonLength: data.canvasJson ? data.canvasJson.length : 0
-            });
-
             const canvasEl = document.getElementById('preview-canvas');
-
             if (!canvasEl) {
                 console.error('Canvas element not found!');
                 return;
             }
-
-            console.log('Canvas element found');
-
             // Destroy previous canvas instance
             if (previewCanvas) {
                 previewCanvas.dispose();
                 console.log('Previous canvas disposed');
             }
-
             // Create new canvas instance
             previewCanvas = new fabric.Canvas('preview-canvas', {
                 selection: false,
                 backgroundColor: 'rgba(255,255,255,0)'
             });
-
             console.log('New canvas created');
-
             // Check if has canvas data
             if (!data.hasCanvas || !data.canvasJson) {
                 console.warn('No canvas data available for area:', data.area);
@@ -410,35 +374,20 @@
                 previewCanvas.renderAll();
                 return;
             }
-
             try {
                 // Parse canvas JSON string
                 const canvasJsonRaw = JSON.parse(data.canvasJson);
-                console.log('Canvas JSON parsed:', canvasJsonRaw);
-                console.log('Objects count:', canvasJsonRaw.objects ? canvasJsonRaw.objects.length : 0);
-
-                // Load design objects DULU
-                console.log('Loading canvas objects...');
                 previewCanvas.loadFromJSON(canvasJsonRaw, function() {
-                    console.log('loadFromJSON callback executed');
-
                     const objectCount = previewCanvas.getObjects().length;
-                    console.log('Objects loaded in canvas:', objectCount);
-
                     // Set all objects non-selectable
                     previewCanvas.forEachObject(function(obj) {
                         obj.set({
                             selectable: false,
                             evented: false
                         });
-                        console.log('Object:', obj.type, 'at', obj.left, obj.top);
                     });
-
-                    // BARU set background template SETELAH objects loaded
                     const templateUrl = '/frontend/assets/img/kaos-templates/' + data.warna + '-' + data.area +
                         '.png';
-                    console.log('Loading template:', templateUrl);
-
                     fabric.Image.fromURL(templateUrl, function(img) {
                         if (img && img.width) {
                             console.log('Template loaded, dimensions:', img.width, 'x', img.height);
@@ -452,21 +401,17 @@
                             });
                             previewCanvas.setBackgroundImage(img, previewCanvas.renderAll.bind(
                                 previewCanvas));
-                            console.log('✓ Background image set');
                         } else {
                             console.warn('Template image failed to load');
                         }
-
                         previewCanvas.renderAll();
                         console.log('✓ Canvas rendered successfully');
                     }, {
                         crossOrigin: 'anonymous'
                     });
-
                 }, function(o, object) {
                     console.log('Loading object:', object.type);
                 });
-
             } catch (error) {
                 console.error('Error loading canvas:', error);
                 console.error('Error stack:', error.stack);

@@ -24,6 +24,25 @@ Route::prefix('admin')
 
         Route::get('/detail-pesanan/{id}', [AdminController::class, 'detailPesanan'])->name('detail.pesanan');
 
+        Route::prefix('production')->name('production.')->group(function () {
+            Route::get('/', [AdminController::class, 'production'])->name('index');
+            Route::post('/{order}/complete', [AdminController::class, 'completeProduction'])->name('complete');
+
+            Route::post('/item/{item}/start', [AdminController::class, 'starItemProduction'])->name('start-item');
+            Route::post('/item/{item}/complete', [AdminController::class, 'completeItemProduction'])->name('complete-item');
+        });
+        Route::prefix('shipping')->name('shipping.')->group(function () {
+            Route::get('/', [ShippingController::class, 'index'])->name('index');
+            Route::get('/{order}', [ShippingController::class, 'show'])->name('show');
+            Route::post('/{order}/input-resi', [ShippingController::class, 'inputResi'])->name('input-resi');
+            // Route::post('/{order}/refresh-tracking', [ShippingController::class, 'refreshTracking'])->name('refresh-tracking');
+
+            Route::post('/{order}/update-tracking', [ShippingController::class, 'updateTracking'])->name('update-tracking');
+            Route::delete('/tracking/{tracking}', [ShippingController::class, 'deleteTracking'])->name('delete-tracking');
+        });
+
+        Route::get('/returns', [AdminController::class, 'returns'])->name('returns');
+
         // Download design files
         Route::get('/order/{orderId}/item/{itemId}/design/{area}/file/{fileIndex}', [DesignFileController::class, 'downloadSingleFile'])->name('download.design.single');
         Route::get('/order/{orderId}/item/{itemId}/design/{area}/download', [DesignFileController::class, 'downloadAreaFiles'])->name('download.design.area');
@@ -53,6 +72,8 @@ Route::prefix('customer')
             Route::get('/error', [PaymentController::class, 'error'])->name('error');
             Route::get('/check-status/{order}', [PaymentController::class, 'checkStatus'])->name('check-status');
         });
+
+        Route::get('/orders/{order}/return', [CustomerController::class, 'returnForm'])->name('orders.return');
     });
 // Midtrans callback 
 Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');

@@ -77,4 +77,24 @@ class CustomerController extends Controller
 
         return view('customer.orders.show', compact('order'));
     }
+
+    /**
+     * Halaman form return barang
+     */
+    public function returnForm(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if (!$order->canRequestReturn()) {
+            return redirect()->route('customer.orders.show', $order->id)
+                ->with('error', 'Order ini tidak dapat diajukan return. Pastikan order sudah selesai dan masih dalam periode 7 hari.');
+        }
+
+        // Load relationships yang dibutuhkan
+        $order->load('items.produk.jenisSablon', 'items.produk.ukuran');
+
+        return view('customer.returns.form', compact('order'));
+    }
 }

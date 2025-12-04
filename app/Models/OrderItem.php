@@ -22,16 +22,21 @@ class OrderItem extends Model
         'priority_score',
         'deadline',
         'production_status',
+
+        'is_return_item',
+        'parent_item_id',
+        'return_reason',
     ];
 
     protected $casts = [
-        'harga_satuan' => 'decimal:2',
-        'subtotal' => 'decimal:2',
-        'deadline' => 'datetime',
-        'design_config' => 'array',
-        'complexity_reviewed_at' => 'datetime',
-        'production_started_at' => 'datetime',
-        'last_priority_calculated_at' => 'datetime',
+        'harga_satuan'                  => 'decimal:2',
+        'subtotal'                      => 'decimal:2',
+        'deadline'                      => 'datetime',
+        'design_config'                 => 'array',
+        'complexity_reviewed_at'        => 'datetime',
+        'production_started_at'         => 'datetime',
+        'last_priority_calculated_at'   => 'datetime',
+        'is_return_item'                => 'boolean'
     ];
     // Helper methods
     public function hasDesign($area)
@@ -75,6 +80,26 @@ class OrderItem extends Model
     {
         return $this->belongsTo(User::class, 'complexity_reviewed_by');
     }
+
+    public function customerReturns()
+    {
+        return $this->hasMany(CustomerReturn::class, 'order_item_id');
+    }
+
+    public function hasCustomerReturn()
+    {
+        return $this->customerReturns()->exists();
+    }
+
+    public function parentItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'parent_item_id');
+    }
+    public function returnItems()
+    {
+        return $this->hasMany(OrderItem::class, 'parent_item_id');
+    }
+
 
     // Helper method untuk cek apakah sudah direview
     public function hasComplexityReview()

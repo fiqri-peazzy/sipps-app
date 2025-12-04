@@ -161,7 +161,7 @@ class RajaOngkirService
                 'origin' => (string) $originDistrictId,
                 'destination' => (string) $destinationDistrictId,
                 'weight' => (int) $weight,
-                'courier' => 'jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse',
+                'courier' => 'jne:sicepat:jnt:lion:pos',
                 'price' => 'lowest',
             ]);
 

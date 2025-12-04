@@ -48,19 +48,31 @@
                 </li>
 
                 <li class="pc-item pc-caption">
-                    <label>Pengiriman</label>
-                    <i class="ti ti-truck-delivery"></i>
+                    <label>Produksi & Pengiriman</label>
+                    <i class="ti ti-package"></i>
                 </li>
                 <li class="pc-item">
-                    <a href="#" class="pc-link">
+                    <a href="{{ route('admin.production.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-settings"></i></span>
+                        <span class="pc-mtext">Produksi</span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('admin.shipping.index') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-truck"></i></span>
                         <span class="pc-mtext">Proses Pengiriman</span>
                     </a>
                 </li>
                 <li class="pc-item">
-                    <a href="#" class="pc-link">
+                    <a href="{{ route('admin.returns') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-refresh"></i></span>
                         <span class="pc-mtext">Return Barang</span>
+                        @php
+                            $pendingReturns = \App\Models\CustomerReturn::where('status', 'pending')->count();
+                        @endphp
+                        @if ($pendingReturns > 0)
+                            <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingReturns }}</span>
+                        @endif
                     </a>
                 </li>
 

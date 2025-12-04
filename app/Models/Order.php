@@ -85,6 +85,46 @@ class Order extends Model
         return $this->hasMany(ShippingTracking::class);
     }
 
+    public function customerReturns()
+    {
+        return $this->hasMany(CustomerReturn::class);
+    }
+
+    public function hasCustomerReturn()
+    {
+        return $this->customerReturns()->exists();
+    }
+
+    public function hasPendingReturn()
+    {
+        return $this->customerReturns()->where('status', 'pending')->exists();
+    }
+
+    public function canRequestReturn()
+    {
+        // Cek eligibility return
+        if ($this->status !== 'completed') {
+            return false;
+        }
+
+        if (!$this->completed_at) {
+            return false;
+        }
+
+        // Maksimal 7 hari setelah completed
+        $daysSinceCompleted = now()->diffInDays($this->completed_at);
+        if ($daysSinceCompleted > 7) {
+            return false;
+        }
+
+        // Cek apakah sudah pernah return
+        if ($this->hasCustomerReturn()) {
+            return false;
+        }
+
+        return true;
+    }
+
     // Accessors
     public function getFormattedTotalHargaAttribute()
     {

@@ -1,35 +1,14 @@
-@extends('layouts.frontend')
+{{-- FILE: resources/views/customer/orders/create.blade.php --}}
+@extends('layouts.customer')
 
-@section('title', 'Buat Pesanan Baru')
-
-@section('content')
+@push('styles')
     <style>
-        .order-form-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            margin: 30px 0;
-        }
-
-        .section-header {
-            border-bottom: 3px solid #6366F1;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-
-        .section-header h4 {
-            color: #1e293b;
-            font-weight: 700;
-            margin: 0;
-        }
-
         .order-item-card {
             background: #f8fafc;
             border: 2px solid #e2e8f0;
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             position: relative;
         }
 
@@ -56,7 +35,7 @@
         }
 
         .btn-add-item {
-            background: linear-gradient(135deg, #6366F1 0%, #F97316 100%);
+            background: linear-gradient(135deg, #6366F1 0%, #4f46e5 100%);
             color: white;
             border: none;
             padding: 12px 30px;
@@ -72,27 +51,27 @@
         }
 
         .price-summary {
-            background: linear-gradient(135deg, #6366F1 0%, #F97316 100%);
+            background: linear-gradient(135deg, #6366F1 0%, #4f46e5 100%);
             border-radius: 15px;
-            padding: 30px;
+            padding: 2rem;
             color: white;
             position: sticky;
-            top: 100px;
+            top: 140px;
         }
 
         .price-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .price-row.total {
             border-bottom: none;
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-top: 10px;
+            margin-top: 1rem;
         }
 
         .btn-submit-order {
@@ -102,9 +81,9 @@
             padding: 15px;
             border-radius: 25px;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 1.1rem;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 1.5rem;
             transition: all 0.3s;
         }
 
@@ -113,24 +92,10 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .form-control,
-        .form-select {
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 12px 15px;
-            transition: all 0.3s;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #6366F1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
         .file-upload-area {
             border: 2px dashed #cbd5e1;
             border-radius: 10px;
-            padding: 30px;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
@@ -142,28 +107,25 @@
         }
 
         .file-upload-area i {
-            font-size: 48px;
+            font-size: 3rem;
             color: #94a3b8;
             margin-bottom: 10px;
         }
     </style>
+@endpush
 
-    <div class="container">
-        <div class="order-form-container">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 style="color: #1e293b; font-weight: 800;">
-                        <i class="lni lni-cart"></i> Buat Pesanan Baru
-                    </h2>
-                    <p style="color: #64748b;">Lengkapi form di bawah untuk membuat pesanan sablon Anda</p>
-                </div>
-            </div>
-
-            @livewire('customer.place-order-form', [
-                'jenisSablons' => $jenisSablons,
-                'ukurans' => $ukurans,
-                'selectedJenis' => $selectedJenis,
-            ])
-        </div>
+@section('customer-content')
+    <div class="content-header">
+        <h1 class="content-title">
+            <i class="lni lni-cart"></i>
+            Buat Pesanan Baru
+        </h1>
+        <p class="content-subtitle">Lengkapi form di bawah untuk membuat pesanan sablon Anda</p>
     </div>
+
+    @livewire('customer.place-order-form', [
+        'jenisSablons' => $jenisSablons,
+        'ukurans' => $ukurans,
+        'selectedJenis' => $selectedJenis,
+    ])
 @endsection

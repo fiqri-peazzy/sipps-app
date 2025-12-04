@@ -133,12 +133,10 @@
                 <button type="button" class="btn btn-add-item mb-4" wire:click="addItem">
                     <i class="lni lni-plus"></i> Tambah Item Pesanan
                 </button>
-
                 <!-- Shipping Address Section -->
                 <div class="section-header mt-5">
                     <h4><i class="lni lni-map-marker"></i> Alamat Pengiriman</h4>
                 </div>
-
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nama Penerima</label>
@@ -148,7 +146,6 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">No. Telepon</label>
                         <input type="text" class="form-control" wire:model="penerima_telepon"
@@ -157,7 +154,6 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-
                     <!-- Provinsi -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Provinsi <span class="text-danger">*</span></label>
@@ -171,7 +167,6 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-
                     <!-- Kota/Kabupaten -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kota/Kabupaten <span class="text-danger">*</span></label>
@@ -192,7 +187,6 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-
                     <!-- Kecamatan -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kecamatan <span class="text-danger">*</span></label>
@@ -213,7 +207,6 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-
                     <!-- Kelurahan (Optional) -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kelurahan/Desa</label>
@@ -231,7 +224,6 @@
                             @endforeach
                         </select>
                     </div>
-
                     <div class="col-12 mb-3">
                         <label class="form-label fw-bold">Alamat Lengkap</label>
                         <textarea class="form-control" wire:model="alamat_lengkap" rows="3"
@@ -240,16 +232,13 @@
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Kode Pos</label>
                         <input type="text" class="form-control" wire:model="kode_pos" placeholder="96xxx">
                     </div>
-
                     <!-- Tipe Pengiriman Info -->
                     <div class="col-12 mb-3">
                         <label class="form-label fw-bold">Tipe Pengiriman</label>
-
                         @if ($loadingShippingCost)
                             <div class="alert alert-info">
                                 <i class="lni lni-spinner-arrow spinning"></i> Menghitung ongkos kirim...
@@ -271,13 +260,11 @@
                             </div>
                         @endif
                     </div>
-
                     <!-- Pilihan Kurir (Antar Kota) -->
                     @if ($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
                         <div class="col-12 mb-3">
                             <label class="form-label fw-bold">Pilih Layanan Pengiriman <span
                                     class="text-danger">*</span></label>
-
                             <div class="row g-2">
                                 @foreach ($courierOptions as $index => $courier)
                                     <div class="col-md-6 col-lg-4">
@@ -298,19 +285,16 @@
                                     </div>
                                 @endforeach
                             </div>
-
                             @error('kurir_code')
                                 <small class="text-danger d-block mt-2">{{ $message }}</small>
                             @enderror
                         </div>
                     @endif
-
                     <div class="col-12">
                         <label class="form-label fw-bold">Catatan Tambahan (Optional)</label>
                         <textarea class="form-control" wire:model="catatan" rows="2" placeholder="Catatan untuk pesanan Anda"></textarea>
                     </div>
                 </div>
-
                 <style>
                     .spinning {
                         animation: spin 1s linear infinite;
@@ -382,7 +366,6 @@
                     }
                 </style>
             </div>
-
             <!-- Right Column - Price Summary -->
             <div class="col-lg-4">
                 <div class="price-summary">
@@ -391,13 +374,11 @@
                         <span>Subtotal ({{ count($orderItems) }} item)</span>
                         <strong>Rp {{ number_format($subtotal, 0, ',', '.') }}</strong>
                     </div>
-
                     <!-- Info Berat Total -->
                     <div class="price-row">
                         <span>Berat Total</span>
                         <strong id="total-weight-display">{{ $totalWeight }} gram</strong>
                     </div>
-
                     <div class="price-row">
                         <span>Ongkos Kirim</span>
                         <strong id="ongkir-display">Rp {{ number_format($ongkir, 0, ',', '.') }}</strong>
@@ -406,7 +387,6 @@
                         <span>Total</span>
                         <strong>Rp {{ number_format($total, 0, ',', '.') }}</strong>
                     </div>
-
                     <button type="submit" class="btn btn-submit-order" wire:loading.attr="disabled"
                         id="btn-submit-order">
                         <span wire:loading.remove>
@@ -416,7 +396,6 @@
                             <i class="lni lni-spinner-arrow spinning"></i> Memproses...
                         </span>
                     </button>
-
                     <div class="mt-3 text-center">
                         <small style="opacity: 0.8;">
                             <i class="lni lni-lock"></i> Transaksi Aman & Terpercaya
@@ -425,9 +404,7 @@
                 </div>
             </div>
         </div>
-
     </form>
-
     <!-- Bootstrap Modal untuk Design Editor -->
     <div class="modal fade" id="designEditorModal" tabindex="-1" aria-labelledby="designEditorModalLabel"
         aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -455,7 +432,6 @@
             </div>
         </div>
     </div>
-
     @push('scripts')
         <script src="{{ asset('frontend/assets/js/design-editor.js') }}"></script>
         <script>
@@ -464,7 +440,6 @@
             var selectedCityId = null;
             var totalWeight = {{ $totalWeight }};
             var courierOptions = [];
-
             // Design Editor Scripts (existing)
             $(document).on('click', '.btn-open-design-editor', function() {
                 if ($(this).is(':disabled')) return;
@@ -472,7 +447,6 @@
                 currentItemIndex = itemIndex;
                 var existingConfigStr = $('.design-config-data[data-item-index="' + itemIndex + '"]').val();
                 var existingConfig = null;
-
                 if (existingConfigStr && existingConfigStr !== '' && existingConfigStr !== 'null') {
                     try {
                         existingConfig = JSON.parse(existingConfigStr);
@@ -480,40 +454,32 @@
                         console.error('Error parsing config:', e);
                     }
                 }
-
                 $('#modal-item-title').text('Item #' + (itemIndex + 1));
                 $(this).data('parsed-config', existingConfig);
                 $('#designEditorModal').modal('show');
             });
-
             $('#designEditorModal').on('shown.bs.modal', function(event) {
                 if (currentItemIndex === null) return;
                 var existingConfig = $('.btn-open-design-editor[data-item-index="' + currentItemIndex + '"]').data(
                     'parsed-config');
-
                 setTimeout(function() {
                     if (typeof DesignEditor !== 'undefined' && typeof fabric !== 'undefined') {
                         DesignEditor.init(currentItemIndex, existingConfig);
                     }
                 }, 300);
             });
-
             $('#designEditorModal').on('hidden.bs.modal', function() {
                 currentItemIndex = null;
                 $('#upload-image').val('');
                 $('#text-input').val('');
                 $('.btn-open-design-editor').removeData('parsed-config');
             });
-
             $(document).on('click', '#btn-save-design-final', function() {
                 if (typeof DesignEditor === 'undefined' || currentItemIndex === null) return;
-
                 var itemIndex = DesignEditor.itemIndex;
                 var designConfig = DesignEditor.getDesignConfig();
-
                 $(this).prop('disabled', true).html('<i class="lni lni-spinner-arrow spinning"></i> Menyimpan...');
                 $('.design-config-data[data-item-index="' + itemIndex + '"]').val(JSON.stringify(designConfig));
-
                 @this.handleDesignConfigSaved(itemIndex, designConfig)
                     .then(function() {
                         $('#designEditorModal').modal('hide');
@@ -528,7 +494,6 @@
             });
         </script>
     @endpush
-
     @push('styles')
         <style>
             @keyframes spin {
@@ -688,6 +653,7 @@
                 box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
                 sticky: top;
                 top: 20px;
+                color: var(--color-primary);
             }
 
             .price-row {

@@ -53,4 +53,15 @@ return [
         'is_3ds' => env('MIDTRANS_IS_3DS', true),
     ],
 
+    'trackingmore' => [
+        'api_key' => env('TRACKINGMORE_API_KEY'),
+        'base_url' => 'https://api.trackingmore.com/v4',
+    ],
+
+    'fonnte' => [
+        'api_key' => env('FONNTE_API_KEY'),
+        'base_url' => env('FONNTE_BASE_URL'),
+    ],
+
+
 ];
