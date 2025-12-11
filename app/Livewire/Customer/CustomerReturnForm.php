@@ -115,12 +115,6 @@ class CustomerReturnForm extends Component
 
             DB::commit();
 
-            Log::info('Customer Return Request Created', [
-                'order_id' => $this->order->id,
-                'order_item_id' => $orderItem->id,
-                'user_id' => Auth::id(),
-            ]);
-
             $this->dispatch('show-alert', [
                 'type'      => 'success',
                 'message'   => 'Permintaan return berhasil diajukan. Mohon tunggu review dari admin.'
@@ -129,11 +123,6 @@ class CustomerReturnForm extends Component
             return redirect()->route('customer.orders.show', $this->order->id);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error('Customer Return Request Error', [
-                'order_id'  => $this->order->id,
-                'error'     => $e->getMessage(),
-            ]);
 
             $this->dispatch('show-alert', [
                 'type'      => 'error',

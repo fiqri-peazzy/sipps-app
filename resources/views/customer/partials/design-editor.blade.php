@@ -53,7 +53,7 @@
                         <div class="placeholder-bg" style="background: #FFFFFF;">
                             <span style="color: #64748b;">Area Lengan Kanan</span>
                         </div>
-                        <canvas id="canvas-right_sleeve" height="600" style="1200"></canvas>
+                        <canvas id="canvas-right_sleeve" height="600" widht="1200"></canvas>
                     </div>
                 </div>
 

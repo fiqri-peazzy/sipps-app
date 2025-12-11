@@ -124,11 +124,9 @@ class ManajemenCustomerReturn extends Component
             $return = CustomerReturn::findOrFail($this->selectedReturn->id);
 
             if ($this->approvalAction === 'approve') {
-                // APPROVE: Buat replacement item
                 $this->approveReturn($return);
                 $message = 'Return request disetujui. Item pengganti berhasil dibuat dan masuk ke queue produksi.';
             } else {
-                // REJECT: Tolak return
                 $this->rejectReturn($return);
                 $message = 'Return request ditolak.';
             }
@@ -145,13 +143,6 @@ class ManajemenCustomerReturn extends Component
             $this->reset(['selectedReturn', 'approvalAction', 'adminNotes']);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error('Process Return Approval Error', [
-                'return_id' => $this->selectedReturn->id,
-                'action' => $this->approvalAction,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
 
             $this->dispatch('alert', [
                 'type' => 'error',
@@ -210,14 +201,6 @@ class ManajemenCustomerReturn extends Component
         $return->order->update([
             'status' => 'returned',
         ]);
-
-        Log::info('Customer Return Approved', [
-            'return_id' => $return->id,
-            'order_id' => $return->order_id,
-            'original_item_id' => $originalItem->id,
-            'replacement_item_id' => $replacementItem->id,
-            'approved_by' => Auth::id(),
-        ]);
     }
 
     private function rejectReturn($return)
@@ -233,12 +216,6 @@ class ManajemenCustomerReturn extends Component
         // Update order status kembali ke completed
         $return->order->update([
             'status' => 'completed',
-        ]);
-
-        Log::info('Customer Return Rejected', [
-            'return_id' => $return->id,
-            'order_id' => $return->order_id,
-            'rejected_by' => Auth::id(),
         ]);
     }
 

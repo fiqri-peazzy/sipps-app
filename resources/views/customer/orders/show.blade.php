@@ -459,6 +459,12 @@
                         <i class="lni lni-reload"></i> Ajukan Return
                     </a>
                 @endif
+
+                @if (in_array($order->status, ['paid', 'verified', 'in_production']))
+                    <button class="btn btn-outline-danger w-100 mb-2">
+                        <i class="lni lni-close"></i> Batalkan Pesanan
+                    </button>
+                @endif
                 <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-secondary w-100">
                     <i class="lni lni-arrow-left"></i> Kembali
                 </a>

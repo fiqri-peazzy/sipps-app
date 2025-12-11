@@ -9,6 +9,7 @@ use App\Http\Controllers\DesignEditorController;
 use App\Http\Controllers\DesignFileController;
 use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/contact', [HomeController::class, 'contact'])->name('contact.store');
@@ -42,6 +43,24 @@ Route::prefix('admin')
         });
 
         Route::get('/returns', [AdminController::class, 'returns'])->name('returns');
+
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            // Laporan Pesanan
+            Route::get('/orders', [ReportController::class, 'orders'])->name('orders');
+            Route::post('/orders/pdf', [ReportController::class, 'ordersPdf'])->name('orders.pdf');
+
+            // Laporan Kinerja DPS (Skripsi)
+            Route::get('/dps-performance', [ReportController::class, 'dpsPerformance'])->name('dps-performance');
+            Route::post('/dps-performance/pdf', [ReportController::class, 'dpsPerformancePdf'])->name('dps-performance.pdf');
+
+            // Laporan Perbandingan FCFS vs DPS (Skripsi)
+            Route::get('/comparison', [ReportController::class, 'comparison'])->name('comparison');
+            Route::post('/comparison/pdf', [ReportController::class, 'comparisonPdf'])->name('comparison.pdf');
+
+            // Dashboard Analitik (View Only)
+            Route::get('/dashboard', [ReportController::class, 'dashboard'])->name('dashboard');
+        });
 
         // Download design files
         Route::get('/order/{orderId}/item/{itemId}/design/{area}/file/{fileIndex}', [DesignFileController::class, 'downloadSingleFile'])->name('download.design.single');

@@ -80,11 +80,43 @@
                     <label>Laporan</label>
                     <i class="ti ti-file-analytics"></i>
                 </li>
-                <li class="pc-item">
+                <li class="pc-item pc-hasmenu">
                     <a href="#" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-chart-bar"></i></span>
                         <span class="pc-mtext">Laporan</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
+                    <ul class="pc-submenu">
+                        <!-- Export Reports -->
+                        <li class="pc-item">
+                            <a class="pc-link" href="{{ route('admin.reports.orders') }}">
+                                <i class="ti ti-file-invoice"></i> Laporan Pesanan
+                            </a>
+                        </li>
+                        <li class="pc-item">
+                            <a class="pc-link" href="{{ route('admin.reports.dps-performance') }}">
+                                <i class="ti ti-chart-line"></i> Kinerja DPS
+                                <span class="badge bg-success badge-sm ms-2">Skripsi</span>
+                            </a>
+                        </li>
+                        <li class="pc-item">
+                            <a class="pc-link" href="{{ route('admin.reports.comparison') }}">
+                                <i class="ti ti-arrows-exchange"></i> FCFS vs DPS
+                                <span class="badge bg-success badge-sm ms-2">Skripsi</span>
+                            </a>
+                        </li>
+
+                        <li class="pc-item">
+                            <hr class="my-2">
+                        </li>
+
+                        <!-- Dashboard Analytics -->
+                        <li class="pc-item">
+                            <a class="pc-link" href="{{ route('admin.reports.dashboard') }}">
+                                <i class="ti ti-dashboard"></i> Dashboard Analitik
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
             </ul>
