@@ -1,4 +1,3 @@
-{{-- FILE: resources/views/customer/orders/show.blade.php --}}
 @extends('layouts.customer')
 
 @push('styles')

@@ -1,4 +1,3 @@
-{{-- FILE: resources/views/customer/orders/create.blade.php --}}
 @extends('layouts.customer')
 
 @push('styles')
@@ -117,7 +116,7 @@
 @section('customer-content')
     <div class="content-header">
         <h1 class="content-title">
-            <i class="lni lni-cart"></i>
+            {{-- <i class="lni lni-cart"></i> --}}
             Buat Pesanan Baru
         </h1>
         <p class="content-subtitle">Lengkapi form di bawah untuk membuat pesanan sablon Anda</p>

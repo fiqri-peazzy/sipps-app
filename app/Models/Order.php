@@ -171,7 +171,7 @@ class Order extends Model
             'completed' => 'success',
             'cancelled' => 'danger',
             'return_requested' => 'warning',
-            'returned' => 'dark',
+            'returned' => 'danger',
         ];
 
         return $colors[$this->status] ?? 'secondary';

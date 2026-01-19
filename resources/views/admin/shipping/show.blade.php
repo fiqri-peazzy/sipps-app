@@ -113,10 +113,10 @@
                                                         class="text-danger">*</span></label>
                                                 <select name="status" class="form-select" required>
                                                     <option value="">Pilih Status</option>
-                                                    <option value="picked_up">📦 Diambil Kurir</option>
-                                                    <option value="in_transit">🚚 Dalam Perjalanan</option>
-                                                    <option value="delivered">✅ Terkirim</option>
-                                                    <option value="returned">↩️ Dikembalikan</option>
+                                                    <option value="picked_up">Diambil Kurir</option>
+                                                    <option value="in_transit">Dalam Perjalanan</option>
+                                                    <option value="delivered">Terkirim</option>
+                                                    <option value="returned">Dikembalikan</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -262,52 +262,51 @@
             </div>
         </div>
     </div>
+    @push('styles')
+        <style>
+            .timeline-container {
+                position: relative;
+                padding-left: 40px;
+            }
+
+            .timeline-item {
+                position: relative;
+                padding-bottom: 30px;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-item:not(:last-child)::before {
+                content: '';
+                position: absolute;
+                left: -24px;
+                top: 30px;
+                width: 2px;
+                height: calc(100% - 10px);
+                background: #e0e0e0;
+            }
+
+            .timeline-badge {
+                position: absolute;
+                left: -40px;
+                top: 0;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                z-index: 1;
+            }
+
+            .timeline-content {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+            }
+        </style>
+    @endpush
 </x-app-layout>
-
-@push('styles')
-    <style>
-        .timeline-container {
-            position: relative;
-            padding-left: 40px;
-        }
-
-        .timeline-item {
-            position: relative;
-            padding-bottom: 30px;
-        }
-
-        .timeline-item:last-child {
-            padding-bottom: 0;
-        }
-
-        .timeline-item:not(:last-child)::before {
-            content: '';
-            position: absolute;
-            left: -24px;
-            top: 30px;
-            width: 2px;
-            height: calc(100% - 10px);
-            background: #e0e0e0;
-        }
-
-        .timeline-badge {
-            position: absolute;
-            left: -40px;
-            top: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            z-index: 1;
-        }
-
-        .timeline-content {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-        }
-    </style>
-@endpush

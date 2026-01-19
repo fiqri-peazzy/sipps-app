@@ -18,7 +18,7 @@
                 </div>
             </div>
         </div>
-    </div>d
+    </div>
 
     @livewire('admin.dashboard-analytics')
 </x-app-layout>
