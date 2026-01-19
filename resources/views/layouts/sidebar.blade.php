@@ -29,6 +29,12 @@
                         <span class="pc-mtext">Data Pesanan</span>
                     </a>
                 </li>
+                <li class="pc-item">
+                    <a href="{{ route('admin.users.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-users"></i></span>
+                        <span class="pc-mtext">Manajemen User</span>
+                    </a>
+                </li>
 
                 <li class="pc-item pc-caption">
                     <label>Manajemen Produksi</label>

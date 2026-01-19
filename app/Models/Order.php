@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Order extends Model
 {
@@ -178,12 +179,13 @@ class Order extends Model
     }
 
     // Static method untuk generate order number
-    public static function generateOrderNumber()
+    public static function generateOrderNumber($date = null)
     {
-        $date = now()->format('Ymd');
-        $lastOrder = self::whereDate('created_at', now())->latest()->first();
+        $date = $date ? Carbon::parse($date) : now();
+        $prefix = $date->format('Ymd');
+        $lastOrder = self::whereDate('created_at', $date)->latest()->first();
         $number = $lastOrder ? (int) substr($lastOrder->order_number, -4) + 1 : 1;
 
-        return 'ORD-' . $date . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+        return 'ORD-' . $prefix . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 }

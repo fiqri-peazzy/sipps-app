@@ -21,6 +21,7 @@ Route::prefix('admin')
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/produk', ManajemenProduk::class)->name('produk.index');
         Route::get('/pesanan', [AdminController::class, 'dataPesanan'])->name('data.pesanan');
+        Route::get('/users', \App\Livewire\Admin\UserManagement::class)->name('users.index');
         Route::get('/penjadwalan-prioritas', [AdminController::class, 'penjadwalan'])->name('penjadwalan.prioritas');
 
         Route::get('/detail-pesanan/{id}', [AdminController::class, 'detailPesanan'])->name('detail.pesanan');
@@ -29,7 +30,7 @@ Route::prefix('admin')
             Route::get('/', [AdminController::class, 'production'])->name('index');
             Route::post('/{order}/complete', [AdminController::class, 'completeProduction'])->name('complete');
 
-            Route::post('/item/{item}/start', [AdminController::class, 'starItemProduction'])->name('start-item');
+            Route::post('/item/{item}/start', [AdminController::class, 'startItemProduction'])->name('start-item');
             Route::post('/item/{item}/complete', [AdminController::class, 'completeItemProduction'])->name('complete-item');
         });
         Route::prefix('shipping')->name('shipping.')->group(function () {
