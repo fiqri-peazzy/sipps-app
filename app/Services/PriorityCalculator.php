@@ -13,8 +13,9 @@ class PriorityCalculator
     /**
      * Calculate Dynamic Priority Score
      */
-    public static function calculatePriorityScore(OrderItem $orderItem): int
+    public static function calculatePriorityScore(OrderItem $orderItem, ?Carbon $now = null): int
     {
+        $now = $now ?? Carbon::now();
         $weights = PriorityWeight::getActive();
 
         if (!$weights) {
@@ -22,9 +23,9 @@ class PriorityCalculator
         }
 
         // Calculate each factor (skala 0-100)
-        $urgencyScore = self::calculateUrgencyScore($orderItem);
+        $urgencyScore = self::calculateUrgencyScore($orderItem, $now);
         $complexityScore = self::normalizeComplexityScore($orderItem);
-        $waitingTimeScore = self::calculateWaitingTimeScore($orderItem);
+        $waitingTimeScore = self::calculateWaitingTimeScore($orderItem, $now);
         $quantityScore = self::calculateQuantityScore($orderItem);
 
         // Apply weights and calculate final score
@@ -41,10 +42,9 @@ class PriorityCalculator
      * Calculate Urgency Score (0-100)
      * Semakin dekat deadline, semakin tinggi score
      */
-    private static function calculateUrgencyScore(OrderItem $orderItem): float
+    private static function calculateUrgencyScore(OrderItem $orderItem, Carbon $now): float
     {
         $deadline = Carbon::parse($orderItem->deadline);
-        $now = Carbon::now();
 
         // Jika sudah lewat deadline
         if ($now->greaterThan($deadline)) {
@@ -84,15 +84,17 @@ class PriorityCalculator
      * Calculate Waiting Time Score (0-100)
      * Semakin lama menunggu, semakin tinggi score
      */
-    private static function calculateWaitingTimeScore(OrderItem $orderItem): float
+    private static function calculateWaitingTimeScore(OrderItem $orderItem, Carbon $now): float
     {
         // Hitung dari verified_at (bukan created_at)
         $startTime = $orderItem->order->verified_at ?? $orderItem->created_at;
-        $waitingHours = Carbon::parse($startTime)->diffInHours(now());
+        $waitingHours = Carbon::parse($startTime)->diffInHours($now);
 
-        // Update waiting_time_hours
-        $orderItem->waiting_time_hours = $waitingHours;
-        $orderItem->saveQuietly(); // Save tanpa trigger events
+        // Update waiting_time_hours (Only if real calculation, not simulation)
+        if ($now->isCurrentSecond()) {
+            $orderItem->waiting_time_hours = $waitingHours;
+            $orderItem->saveQuietly();
+        }
 
         // Score based on waiting hours
         if ($waitingHours < 24) return 10;   // < 1 hari
@@ -149,11 +151,12 @@ class PriorityCalculator
      */
     public static function getFactorsBreakdown(OrderItem $orderItem): array
     {
+        $now = Carbon::now();
         $weights = PriorityWeight::getActive();
 
-        $urgencyScore = self::calculateUrgencyScore($orderItem);
+        $urgencyScore = self::calculateUrgencyScore($orderItem, $now);
         $complexityScore = self::normalizeComplexityScore($orderItem);
-        $waitingTimeScore = self::calculateWaitingTimeScore($orderItem);
+        $waitingTimeScore = self::calculateWaitingTimeScore($orderItem, $now);
         $quantityScore = self::calculateQuantityScore($orderItem);
 
         return [

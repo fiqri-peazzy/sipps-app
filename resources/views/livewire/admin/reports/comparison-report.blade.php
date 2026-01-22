@@ -110,6 +110,27 @@
                             <strong class="text-danger">{{ $comparison['fcfs']['late_items'] }}</strong>
                         </div>
                     </div>
+                    <hr class="my-2">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded text-center">
+                                <small class="text-muted d-block">Total Tardiness</small>
+                                <strong>{{ $comparison['fcfs']['total_tardiness'] }} jam</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded text-center">
+                                <small class="text-muted d-block">Max Lateness</small>
+                                <strong>{{ $comparison['fcfs']['max_lateness'] }} jam</strong>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-2 bg-light rounded text-center">
+                                <small class="text-muted d-block">Avg Shipping Latency</small>
+                                <strong>{{ $comparison['fcfs']['shipping_delay_score'] }} jam</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,6 +196,28 @@
                             <strong class="text-danger">{{ $comparison['dps']['late_items'] }}</strong>
                         </div>
                     </div>
+                    <hr class="my-2">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded text-center">
+                                <small class="text-muted d-block">Total Tardiness</small>
+                                <strong class="text-success">{{ $comparison['dps']['total_tardiness'] }} jam</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded text-center">
+                                <small class="text-muted d-block">Max Lateness</small>
+                                <strong class="text-success">{{ $comparison['dps']['max_lateness'] }} jam</strong>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-2 bg-light rounded text-center">
+                                <small class="text-muted d-block">Avg Shipping Latency</small>
+                                <strong class="text-success">{{ $comparison['dps']['shipping_delay_score'] }}
+                                    jam</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -189,38 +232,48 @@
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="p-3">
                                 <i class="ti ti-check-circle"
-                                    style="font-size: 48px; color: {{ $comparison['improvements']['on_time_rate'] >= 0 ? '#28a745' : '#dc3545' }};"></i>
-                                <h3 class="mt-2"
+                                    style="font-size: 40px; color: {{ $comparison['improvements']['on_time_rate'] >= 0 ? '#28a745' : '#dc3545' }};"></i>
+                                <h4 class="mt-2"
                                     style="color: {{ $comparison['improvements']['on_time_rate'] >= 0 ? '#28a745' : '#dc3545' }};">
                                     {{ $comparison['improvements']['on_time_rate'] >= 0 ? '+' : '' }}{{ $comparison['improvements']['on_time_rate'] }}%
-                                </h3>
-                                <p class="text-muted mb-0">On-Time Delivery Rate</p>
+                                </h4>
+                                <p class="text-muted mb-0 small">On-Time Rate</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="p-3">
                                 <i class="ti ti-clock"
-                                    style="font-size: 48px; color: {{ $comparison['improvements']['avg_completion_time'] >= 0 ? '#28a745' : '#dc3545' }};"></i>
-                                <h3 class="mt-2"
+                                    style="font-size: 40px; color: {{ $comparison['improvements']['avg_completion_time'] >= 0 ? '#28a745' : '#dc3545' }};"></i>
+                                <h4 class="mt-2"
                                     style="color: {{ $comparison['improvements']['avg_completion_time'] >= 0 ? '#28a745' : '#dc3545' }};">
                                     {{ $comparison['improvements']['avg_completion_time'] >= 0 ? '-' : '+' }}{{ abs($comparison['improvements']['avg_completion_time']) }}
                                     jam
-                                </h3>
-                                <p class="text-muted mb-0">Completion Time (lebih cepat)</p>
+                                </h4>
+                                <p class="text-muted mb-0 small">Production Flow</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="ti ti-truck" style="font-size: 40px; color: #28a745;"></i>
+                                <h4 class="mt-2" style="color: #28a745;">
+                                    -{{ round($comparison['fcfs']['shipping_delay_score'] - $comparison['dps']['shipping_delay_score'], 1) }}
+                                    jam
+                                </h4>
+                                <p class="text-muted mb-0 small">Shipping Latency</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="p-3">
                                 <i class="ti ti-activity"
-                                    style="font-size: 48px; color: {{ $comparison['improvements']['efficiency'] >= 0 ? '#28a745' : '#dc3545' }};"></i>
-                                <h3 class="mt-2"
+                                    style="font-size: 40px; color: {{ $comparison['improvements']['efficiency'] >= 0 ? '#28a745' : '#dc3545' }};"></i>
+                                <h4 class="mt-2"
                                     style="color: {{ $comparison['improvements']['efficiency'] >= 0 ? '#28a745' : '#dc3545' }};">
                                     {{ $comparison['improvements']['efficiency'] >= 0 ? '+' : '' }}{{ $comparison['improvements']['efficiency'] }}%
-                                </h3>
-                                <p class="text-muted mb-0">Efficiency Score</p>
+                                </h4>
+                                <p class="text-muted mb-0 small">Efficiency Score</p>
                             </div>
                         </div>
                     </div>

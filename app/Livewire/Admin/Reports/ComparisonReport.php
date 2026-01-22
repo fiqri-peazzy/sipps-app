@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 class ComparisonReport extends Component
 {
@@ -49,23 +50,26 @@ class ComparisonReport extends Component
 
     private function simulateComparison(Collection $items)
     {
-        // FCFS Simulation: Sort by created_at (first come first serve)
-        $fcfsItems = $items->sortBy('order.created_at')->values();
+        if ($items->isEmpty()) {
+            return [
+                'fcfs' => $this->emptyMetrics(),
+                'dps' => $this->emptyMetrics(),
+                'improvements' => ['on_time_rate' => 0, 'avg_completion_time' => 0, 'efficiency' => 0],
+                'total_items' => 0,
+            ];
+        }
 
-        // DPS Simulation: Sort by priority_score (existing DPS data)
-        $dpsItems = $items->sortByDesc('priority_score')->values();
+        // 1. FCFS: PURE SIMULATION (What if we only used FCFS?)
+        $fcfsMetrics = $this->runFcfsHypotheticalSimulation($items);
 
-        // Calculate FCFS Metrics
-        $fcfsMetrics = $this->calculateMethodMetrics($fcfsItems, 'fcfs');
+        // 2. DPS: REAL PROGRESS (Actual performance of the current DPS system)
+        $dpsMetrics = $this->calculateRealDpsMetrics($items);
 
-        // Calculate DPS Metrics
-        $dpsMetrics = $this->calculateMethodMetrics($dpsItems, 'dps');
-
-        // Calculate Improvements
+        // Hitung Peningkatan
         $improvements = [
-            'on_time_rate' => $dpsMetrics['on_time_rate'] - $fcfsMetrics['on_time_rate'],
-            'avg_completion_time' => $fcfsMetrics['avg_completion_time'] - $dpsMetrics['avg_completion_time'],
-            'efficiency' => $dpsMetrics['efficiency'] - $fcfsMetrics['efficiency'],
+            'on_time_rate' => round($dpsMetrics['on_time_rate'] - $fcfsMetrics['on_time_rate'], 2),
+            'avg_completion_time' => round($fcfsMetrics['avg_completion_time'] - $dpsMetrics['avg_completion_time'], 2),
+            'efficiency' => round($dpsMetrics['efficiency'] - $fcfsMetrics['efficiency'], 2),
         ];
 
         return [
@@ -76,80 +80,140 @@ class ComparisonReport extends Component
         ];
     }
 
-    private function calculateMethodMetrics(Collection $items, string $method)
+    private function runFcfsHypotheticalSimulation(Collection $items)
     {
-        $completedItems = $items->where('production_status', 'completed');
+        $totalItems = $items->count();
+        $unprocessed = $items->sortBy('order.verified_at')->values();
+        $simStartTime = $items->min('order.verified_at') ?? now();
 
-        // 1. On-Time Delivery Rate
-        $onTimeItems = $completedItems->filter(function ($item) {
-            return $item->order->completed_at &&
-                $item->deadline &&
-                $item->order->completed_at->lte($item->deadline);
-        });
+        $capacity = 2;
+        $slots = array_fill(0, $capacity, clone $simStartTime);
+        $secondsPerUnit = 1800;
+        $setupSeconds = 14400;
 
-        $onTimeRate = $completedItems->count() > 0
-            ? ($onTimeItems->count() / $completedItems->count()) * 100
-            : 0;
+        $metrics = ['wait' => 0, 'flow' => 0, 'on_time' => 0, 'tardiness' => 0, 'max_late' => 0, 'ship_delay' => 0];
 
-        // 2. Average Completion Time (verified_at to completed_at in hours)
-        $completionTimes = $completedItems->filter(function ($item) {
-            return $item->order->verified_at && $item->order->completed_at;
-        })->map(function ($item) {
-            return $item->order->verified_at->diffInHours($item->order->completed_at);
-        });
+        foreach ($unprocessed as $item) {
+            $earliestSlotTime = collect($slots)->min();
+            $arrival = $item->order->verified_at ?? $simStartTime;
 
-        $avgCompletionTime = $completionTimes->avg() ?? 0;
+            $start = $earliestSlotTime->gt($arrival) ? clone $earliestSlotTime : clone $arrival;
+            $duration = $setupSeconds + (($item->quantity ?? 1) * $secondsPerUnit);
+            $finish = (clone $start)->addSeconds($duration);
 
-        // 3. Efficiency Score (items per day)
-        $totalDays = now()->parse($this->startDate)->diffInDays(now()->parse($this->endDate)) ?: 1;
-        $throughput = $completedItems->count() / $totalDays;
+            // Metrics
+            $metrics['wait'] += $arrival->diffInMinutes($start) / 60;
+            $metrics['flow'] += $arrival->diffInMinutes($finish) / 60;
 
-        // Normalize efficiency to 0-100 scale (assume 10 items/day = 100%)
-        $efficiency = min(($throughput / 10) * 100, 100);
+            if ($item->deadline) {
+                $lateness = $item->deadline->diffInMinutes($finish, false) / 60;
+                if ($lateness > 0) {
+                    $metrics['tardiness'] += $lateness;
+                    $metrics['max_late'] = max($metrics['max_late'], $lateness);
+                } else {
+                    $metrics['on_time']++;
+                }
+            }
 
-        // 4. Average Waiting Time
-        $waitingTimes = $items->filter(function ($item) {
-            return $item->order->verified_at && $item->production_started_at;
-        })->map(function ($item) {
-            return $item->order->verified_at->diffInHours($item->production_started_at);
-        });
+            // Hypo Shipping
+            $shipDays = ($item->order->kurir == 'jne') ? 2 : 3;
+            $delivered = (clone $finish)->addDays($shipDays);
+            if ($item->deadline && $delivered->gt(Carbon::parse($item->deadline)->addDay())) {
+                $metrics['ship_delay'] += Carbon::parse($item->deadline)->addDay()->diffInHours($delivered);
+            }
 
-        $avgWaitingTime = $waitingTimes->avg() ?? 0;
-
-        // 5. Late Deliveries
-        $lateItems = $completedItems->filter(function ($item) {
-            return $item->order->completed_at &&
-                $item->deadline &&
-                $item->order->completed_at->gt($item->deadline);
-        });
-
-        $lateRate = $completedItems->count() > 0
-            ? ($lateItems->count() / $completedItems->count()) * 100
-            : 0;
-
-        // 6. Priority Distribution (only for DPS)
-        $priorityDistribution = null;
-        if ($method === 'dps') {
-            $priorityDistribution = [
-                'very_high' => $items->whereBetween('priority_score', [81, 100])->count(),
-                'high' => $items->whereBetween('priority_score', [61, 80])->count(),
-                'medium' => $items->whereBetween('priority_score', [41, 60])->count(),
-                'low' => $items->whereBetween('priority_score', [21, 40])->count(),
-                'very_low' => $items->whereBetween('priority_score', [0, 20])->count(),
-            ];
+            $slotIdx = array_search($earliestSlotTime, $slots);
+            $slots[$slotIdx] = clone $finish;
         }
 
+        $totalHours = $simStartTime->diffInMinutes(collect($slots)->max()) / 60;
+        return $this->formatMetricsArray($totalItems, $metrics, $totalHours);
+    }
+
+    private function calculateRealDpsMetrics(Collection $items)
+    {
+        $totalItems = $items->count();
+        $now = now();
+        $metrics = ['wait' => 0, 'flow' => 0, 'on_time' => 0, 'tardiness' => 0, 'max_late' => 0, 'ship_delay' => 0];
+
+        foreach ($items as $item) {
+            $arrival = $item->order->verified_at ?? $item->created_at;
+
+            if ($item->production_status === 'completed' && $item->order->completed_at) {
+                $start = $item->production_started_at ?? $arrival;
+                $finish = $item->order->completed_at;
+            } elseif ($item->production_status === 'in_progress' && $item->production_started_at) {
+                $start = $item->production_started_at;
+                $finish = (clone $start)->addSeconds(14400 + (($item->quantity ?? 1) * 1800));
+            } else {
+                $start = $now->gt($arrival) ? clone $now : clone $arrival;
+                $finish = (clone $start)->addSeconds(14400 + (($item->quantity ?? 1) * 1800));
+            }
+
+            $metrics['wait'] += $arrival->diffInMinutes($start) / 60;
+            $metrics['flow'] += $arrival->diffInMinutes($finish) / 60;
+
+            if ($item->deadline) {
+                $lateness = $item->deadline->diffInMinutes($finish, false) / 60;
+                if ($lateness > 0) {
+                    $metrics['tardiness'] += $lateness;
+                    $metrics['max_late'] = max($metrics['max_late'], $lateness);
+                } else {
+                    $metrics['on_time']++;
+                }
+            }
+
+            if ($item->order->shipped_at) {
+                $shippedAt = $item->order->shipped_at;
+                $deadlineShip = $item->deadline ? Carbon::parse($item->deadline)->addDay() : null;
+                if ($deadlineShip && $shippedAt->gt($deadlineShip)) {
+                    $metrics['ship_delay'] += $deadlineShip->diffInHours($shippedAt);
+                }
+            }
+        }
+
+        $totalDays = Carbon::parse($this->startDate)->diffInDays(Carbon::parse($this->endDate)) ?: 1;
+        $res = $this->formatMetricsArray($totalItems, $metrics, $totalDays * 24);
+        $res['completed_items'] = $items->where('production_status', 'completed')->count();
+        $res['throughput'] = round($res['completed_items'] / $totalDays, 2);
+
+        return $res;
+    }
+
+    private function formatMetricsArray($totalItems, $metrics, $totalHours)
+    {
+        $onTimeRate = ($metrics['on_time'] / $totalItems) * 100;
         return [
             'on_time_rate' => round($onTimeRate, 2),
-            'avg_completion_time' => round($avgCompletionTime, 2),
-            'efficiency' => round($efficiency, 2),
-            'avg_waiting_time' => round($avgWaitingTime, 2),
-            'late_rate' => round($lateRate, 2),
-            'throughput' => round($throughput, 2),
-            'completed_items' => $completedItems->count(),
-            'on_time_items' => $onTimeItems->count(),
-            'late_items' => $lateItems->count(),
-            'priority_distribution' => $priorityDistribution,
+            'avg_completion_time' => round($metrics['flow'] / $totalItems, 2),
+            'avg_waiting_time' => round($metrics['wait'] / $totalItems, 2),
+            'total_tardiness' => round($metrics['tardiness'], 2),
+            'max_lateness' => round($metrics['max_late'], 2),
+            'shipping_delay_score' => round($metrics['ship_delay'] / $totalItems, 2),
+            'efficiency' => round(($totalItems / max(1, $totalHours / 24)) * 10, 2),
+            'late_rate' => round(100 - $onTimeRate, 2),
+            'throughput' => round($totalItems / max(1, $totalHours / 24), 2),
+            'completed_items' => $totalItems,
+            'on_time_items' => $metrics['on_time'],
+            'late_items' => $totalItems - $metrics['on_time'],
+        ];
+    }
+
+    private function emptyMetrics()
+    {
+        return [
+            'on_time_rate' => 0,
+            'avg_completion_time' => 0,
+            'avg_waiting_time' => 0,
+            'total_tardiness' => 0,
+            'max_lateness' => 0,
+            'shipping_delay_score' => 0,
+            'efficiency' => 0,
+            'late_rate' => 0,
+            'throughput' => 0,
+            'completed_items' => 0,
+            'on_time_items' => 0,
+            'late_items' => 0,
         ];
     }
 
