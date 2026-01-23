@@ -56,10 +56,10 @@
                     <div class="card bg-primary text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="grow">
                                     <i class="ti ti-shopping-cart" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Total Pesanan</h6>
                                     <h3 class="text-white mb-0">{{ $stats['total_orders'] }}</h3>
                                 </div>
@@ -71,10 +71,10 @@
                     <div class="card bg-success text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="grow">
                                     <i class="ti ti-package" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Total Item</h6>
                                     <h3 class="text-white mb-0">{{ $stats['total_items'] }}</h3>
                                 </div>
@@ -86,10 +86,10 @@
                     <div class="card bg-info text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="grow">
                                     <i class="ti ti-cash" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Total Revenue</h6>
                                     <h3 class="text-white mb-0">Rp
                                         {{ number_format($stats['total_revenue'], 0, ',', '.') }}</h3>
@@ -102,10 +102,10 @@
                     <div class="card bg-warning text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="grow">
                                     <i class="ti ti-trending-up" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Rata-rata Nilai Order</h6>
                                     <h3 class="text-white mb-0">Rp
                                         {{ number_format($stats['avg_order_value'], 0, ',', '.') }}</h3>
@@ -259,49 +259,70 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>No. Order</th>
-                                    <th>Tanggal</th>
-                                    <th>Customer</th>
-                                    <th>Total Item</th>
-                                    <th>Total Harga</th>
+                                    <th>Kode Pesanan</th>
+                                    <th>Tgl Pesan</th>
+                                    <th>Deadline</th>
+                                    <th>Sisa Waktu ($T_i$)</th>
+                                    <th>Kompleksitas ($C_i$) [1-5]</th>
+                                    <th>Urgensi ($U_i$) [1-5]</th>
+                                    <th>Keterangan</th>
                                     <th>Status</th>
-                                    <th>Pembayaran</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($orders as $index => $order)
+                                @forelse($orders as $index => $item)
+                                    @php
+                                        $factors = \App\Services\PriorityCalculator::getFactorsBreakdown($item);
+                                        $remainingDays = $item->deadline
+                                            ? round(now()->diffInDays($item->deadline, false))
+                                            : 0;
+
+                                        // Map scores to 1-5 scale
+                                        $ciScale = round(($item->complexity_score ?? 0) / 2, 1);
+                                        $uiScale = round(($factors['urgency']['raw_score'] ?? 0) / 20, 1);
+
+                                        // Ensure min scale 1 if data exists
+                                        $ciScale = max(1, $ciScale);
+                                        $uiScale = max(1, $uiScale);
+                                    @endphp
                                     <tr>
                                         <td>{{ $orders->firstItem() + $index }}</td>
                                         <td>
-                                            <strong>{{ $order->order_number }}</strong>
+                                            <strong>{{ $item->order->order_number }}</strong>
                                         </td>
-                                        <td>{{ $order->created_at->format('d M Y') }}</td>
+                                        <td>{{ $item->order->created_at->format('d/m/y') }}</td>
+                                        <td>{{ $item->deadline ? $item->deadline->format('d/m/y') : '-' }}</td>
                                         <td>
-                                            {{ $order->penerima_nama }}<br>
-                                            <small class="text-muted">{{ $order->user->email }}</small>
-                                        </td>
-                                        <td>{{ $order->total_item }} item</td>
-                                        <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ $order->status_color }}">
-                                                {{ $order->status_label }}
+                                            <span
+                                                class="badge bg-{{ $remainingDays < 2 ? 'danger' : ($remainingDays < 5 ? 'warning' : 'info') }}">
+                                                {{ $remainingDays }} Hari
                                             </span>
                                         </td>
                                         <td>
-                                            @php
-                                                $paymentColors = [
-                                                    'pending' => 'secondary',
-                                                    'settlement' => 'success',
-                                                    'capture' => 'success',
-                                                    'deny' => 'danger',
-                                                    'cancel' => 'danger',
-                                                    'expire' => 'warning',
-                                                    'failure' => 'danger',
-                                                ];
-                                            @endphp
-                                            <span
-                                                class="badge bg-{{ $paymentColors[$order->payment_status] ?? 'secondary' }}">
-                                                {{ ucfirst($order->payment_status) }}
+                                            <div class="d-flex align-items-center">
+                                                <span class="fw-bold me-2">{{ $ciScale }}</span>
+                                                <div class="progress w-100" style="height: 4px;">
+                                                    <div class="progress-bar bg-info"
+                                                        style="width: {{ ($ciScale / 5) * 100 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="fw-bold me-2">{{ $uiScale }}</span>
+                                                <div class="progress w-100" style="height: 4px;">
+                                                    <div class="progress-bar bg-danger"
+                                                        style="width: {{ ($uiScale / 5) * 100 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small
+                                                class="text-muted">{{ Str::limit($item->catatan_item ?? '-', 30) }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ $item->order->status_color }}">
+                                                {{ $item->order->status_label }}
                                             </span>
                                         </td>
                                     </tr>

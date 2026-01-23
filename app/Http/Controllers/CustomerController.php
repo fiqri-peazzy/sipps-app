@@ -73,7 +73,7 @@ class CustomerController extends Controller
             abort(403);
         }
 
-        $order->load(['items.produk.jenisSablon', 'paymentHistories', 'shippingTrackings']);
+        $order->load(['items.produk.jenisSablon', 'items.customerReturns', 'paymentHistories', 'shippingTrackings']);
 
         return view('customer.orders.show', compact('order'));
     }

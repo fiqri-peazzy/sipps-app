@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\WhatsAppService;
 
 class CustomerReturnForm extends Component
 {
@@ -114,6 +115,18 @@ class CustomerReturnForm extends Component
             ]);
 
             DB::commit();
+
+            // Kirim Notifikasi WA
+            try {
+                $whatsapp = app(WhatsAppService::class);
+                $whatsapp->sendReturnRequestNotification(
+                    $this->order->penerima_telepon,
+                    $this->order->order_number,
+                    $orderItem->produk->jenisSablon->nama
+                );
+            } catch (\Exception $e) {
+                Log::error('Gagal kirim WA return request: ' . $e->getMessage());
+            }
 
             $this->dispatch('show-alert', [
                 'type'      => 'success',

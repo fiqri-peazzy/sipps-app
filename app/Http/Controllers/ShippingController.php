@@ -378,7 +378,7 @@ class ShippingController extends Controller
             });
         }
 
-        $orders = $query->latest()->paginate(20);
+        $orders = $query->latest('updated_at')->paginate(20);
 
         // Get distinct kurir untuk filter
         $kurirs = Order::whereNotNull('kurir')

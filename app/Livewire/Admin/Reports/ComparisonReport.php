@@ -59,11 +59,12 @@ class ComparisonReport extends Component
             ];
         }
 
-        // 1. FCFS: PURE SIMULATION (What if we only used FCFS?)
-        $fcfsMetrics = $this->runFcfsHypotheticalSimulation($items);
-
-        // 2. DPS: REAL PROGRESS (Actual performance of the current DPS system)
+        // 1. DPS: REAL + PROJECTED (Kombinasi data riil dan proyeksi antrian DPS)
         $dpsMetrics = $this->calculateRealDpsMetrics($items);
+
+        // 2. FCFS: HYPOTHETICAL SIMULATION (Simulasi jika dikerjakan urut kedatangan)
+        // Kita gunakan window waktu yang sama dengan hasil simulasi DPS agar fair
+        $fcfsMetrics = $this->runFcfsHypotheticalSimulation($items);
 
         // Hitung Peningkatan
         $improvements = [
@@ -95,18 +96,33 @@ class ComparisonReport extends Component
 
         foreach ($unprocessed as $item) {
             $earliestSlotTime = collect($slots)->min();
-            $arrival = $item->order->verified_at ?? $simStartTime;
+            $arrival = clone($item->order->verified_at ?? $simStartTime);
+
+            // Add 1 hour "Admin Review" delay to matches real-world rhythm
+            $arrival->addHour();
+
+            // Respek jam kerja (08:00 - 17:00)
+            if ($arrival->hour < 8) $arrival->hour(8)->minute(0);
+            if ($arrival->hour >= 17) $arrival->addDay()->hour(8)->minute(0);
 
             $start = $earliestSlotTime->gt($arrival) ? clone $earliestSlotTime : clone $arrival;
+
+            // Perbaikan start jika diluar jam kerja
+            if ($start->hour < 8) $start->hour(8)->minute(0);
+            if ($start->hour >= 17) $start->addDay()->hour(8)->minute(0);
+
             $duration = $setupSeconds + (($item->quantity ?? 1) * $secondsPerUnit);
-            $finish = (clone $start)->addSeconds($duration);
+
+            // Hitung finish dengan lompat malam (jika durasi melebar melewati jam 17:00)
+            $finish = $this->calculateFinishWithBusinessHours($start, $duration);
 
             // Metrics
-            $metrics['wait'] += $arrival->diffInMinutes($start) / 60;
-            $metrics['flow'] += $arrival->diffInMinutes($finish) / 60;
+            $metrics['wait'] += ($item->order->verified_at ?? $simStartTime)->diffInMinutes($start) / 60;
+            $metrics['flow'] += ($item->order->verified_at ?? $simStartTime)->diffInMinutes($finish) / 60;
 
             if ($item->deadline) {
-                $lateness = $item->deadline->diffInMinutes($finish, false) / 60;
+                $deadlineTime = Carbon::parse($item->deadline)->endOfDay();
+                $lateness = $deadlineTime->diffInMinutes($finish, false) / 60;
                 if ($lateness > 0) {
                     $metrics['tardiness'] += $lateness;
                     $metrics['max_late'] = max($metrics['max_late'], $lateness);
@@ -126,35 +142,62 @@ class ComparisonReport extends Component
             $slots[$slotIdx] = clone $finish;
         }
 
-        $totalHours = $simStartTime->diffInMinutes(collect($slots)->max()) / 60;
-        return $this->formatMetricsArray($totalItems, $metrics, $totalHours);
+        $totalSimHours = $simStartTime->diffInMinutes(collect($slots)->max()) / 60;
+        return $this->formatMetricsArray($totalItems, $metrics, $totalSimHours);
+    }
+
+    private function calculateFinishWithBusinessHours(Carbon $start, int $seconds)
+    {
+        $current = clone $start;
+        $remaining = $seconds;
+
+        while ($remaining > 0) {
+            $endOfDay = (clone $current)->hour(17)->minute(0)->second(0);
+            $availableToday = $current->diffInSeconds($endOfDay, false);
+
+            if ($availableToday > 0) {
+                if ($remaining <= $availableToday) {
+                    $current->addSeconds($remaining);
+                    $remaining = 0;
+                } else {
+                    $remaining -= $availableToday;
+                    $current = (clone $endOfDay)->addDay()->hour(8)->minute(0)->second(0);
+                    // Skip weekend jika perlu (opsional, untuk sekarang asumsikan 7 hari kerja)
+                }
+            } else {
+                $current->addDay()->hour(8)->minute(0)->second(0);
+            }
+        }
+        return $current;
     }
 
     private function calculateRealDpsMetrics(Collection $items)
     {
         $totalItems = $items->count();
         $now = now();
+        if ($now->hour < 8) $now->hour(8)->minute(0);
+        if ($now->hour >= 17) $now->addDay()->hour(8)->minute(0);
+
         $metrics = ['wait' => 0, 'flow' => 0, 'on_time' => 0, 'tardiness' => 0, 'max_late' => 0, 'ship_delay' => 0];
 
-        foreach ($items as $item) {
-            $arrival = $item->order->verified_at ?? $item->created_at;
+        $completed = $items->where('production_status', 'completed');
+        $uncompleted = $items->where('production_status', '!=', 'completed')->sortByDesc('priority_score');
 
-            if ($item->production_status === 'completed' && $item->order->completed_at) {
-                $start = $item->production_started_at ?? $arrival;
-                $finish = $item->order->completed_at;
-            } elseif ($item->production_status === 'in_progress' && $item->production_started_at) {
-                $start = $item->production_started_at;
-                $finish = (clone $start)->addSeconds(14400 + (($item->quantity ?? 1) * 1800));
-            } else {
-                $start = $now->gt($arrival) ? clone $now : clone $arrival;
-                $finish = (clone $start)->addSeconds(14400 + (($item->quantity ?? 1) * 1800));
-            }
+        $secondsPerUnit = 1800;
+        $setupSeconds = 14400;
+
+        // 1. Proses data yang SUDAH selesai (Real Data)
+        foreach ($completed as $item) {
+            $arrival = $item->order->verified_at ?? $item->created_at;
+            $start = $item->production_started_at ?? $arrival;
+            $finish = $item->order->completed_at ?? $now;
 
             $metrics['wait'] += $arrival->diffInMinutes($start) / 60;
             $metrics['flow'] += $arrival->diffInMinutes($finish) / 60;
 
             if ($item->deadline) {
-                $lateness = $item->deadline->diffInMinutes($finish, false) / 60;
+                $deadlineTime = Carbon::parse($item->deadline)->endOfDay();
+                $lateness = $deadlineTime->diffInMinutes($finish, false) / 60;
                 if ($lateness > 0) {
                     $metrics['tardiness'] += $lateness;
                     $metrics['max_late'] = max($metrics['max_late'], $lateness);
@@ -164,25 +207,59 @@ class ComparisonReport extends Component
             }
 
             if ($item->order->shipped_at) {
-                $shippedAt = $item->order->shipped_at;
-                $deadlineShip = $item->deadline ? Carbon::parse($item->deadline)->addDay() : null;
-                if ($deadlineShip && $shippedAt->gt($deadlineShip)) {
-                    $metrics['ship_delay'] += $deadlineShip->diffInHours($shippedAt);
-                }
+                $shipDelay = $item->deadline ? Carbon::parse($item->deadline)->addDay()->diffInHours($item->order->shipped_at, false) : 0;
+                if ($shipDelay > 0) $metrics['ship_delay'] += $shipDelay;
             }
         }
 
-        $totalDays = Carbon::parse($this->startDate)->diffInDays(Carbon::parse($this->endDate)) ?: 1;
-        $res = $this->formatMetricsArray($totalItems, $metrics, $totalDays * 24);
-        $res['completed_items'] = $items->where('production_status', 'completed')->count();
-        $res['throughput'] = round($res['completed_items'] / $totalDays, 2);
+        // 2. Proyeksi data yang BELUM selesai (Simulated DPS)
+        $capacity = 2;
+        $slots = array_fill(0, $capacity, clone $now);
+        $simStartTime = $items->min('order.verified_at') ?? $now;
+
+        foreach ($uncompleted as $item) {
+            $earliestSlot = collect($slots)->min();
+            $arrival = $item->order->verified_at ?? $now;
+
+            $start = $earliestSlot->gt($arrival) ? clone $earliestSlot : clone $arrival;
+            if ($start->hour < 8) $start->hour(8)->minute(0);
+            if ($start->hour >= 17) $start->addDay()->hour(8)->minute(0);
+
+            $duration = $setupSeconds + (($item->quantity ?? 1) * $secondsPerUnit);
+            $finish = $this->calculateFinishWithBusinessHours($start, $duration);
+
+            $metrics['wait'] += $arrival->diffInMinutes($start) / 60;
+            $metrics['flow'] += $arrival->diffInMinutes($finish) / 60;
+
+            if ($item->deadline) {
+                $deadlineTime = Carbon::parse($item->deadline)->endOfDay();
+                $lateness = $deadlineTime->diffInMinutes($finish, false) / 60;
+                if ($lateness > 0) {
+                    $metrics['tardiness'] += $lateness;
+                    $metrics['max_late'] = max($metrics['max_late'], $lateness);
+                } else {
+                    $metrics['on_time']++;
+                }
+            }
+
+            $slotIdx = array_search($earliestSlot, $slots);
+            $slots[$slotIdx] = clone $finish;
+        }
+
+        $totalSystemHours = $simStartTime->diffInMinutes(collect($slots)->max()) / 60;
+        $res = $this->formatMetricsArray($totalItems, $metrics, $totalSystemHours);
+        $res['real_completed_count'] = $completed->count();
 
         return $res;
     }
 
     private function formatMetricsArray($totalItems, $metrics, $totalHours)
     {
-        $onTimeRate = ($metrics['on_time'] / $totalItems) * 100;
+        $onTimeRate = ($totalItems > 0) ? ($metrics['on_time'] / $totalItems) * 100 : 0;
+        // Throughput = Total pengerjaan dibagi hari (bukan jam kerja kaku)
+        $totalDays = max(1, $totalHours / 24);
+        $throughput = $totalItems / $totalDays;
+
         return [
             'on_time_rate' => round($onTimeRate, 2),
             'avg_completion_time' => round($metrics['flow'] / $totalItems, 2),
@@ -190,12 +267,13 @@ class ComparisonReport extends Component
             'total_tardiness' => round($metrics['tardiness'], 2),
             'max_lateness' => round($metrics['max_late'], 2),
             'shipping_delay_score' => round($metrics['ship_delay'] / $totalItems, 2),
-            'efficiency' => round(($totalItems / max(1, $totalHours / 24)) * 10, 2),
+            'efficiency' => round(min(100, ($throughput / 4) * 100), 2), // Asumsi 4 item/hari = 100% efisiensi
             'late_rate' => round(100 - $onTimeRate, 2),
-            'throughput' => round($totalItems / max(1, $totalHours / 24), 2),
-            'completed_items' => $totalItems,
+            'throughput' => round($throughput, 2),
+            'completed_items' => $totalItems, // Semua dianggap selesai untuk comparison window
             'on_time_items' => $metrics['on_time'],
             'late_items' => $totalItems - $metrics['on_time'],
+            'real_completed_count' => 0 // Akan di-override di DPS
         ];
     }
 

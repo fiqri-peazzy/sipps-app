@@ -22,6 +22,8 @@ class CustomerReturn extends Model
         'admin_notes',
         'replacement_order_item_id',
         'priority_boost',
+        'resolution_type', // 'replacement', 'refund'
+        'refund_amount',
     ];
 
     protected $casts = [

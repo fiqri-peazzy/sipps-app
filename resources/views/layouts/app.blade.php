@@ -9,7 +9,7 @@
 
     <title>{{ config('app.name') }} - @yield('title', 'Dashboard')</title>
 
-    <link rel="icon" href="{{ asset('backend/assets/images/favicon.svg') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ asset('backend/assets/images/sipps.png') }}" type="image/png" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
         id="main-font-link" />
     <link rel="stylesheet" href="{{ asset('backend/assets/fonts/phosphor/duotone/style.css') }}" />

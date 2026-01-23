@@ -76,16 +76,21 @@ class PlaceOrderForm extends Component
         'penerima_nama' => 'required|string|max:255',
         'penerima_telepon' => 'required|string|max:20',
         'alamat_lengkap' => 'required|string',
-        'provinsi' => 'required|string',
-        'kota' => 'required|string',
+        'provinsi_id' => 'required|integer',
         'kota_id' => 'required|integer',
         'district_id' => 'required|integer',
         'tipe_pengiriman' => 'required|in:dalam_kota,antar_kota',
+        'provinsi' => 'nullable|string',
+        'kota' => 'nullable|string',
     ];
 
     protected $messages = [
+        'orderItems.*.produk_id.required' => 'Wajib pilih produk untuk setiap item',
+        'penerima_nama.required' => 'Nama penerima wajib diisi',
+        'penerima_telepon.required' => 'Nomor telepon/WA wajib diisi',
+        'alamat_lengkap.required' => 'Alamat lengkap wajib diisi',
+        'provinsi_id.required' => 'Pilih provinsi terlebih dahulu',
         'kota_id.required' => 'Kota tujuan harus dipilih',
-        'provinsi.required' => 'Provinsi harus dipilih',
         'district_id.required' => 'Kecamatan harus dipilih',
     ];
 

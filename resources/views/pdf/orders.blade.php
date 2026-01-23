@@ -264,8 +264,8 @@
                     <td>{{ now()->format('d M Y, H:i') }} WIB</td>
                 </tr>
                 <tr>
-                    <td>Total Data:</td>
-                    <td>{{ $orders->count() }} pesanan</td>
+                    <td>Total Produk:</td>
+                    <td>{{ $items->count() }} item sablon</td>
                 </tr>
             </table>
         </div>
@@ -360,70 +360,65 @@
         <!-- Detail Orders Table -->
         <h3
             style="font-size: 12pt; color: #333; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #667eea;">
-            Detail Pesanan
+            Daftar Parameter Prioritas Pesanan (Metode DPS)
         </h3>
 
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 5%;">No</th>
-                    <th style="width: 15%;">No. Order</th>
-                    <th style="width: 12%;">Tanggal</th>
-                    <th style="width: 20%;">Customer</th>
-                    <th style="width: 8%;">Item</th>
-                    <th style="width: 15%;">Total Harga</th>
-                    <th style="width: 12%;">Status</th>
-                    <th style="width: 13%;">Pembayaran</th>
+                    <th style="width: 3%;">No</th>
+                    <th style="width: 12%;">Kode Pesanan</th>
+                    <th style="width: 10%;">Tgl Pesan</th>
+                    <th style="width: 10%;">Deadline</th>
+                    <th style="width: 8%;">Sisa Waktu ($T_i$)</th>
+                    <th style="width: 10%;">Kompleksitas ($C_i$) [1-5]</th>
+                    <th style="width: 10%;">Urgensi ($U_i$) [1-5]</th>
+                    <th style="width: 22%;">Keterangan / Item</th>
+                    <th style="width: 15%;">Status Order</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($orders as $index => $order)
+                @foreach ($items as $index => $item)
+                    @php
+                        $factors = \App\Services\PriorityCalculator::getFactorsBreakdown($item);
+                        $remainingDays = $item->deadline ? round(now()->diffInDays($item->deadline, false)) : 0;
+
+                        // Map scores to 1-5 scale
+                        $ciScale = max(1, round(($item->complexity_score ?? 0) / 2, 1));
+                        $uiScale = max(1, round(($factors['urgency']['raw_score'] ?? 0) / 20, 1));
+                    @endphp
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
-                        <td><strong>{{ $order->order_number }}</strong></td>
-                        <td>{{ $order->created_at->format('d M Y') }}</td>
-                        <td>
-                            {{ $order->penerima_nama }}<br>
-                            <span class="text-muted small">{{ $order->user->email }}</span>
+                        <td><strong>{{ $item->order->order_number }}</strong></td>
+                        <td>{{ $item->order->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $item->deadline ? $item->deadline->format('d/m/Y') : '-' }}</td>
+                        <td class="text-center">
+                            {{ $remainingDays }} Hari
                         </td>
-                        <td class="text-center">{{ $order->total_item }}</td>
-                        <td class="text-right font-weight-bold">Rp
-                            {{ number_format($order->total_harga, 0, ',', '.') }}
-                        </td>
+                        <td class="text-center font-weight-bold">{{ $ciScale }}</td>
+                        <td class="text-center font-weight-bold">{{ $uiScale }}</td>
                         <td>
-                            @php
-                                $statusColors = [
-                                    'pending_payment' => 'warning',
-                                    'paid' => 'info',
-                                    'verified' => 'primary',
-                                    'in_production' => 'secondary',
-                                    'ready_to_ship' => 'info',
-                                    'shipped' => 'primary',
-                                    'completed' => 'success',
-                                    'cancelled' => 'danger',
-                                    'return_requested' => 'warning',
-                                    'returned' => 'dark',
-                                ];
-                            @endphp
-                            <span class="badge badge-{{ $statusColors[$order->status] ?? 'secondary' }}">
-                                {{ $order->status_label }}
-                            </span>
+                            <div style="font-weight: bold;">{{ $item->produk->jenisSablon->nama }}
+                                ({{ $item->quantity }} pcs)
+                            </div>
+                            <div class="text-muted" style="font-size: 7pt;">{{ $item->catatan_item ?? '-' }}</div>
                         </td>
                         <td>
                             @php
-                                $paymentColors = [
-                                    'pending' => 'secondary',
-                                    'settlement' => 'success',
-                                    'capture' => 'success',
-                                    'deny' => 'danger',
-                                    'cancel' => 'danger',
-                                    'expire' => 'warning',
-                                    'failure' => 'danger',
+                                $statusLabels = [
+                                    'pending_payment' => 'Menunggu Pembayaran',
+                                    'paid' => 'Sudah Dibayar',
+                                    'verified' => 'Diverifikasi',
+                                    'in_production' => 'Sedang Produksi',
+                                    'ready_to_ship' => 'Siap Kirim',
+                                    'shipped' => 'Sedang Dikirim',
+                                    'completed' => 'Selesai',
+                                    'cancelled' => 'Dibatalkan',
+                                    'return_requested' => 'Ajuan Return',
+                                    'returned' => 'Dikembalikan',
                                 ];
                             @endphp
-                            <span class="badge badge-{{ $paymentColors[$order->payment_status] ?? 'secondary' }}">
-                                {{ ucfirst($order->payment_status) }}
-                            </span>
+                            {{ $statusLabels[$item->order->status] ?? $item->order->status }}
                         </td>
                     </tr>
                 @endforeach

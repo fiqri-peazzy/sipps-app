@@ -27,9 +27,10 @@ new #[Layout('layouts.guest')] class extends Component {
 }; ?>
 
 <div>
-    <a href="{{ url('/') }}" style="text-decoration:none;" class="d-flex justify-content-center">
-        {{-- <img src="{{ asset('backend/assets/images/logo-dark.svg') }}" alt="logo" class="img-fluid brand-logo" /> --}}
-        <h2 class="text-secondary"><b>NClothing Login User</b></h2>
+    <a href="{{ url('/') }}" style="text-decoration:none;" class="d-flex flex-column align-items-center mb-4">
+        <img src="{{ asset('backend/assets/images/sipps.png') }}" alt="SIPPS Logo" class="img-fluid mb-2"
+            style="max-height: 80px;" />
+        <h2 class="text-secondary"><b>SIPPS Login</b></h2>
     </a>
 
     {{-- <div class="row">

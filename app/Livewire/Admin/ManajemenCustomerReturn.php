@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Services\WhatsAppService;
+use App\Services\PriorityCalculator;
 
 
 class ManajemenCustomerReturn extends Component
@@ -29,6 +31,9 @@ class ManajemenCustomerReturn extends Component
     public $showApprovalModal   = false;
     public $approvalAction;
     public $adminNotes          = '';
+
+    public $resolutionType      = 'replacement'; // 'replacement', 'refund'
+    public $refundAmount        = 0;
 
     public function render()
     {
@@ -51,7 +56,7 @@ class ManajemenCustomerReturn extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->whereHas('order', function ($subQ) {
-                    $subQ->where('order_number', 'like', "%$this->seacrh%")
+                    $subQ->where('order_number', 'like', "%$this->search%")
                         ->orWhere('penerima_nama', 'like', "%$this->search%");
                 })
                     ->orWhereHas('user', function ($subQ) {
@@ -89,9 +94,11 @@ class ManajemenCustomerReturn extends Component
 
     public function openApprovalModal($returnId, $action)
     {
-        $this->selectedReturn      = CustomerReturn::findOrFail($returnId);
+        $this->selectedReturn      = CustomerReturn::with('orderItem')->findOrFail($returnId);
         $this->approvalAction      = $action;
         $this->adminNotes          = '';
+        $this->resolutionType      = 'replacement';
+        $this->refundAmount        = (float) $this->selectedReturn->orderItem->subtotal;
         $this->showApprovalModal   = true;
     }
 
@@ -155,41 +162,72 @@ class ManajemenCustomerReturn extends Component
     {
         $originalItem = $return->orderItem;
 
-        // Create replacement item (duplicate dari item original)
-        $replacementItem = OrderItem::create([
-            'order_id' => $originalItem->order_id,
-            'produk_id' => $originalItem->produk_id,
-            'quantity' => $originalItem->quantity,
-            'ukuran_kaos' => $originalItem->ukuran_kaos,
-            'warna_kaos' => $originalItem->warna_kaos,
-            'harga_satuan' => $originalItem->harga_satuan,
-            'subtotal' => $originalItem->subtotal,
-            'design_config' => $originalItem->design_config,
-            'catatan_item' => $originalItem->catatan_item,
+        if ($this->resolutionType === 'replacement') {
+            // Create replacement item (duplicate dari item original)
+            $replacementItem = OrderItem::create([
+                'order_id' => $originalItem->order_id,
+                'produk_id' => $originalItem->produk_id,
+                'quantity' => $originalItem->quantity,
+                'ukuran_kaos' => $originalItem->ukuran_kaos,
+                'warna_kaos' => $originalItem->warna_kaos,
+                'harga_satuan' => $originalItem->harga_satuan,
+                'subtotal' => $originalItem->subtotal,
+                'design_config' => $originalItem->design_config,
+                'catatan_item' => $originalItem->catatan_item,
 
-            // Return item settings
-            'is_return_item' => true,
-            'parent_item_id' => $originalItem->id,
-            'return_reason' => $return->reason_detail,
+                // Return item settings
+                'is_return_item' => true,
+                'parent_item_id' => $originalItem->id,
+                'return_reason' => $return->reason_detail,
 
-            // Production settings
-            'deadline' => now()->addDays(7), // Deadline 7 hari
-            'production_status' => 'in_queue',
-            'priority_score' => 0, // Akan di-calculate ulang oleh DPS
+                // Production settings
+                'deadline' => now()->addDays(3), // Deadline dipercepat untuk return
+                'production_status' => 'in_queue',
+                'priority_score' => 0,
 
-            // Complexity (copy dari parent)
-            'complexity_score' => $originalItem->complexity_score,
-            'auto_complexity_score' => $originalItem->auto_complexity_score,
-            'manual_complexity_score' => $originalItem->manual_complexity_score,
-        ]);
+                // Complexity (copy dari parent)
+                'complexity_score' => $originalItem->complexity_score,
+                'auto_complexity_score' => $originalItem->auto_complexity_score,
+                'manual_complexity_score' => $originalItem->manual_complexity_score,
+            ]);
 
-        // Update return request
+            // Recalculate Priority dengan boost after_return
+            PriorityCalculator::calculateAndSave($replacementItem, 'after_return');
+
+            // Update return request with replacement item id
+            $return->update([
+                'replacement_order_item_id' => $replacementItem->id,
+            ]);
+
+            // Update order status KEMBALI KE PRODUKSI
+            $return->order->update([
+                'status' => 'in_production',
+                'shipped_at' => null,     // Reset agar timeline akurat
+                'completed_at' => null,   // Reset agar timeline akurat
+            ]);
+
+            // Kirim Notifikasi WA Approval Replacement
+            try {
+                $whatsapp = app(WhatsAppService::class);
+                $whatsapp->sendReturnApprovalNotification(
+                    $return->order->penerima_telepon,
+                    $return->order->order_number,
+                    $originalItem->produk->jenisSablon->nama,
+                    $this->adminNotes
+                );
+            } catch (\Exception $e) {
+                Log::error('WA Approval Error: ' . $e->getMessage());
+            }
+        }
+
+        // Update return request general info
         $return->update([
             'status' => 'approved',
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
             'admin_notes' => $this->adminNotes,
-            'replacement_order_item_id' => $replacementItem->id,
+            'resolution_type' => $this->resolutionType,
+            'refund_amount' => $this->resolutionType === 'refund' ? $this->refundAmount : 0,
         ]);
 
         // Update original item
@@ -197,10 +235,27 @@ class ManajemenCustomerReturn extends Component
             'returned_count' => $originalItem->returned_count + 1,
         ]);
 
-        // Update order status
-        $return->order->update([
-            'status' => 'returned',
-        ]);
+        if ($this->resolutionType === 'refund') {
+            // REFUND
+            $return->order->update([
+                'status' => 'returned',
+                'cancelled_at' => now(), // Anggap dibatalkan karena refund
+            ]);
+
+            // Kirim Notifikasi WA Refund
+            try {
+                $whatsapp = app(WhatsAppService::class);
+                // Kita gunakan template approved tapi dengan catatan refund
+                $whatsapp->sendReturnApprovalNotification(
+                    $return->order->penerima_telepon,
+                    $return->order->order_number,
+                    $originalItem->produk->jenisSablon->nama,
+                    "Return disetujui dengan pengembalian dana senilai Rp " . number_format($this->refundAmount, 0, ',', '.') . ". Dana akan dikirimkan ke rekening Anda. " . $this->adminNotes
+                );
+            } catch (\Exception $e) {
+                Log::error('WA Refund Error: ' . $e->getMessage());
+            }
+        }
     }
 
     private function rejectReturn($return)
@@ -217,6 +272,19 @@ class ManajemenCustomerReturn extends Component
         $return->order->update([
             'status' => 'completed',
         ]);
+
+        // Kirim Notifikasi WA
+        try {
+            $whatsapp = app(WhatsAppService::class);
+            $whatsapp->sendReturnRejectionNotification(
+                $return->order->penerima_telepon,
+                $return->order->order_number,
+                $return->orderItem->produk->jenisSablon->nama,
+                $this->adminNotes ?: 'Bukti kurang kuat atau tidak sesuai ketentuan.'
+            );
+        } catch (\Exception $e) {
+            Log::error('WA Rejection Error: ' . $e->getMessage());
+        }
     }
 
     public function resetFilters()

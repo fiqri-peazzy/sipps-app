@@ -3,7 +3,8 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="{{ route('admin.dashboard') }}" class="b-brand text-primary">
-                <img src="{{ asset('backend/assets/images/logo.svg') }}" alt="" class="logo" />
+                <img src="{{ asset('backend/assets/images/sipps.png') }}" alt="SIPPS" class="logo"
+                    style="max-height: 45px; object-fit: contain;" />
             </a>
         </div>
         <div class="navbar-content">
@@ -83,41 +84,53 @@
                 </li>
 
                 <li class="pc-item pc-caption">
-                    <label>Laporan</label>
+                    <label>Marketing & Konten</label>
+                    <i class="ti ti-world"></i>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('admin.portfolio.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-layout-grid"></i></span>
+                        <span class="pc-mtext">Portfolio Kerja</span>
+                    </a>
+                </li>
+
+                <li class="pc-item pc-caption">
+                    <label>Laporan & Analitik</label>
                     <i class="ti ti-file-analytics"></i>
                 </li>
-                <li class="pc-item pc-hasmenu">
-                    <a href="#" class="pc-link">
+                <li class="pc-item pc-hasmenu {{ request()->routeIs('admin.reports.*') ? 'pc-trigger active' : '' }}">
+                    <a href="#!" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-chart-bar"></i></span>
                         <span class="pc-mtext">Laporan</span>
-                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                        <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
                     </a>
-                    <ul class="pc-submenu">
+                    <ul class="pc-submenu"
+                        style="{{ request()->routeIs('admin.reports.*') ? 'display: block;' : '' }}">
                         <!-- Export Reports -->
-                        <li class="pc-item">
+                        <li class="pc-item {{ request()->routeIs('admin.reports.orders') ? 'active' : '' }}">
                             <a class="pc-link" href="{{ route('admin.reports.orders') }}">
                                 <i class="ti ti-file-invoice"></i> Laporan Pesanan
                             </a>
                         </li>
-                        <li class="pc-item">
+                        <li class="pc-item {{ request()->routeIs('admin.reports.dps-performance') ? 'active' : '' }}">
                             <a class="pc-link" href="{{ route('admin.reports.dps-performance') }}">
                                 <i class="ti ti-chart-line"></i> Kinerja DPS
-                                <span class="badge bg-success badge-sm ms-2">Skripsi</span>
+                                <span class="badge bg-success badge-sm ms-2" style="font-size: 8px;">Skripsi</span>
                             </a>
                         </li>
-                        <li class="pc-item">
+                        <li class="pc-item {{ request()->routeIs('admin.reports.comparison') ? 'active' : '' }}">
                             <a class="pc-link" href="{{ route('admin.reports.comparison') }}">
                                 <i class="ti ti-arrows-exchange"></i> FCFS vs DPS
-                                <span class="badge bg-success badge-sm ms-2">Skripsi</span>
+                                <span class="badge bg-success badge-sm ms-2" style="font-size: 8px;">Skripsi</span>
                             </a>
                         </li>
 
                         <li class="pc-item">
-                            <hr class="my-2">
+                            <hr class="my-2 border-top border-secondary opacity-25">
                         </li>
 
                         <!-- Dashboard Analytics -->
-                        <li class="pc-item">
+                        <li class="pc-item {{ request()->routeIs('admin.reports.dashboard') ? 'active' : '' }}">
                             <a class="pc-link" href="{{ route('admin.reports.dashboard') }}">
                                 <i class="ti ti-dashboard"></i> Dashboard Analitik
                             </a>

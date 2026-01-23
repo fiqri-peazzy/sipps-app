@@ -3,6 +3,9 @@
 namespace App\Livewire\Admin\Reports;
 
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Services\PriorityCalculator;
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -27,28 +30,29 @@ class OrdersReport extends Component
 
     public function render()
     {
-        // Query dengan filter real-time
-        $query = Order::with(['user', 'items.produk'])
-            ->whereBetween('created_at', [$this->startDate, $this->endDate]);
-
-        if ($this->status) {
-            $query->where('status', $this->status);
-        }
+        // Query OrderItem yang berelasi dengan Order dan Produk
+        $query = OrderItem::with(['order.user', 'produk.jenisSablon'])
+            ->whereHas('order', function ($q) {
+                $q->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
+                if ($this->status) {
+                    $q->where('status', $this->status);
+                }
+            });
 
         $orders = $query->latest()->paginate(20);
 
-        // Statistics
-        $allOrders = Order::whereBetween('created_at', [$this->startDate, $this->endDate])
-            ->when($this->status, fn($q) => $q->where('status', $this->status))
-            ->get();
+        // Statistics (Based on unique Orders within the filtered Items)
+        $orderIds = (clone $query)->pluck('order_id')->unique();
+        $filteredOrders = Order::whereIn('id', $orderIds)->get();
+        $filteredItems = (clone $query)->get();
 
         $stats = [
-            'total_orders' => $allOrders->count(),
-            'total_revenue' => $allOrders->sum('total_harga'),
-            'avg_order_value' => $allOrders->avg('total_harga') ?? 0,
-            'total_items' => $allOrders->sum('total_item'),
-            'status_breakdown' => $allOrders->groupBy('status')->map->count(),
-            'payment_breakdown' => $allOrders->groupBy('payment_status')->map->count(),
+            'total_orders' => $filteredOrders->count(),
+            'total_revenue' => $filteredOrders->sum('total_harga'),
+            'avg_order_value' => $filteredOrders->avg('total_harga') ?? 0,
+            'total_items' => $filteredItems->sum('quantity'),
+            'status_breakdown' => $filteredOrders->groupBy('status')->map->count(),
+            'payment_breakdown' => $filteredOrders->groupBy('payment_status')->map->count(),
         ];
 
         return view('livewire.admin.reports.orders-report', compact('orders', 'stats'));
@@ -57,45 +61,45 @@ class OrdersReport extends Component
     public function resetFilters()
     {
         $this->reset(['startDate', 'endDate', 'status']);
-        $this->mount(); // Reset ke default
+        $this->mount();
     }
 
     public function exportPdf()
     {
-        $query = Order::with(['user', 'items.produk'])
-            ->whereBetween('created_at', [$this->startDate, $this->endDate]);
+        $query = OrderItem::with(['order.user', 'produk.jenisSablon'])
+            ->whereHas('order', function ($q) {
+                $q->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
+                if ($this->status) {
+                    $q->where('status', $this->status);
+                }
+            });
 
-        if ($this->status) {
-            $query->where('status', $this->status);
-        }
+        $items = $query->latest()->get();
 
-        $orders = $query->latest()->get();
-
-        $allOrders = Order::whereBetween('created_at', [$this->startDate, $this->endDate])
-            ->when($this->status, fn($q) => $q->where('status', $this->status))
-            ->get();
+        $orderIds = (clone $query)->pluck('order_id')->unique();
+        $filteredOrders = Order::whereIn('id', $orderIds)->get();
 
         $stats = [
-            'total_orders' => $allOrders->count(),
-            'total_revenue' => $allOrders->sum('total_harga'),
-            'avg_order_value' => $allOrders->avg('total_harga') ?? 0,
-            'total_items' => $allOrders->sum('total_item'),
-            'status_breakdown' => $allOrders->groupBy('status')->map->count(),
-            'payment_breakdown' => $allOrders->groupBy('payment_status')->map->count(),
+            'total_orders' => $filteredOrders->count(),
+            'total_revenue' => $filteredOrders->sum('total_harga'),
+            'avg_order_value' => $filteredOrders->avg('total_harga') ?? 0,
+            'total_items' => $items->sum('quantity'),
+            'status_breakdown' => $filteredOrders->groupBy('status')->map->count(),
+            'payment_breakdown' => $filteredOrders->groupBy('payment_status')->map->count(),
         ];
 
         $pdf = Pdf::loadView('pdf.orders', [
-            'orders' => $orders,
+            'items' => $items,
             'stats' => $stats,
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
             'status' => $this->status,
         ]);
 
-        $filename = 'Laporan_Pesanan_' . date('Ymd_His') . '.pdf';
+        $filename = 'Laporan_Pesanan_DPS_' . date('Ymd_His') . '.pdf';
 
         return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->setPaper('a4', 'portrait')->output();
+            echo $pdf->setPaper('a4', 'landscape')->output(); // Landscape for better table fit
         }, $filename);
     }
 }

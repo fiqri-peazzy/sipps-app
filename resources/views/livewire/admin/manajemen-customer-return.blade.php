@@ -394,13 +394,45 @@
                         </div>
 
                         @if ($approvalAction === 'approve')
+                            <div class="mb-4">
+                                <label class="form-label font-weight-bold">Tipe Penyelesaian Return:</label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                            wire:model.live="resolutionType" value="replacement" id="typeRepl">
+                                        <label class="form-check-label" for="typeRepl">Produksi Ulang (Redo)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                            wire:model.live="resolutionType" value="refund" id="typeRefund">
+                                        <label class="form-check-label" for="typeRefund">Kembalikan Dana
+                                            (Refund)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if ($resolutionType === 'refund')
+                                <div class="mb-4 p-3 bg-light rounded border">
+                                    <label class="form-label font-weight-bold">Nominal Pengembalian (Rp):</label>
+                                    <input type="number" wire:model="refundAmount" class="form-control"
+                                        placeholder="Masukkan nominal refund">
+                                    <small class="text-muted">Maksimal: Rp
+                                        {{ number_format($selectedReturn->orderItem->subtotal, 0, ',', '.') }}</small>
+                                </div>
+                            @endif
+
                             <div class="alert alert-info">
                                 <h6><i class="ti ti-info-circle"></i> Proses Approval:</h6>
                                 <ul class="mb-0">
-                                    <li>Item pengganti akan dibuat otomatis</li>
-                                    <li>Masuk ke queue produksi dengan <strong>priority tinggi</strong></li>
-                                    <li>Deadline: <strong>7 hari</strong> dari sekarang</li>
-                                    <li>Customer akan menerima notifikasi</li>
+                                    @if ($resolutionType === 'replacement')
+                                        <li>Item pengganti akan dibuat otomatis</li>
+                                        <li>Order kembali ke status <strong>Sedang Produksi</strong></li>
+                                        <li>Timeline produksi pada customer akan di-reset</li>
+                                    @else
+                                        <li>Pesanan akan ditandai <strong>Returned</strong> (Uang Kembali)</li>
+                                        <li>Status return menjadi <strong>Selesai</strong></li>
+                                    @endif
+                                    <li>Customer akan menerima notifikasi otomatis</li>
                                 </ul>
                             </div>
                         @else

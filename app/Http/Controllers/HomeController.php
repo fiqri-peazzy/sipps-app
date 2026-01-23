@@ -20,32 +20,11 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        $portfolios = [
-            [
-                'image' => 'https://images.unsplash.com/photo-1618354691714-7d92150909db?q=80&w=1167&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                'title' => 'Sablon DTF Jersey Tim Futsal',
-                'category' => 'DTF',
-                'description' => 'Sablon jersey tim futsal dengan teknik DTF hasil tajam dan detail'
-            ],
-            [
-                'image' => 'https://plus.unsplash.com/premium_photo-1747643596473-36555168062f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                'title' => 'Sablon Manual Kaos Event',
-                'category' => 'Manual',
-                'description' => 'Sablon manual untuk kaos event dengan hasil awet dan tidak mudah luntur'
-            ],
-            [
-                'image' => 'https://images.unsplash.com/photo-1704138161405-b4164c58f213?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                'title' => 'Polyflex Logo Perusahaan',
-                'category' => 'Polyflex',
-                'description' => 'Sablon polyflex untuk seragam kantor dengan logo perusahaan'
-            ],
-            [
-                'image' => 'https://media.istockphoto.com/id/1140961205/id/vektor/templat-desain-kaos-e-sport-tata-letak-biru-putih-dan-merah.jpg?s=2048x2048&w=is&k=20&c=nV95E6nQ1b1qvEOqAWg8pNnZSGqzI5XZ6lbCJaw3G8I=',
-                'title' => 'Sublim Kaos Olahraga',
-                'category' => 'Sublim',
-                'description' => 'Sablon sublim full print untuk kaos olahraga dengan warna vibrant'
-            ],
-        ];
+        $portfolios = \App\Models\Portfolio::where('is_active', true)
+            ->where('is_featured', true)
+            ->latest()
+            ->take(4)
+            ->get();
         $testimonials = [
             [
                 'name' => 'Budi Santoso',
@@ -115,5 +94,22 @@ class HomeController extends Controller
             'deskripsi' => $jenisSablon->deskripsi,
             'priceTable' => $priceTable,
         ]);
+    }
+
+    public function layanan()
+    {
+        $jenisSablons = JenisSablon::where('is_active', true)
+            ->withCount('produks')
+            ->get();
+        return view('frontend.layanan', compact('jenisSablons'));
+    }
+
+    public function portfolio()
+    {
+        // Use the same sample data for now
+        $portfolios = \App\Models\Portfolio::where('is_active', true)
+            ->latest()
+            ->paginate(12);
+        return view('frontend.portfolio', compact('portfolios'));
     }
 }

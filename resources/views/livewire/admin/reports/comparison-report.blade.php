@@ -96,12 +96,12 @@
                         </div>
                     </div>
                     <hr class="my-3">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <small class="text-muted d-block">Completed</small>
+                    <div class="row text-center mt-3">
+                        <div class="col-4 border-end">
+                            <small class="text-muted d-block">Sample</small>
                             <strong>{{ $comparison['fcfs']['completed_items'] }}</strong>
                         </div>
-                        <div class="col-4">
+                        <div class="col-4 border-end">
                             <small class="text-muted d-block">On-Time</small>
                             <strong class="text-success">{{ $comparison['fcfs']['on_time_items'] }}</strong>
                         </div>
@@ -183,16 +183,20 @@
                     </div>
                     <hr class="my-3">
                     <div class="row text-center">
-                        <div class="col-4">
-                            <small class="text-muted d-block">Completed</small>
+                        <div class="col-3 border-end">
+                            <small class="text-muted d-block" style="font-size: 10px;">Sample</small>
                             <strong>{{ $comparison['dps']['completed_items'] }}</strong>
                         </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block">On-Time</small>
+                        <div class="col-3 border-end">
+                            <small class="text-muted d-block" style="font-size: 10px;">Real Done</small>
+                            <strong class="text-primary">{{ $comparison['dps']['real_completed_count'] }}</strong>
+                        </div>
+                        <div class="col-3 border-end">
+                            <small class="text-muted d-block" style="font-size: 10px;">On-Time</small>
                             <strong class="text-success">{{ $comparison['dps']['on_time_items'] }}</strong>
                         </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block">Late</small>
+                        <div class="col-3">
+                            <small class="text-muted d-block" style="font-size: 10px;">Late</small>
                             <strong class="text-danger">{{ $comparison['dps']['late_items'] }}</strong>
                         </div>
                     </div>

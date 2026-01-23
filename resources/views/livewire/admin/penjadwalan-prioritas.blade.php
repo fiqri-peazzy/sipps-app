@@ -6,10 +6,10 @@
             <div class="card bg-primary text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <i class="ti ti-clock-pause" style="font-size: 2.5rem;"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
+                        <div class="grow ms-3">
                             <h6 class="mb-0 text-white">Menunggu</h6>
                             <h3 class="mb-0 text-white">{{ $stats['waiting'] }}</h3>
                         </div>
@@ -21,10 +21,10 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <i class="ti ti-list-check" style="font-size: 2.5rem;"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
+                        <div class="grow ms-3">
                             <h6 class="mb-0 text-white">Dalam Antrian</h6>
                             <h3 class="mb-0 text-white">{{ $stats['in_queue'] }}</h3>
                         </div>
@@ -36,10 +36,10 @@
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <i class="ti ti-progress" style="font-size: 2.5rem;"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
+                        <div class="grow ms-3">
                             <h6 class="mb-0 text-white">Dalam Produksi</h6>
                             <h3 class="mb-0 text-white">{{ $stats['in_progress'] }}</h3>
                         </div>
@@ -51,10 +51,10 @@
             <div class="card bg-secondary text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <i class="ti ti-hourglass" style="font-size: 2.5rem;"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
+                        <div class="grow ms-3">
                             <h6 class="mb-0 text-white">Rata-rata Tunggu</h6>
                             <h3 class="mb-0 text-white">{{ number_format($stats['avg_waiting_hours'], 1) }}h</h3>
                         </div>
@@ -94,7 +94,7 @@
                 <div class="col-md-3">
                     <label class="form-label">&nbsp;</label>
                     <button wire:click="recalculateAll" class="btn btn-primary w-100">
-                        <i class="ti ti-refresh"></i> Hitung Ulang Semua Prioritas
+                        <i class="ti ti-refresh"></i> Hitung Prioritas
                     </button>
                 </div>
             </div>
@@ -507,7 +507,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
-                                    <div class="flex-grow-1">
+                                    <div class="grow">
                                         <div class="progress" style="height: 30px;">
                                             <div class="progress-bar bg-info" role="progressbar"
                                                 style="width: {{ $selectedItem->auto_complexity_score * 10 }}%">

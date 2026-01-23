@@ -1,176 +1,122 @@
 @extends('layouts.customer')
 
 @section('customer-content')
-    <div class="content-header">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h1 class="content-title">
-                    Pesanan Saya
-                </h1>
-                <p class="content-subtitle">Daftar semua pesanan yang telah Anda buat</p>
-            </div>
-            <a href="{{ route('customer.order.create') }}" class="btn-primary-custom">
-                <i class="lni lni-plus"></i> Buat Pesanan Baru
-            </a>
-        </div>
+    <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Riwayat <span
+                class="text-primary italic">Pesanan</span></h1>
+        <p class="text-slate-500 mt-2 text-lg">Daftar riwayat dan status pesanan sablon Anda.</p>
     </div>
 
-    <div class="card border-0 shadow-sm mt-4">
-        <div class="card-body p-0">
-            @if ($orders->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover table-borderless align-middle mb-0" id="order-table">
-                        <thead class="bg-light text-muted">
-                            <tr>
-                                <th class="ps-4">No. Order</th>
-                                <th>Tanggal</th>
-                                <th>Produk</th>
-                                <th>Status</th>
-                                <th class="text-end">Total</th>
-                                <th class="text-center pe-4">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($orders as $order)
-                                <tr>
-                                    <td class="ps-4">
-                                        <span class="fw-bold text-dark">{{ $order->order_number }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="text-muted small">
-                                            {{ $order->created_at->format('d M Y') }}<br>
-                                            {{ $order->created_at->format('H:i') }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="small">
-                                            @foreach ($order->items as $item)
-                                                <div class="text-truncate" style="max-width: 250px;">
-                                                    <i class="fa-solid fa-circle-dot me-1 text-primary"
-                                                        style="font-size: 6px;"></i>
-                                                    {{ $item->produk->jenisSablon->nama }}
-                                                    <span class="text-muted">({{ $item->quantity }})</span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill badge-soft-{{ $order->status_color ?? 'primary' }}">
-                                            {{ $order->status_label }}
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="fw-bold text-indigo">{{ $order->formatted_total_harga }}</span>
-                                    </td>
-                                    <td class="text-center pe-4">
+    <div class="card-modern p-0! overflow-hidden">
+        <div class="p-8 border-b border-slate-50 flex items-center justify-between flex-wrap gap-4">
+            <h4 class="text-xl font-black text-slate-900">Riwayat Pesanan</h4>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total: {{ $orders->total() }}
+                    Pesanan</span>
+            </div>
+        </div>
+
+        @if ($orders->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50">
+                            <th
+                                class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+                                No. Order</th>
+                            <th
+                                class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+                                Tanggal</th>
+                            <th
+                                class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+                                Produk</th>
+                            <th
+                                class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+                                Status</th>
+                            <th
+                                class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-right whitespace-nowrap">
+                                Total</th>
+                            <th
+                                class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center whitespace-nowrap">
+                                Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @foreach ($orders as $order)
+                            <tr class="group hover:bg-slate-50/50 transition-colors">
+                                <td class="px-8 py-6">
+                                    <span class="font-black text-slate-900">{{ $order->order_number }}</span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-sm font-bold text-slate-700">{{ $order->created_at->format('d M Y') }}</span>
+                                        <span
+                                            class="text-[10px] font-bold text-slate-400 uppercase">{{ $order->created_at->format('H:i') }}
+                                            WIB</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="max-w-[200px] space-y-1">
+                                        @foreach ($order->items->take(2) as $item)
+                                            <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                                                <span class="h-1 w-1 rounded-full bg-primary shrink-0"></span>
+                                                <span class="truncate">{{ $item->produk->jenisSablon->nama }}</span>
+                                                <span class="text-slate-400">({{ $item->quantity }})</span>
+                                            </div>
+                                        @endforeach
+                                        @if ($order->items->count() > 2)
+                                            <span
+                                                class="text-[10px] font-black text-primary uppercase">+{{ $order->items->count() - 2 }}
+                                                lainnya</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span
+                                        class="inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
+                                        @if ($order->status == 'completed') bg-green-100 text-green-700
+                                        @elseif($order->status == 'pending_payment')
+                                        @elseif($order->status == 'cancelled')
+                                        @else @endif">
+                                        {{ $order->status_label }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6 text-right text-sm">
+                                    <span class="font-black text-primary">{{ $order->formatted_total_harga }}</span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center justify-center">
                                         <a href="{{ route('customer.orders.show', $order->id) }}"
-                                            class="btn btn-sm btn-icon-only btn-primary" title="Lihat Detail">
+                                            class="h-9 w-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">
                                             <i class="lni lni-eye"></i>
                                         </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-5">
-                    <div class="mb-3">
-                        <i class="fa-solid fa-box-open text-muted opacity-25" style="font-size: 64px;"></i>
-                    </div>
-                    <h4>Belum Ada Pesanan</h4>
-                    <p class="text-muted mb-4">Anda belum membuat pesanan apapun.</p>
-                    <a href="{{ route('customer.order.create') }}" class="btn btn-primary px-4">
-                        <i class="fa-solid fa-plus me-2"></i>Buat Pesanan Pertama
-                    </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if ($orders->hasPages())
+                <div class="p-8 border-t border-slate-50">
+                    {{ $orders->links() }}
                 </div>
             @endif
-        </div>
+        @else
+            <div class="py-24 flex flex-col items-center text-center px-8">
+                <div
+                    class="h-24 w-24 rounded-[2.5rem] bg-slate-50 flex items-center justify-center text-slate-200 mb-8 border border-white rotate-3">
+                    <i class="lni lni-package text-5xl"></i>
+                </div>
+                <h4 class="text-2xl font-black text-slate-900 mb-2">Riwayat Kosong</h4>
+                <p class="text-slate-500 max-w-sm mb-10">Sepertinya Anda belum memiliki pesanan. Mulai berkreasi dengan
+                    desain kaos unik Anda!</p>
+                <a href="{{ route('customer.order.create') }}" class="btn-premium">
+                    <i class="lni lni-plus mr-2"></i> Buat Pesanan Baru
+                </a>
+            </div>
+        @endif
     </div>
-
-    @if ($orders->count() > 0)
-        <div class="d-flex justify-content-center mt-4">
-            {{ $orders->links() }}
-        </div>
-    @endif
-
-    @push('styles')
-        <style>
-            #order-table thead th {
-                font-size: 0.8rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                padding-top: 15px;
-                padding-bottom: 15px;
-                border-bottom: 1px solid #f1f5f9;
-            }
-
-            #order-table tbody td {
-                padding-top: 18px;
-                padding-bottom: 18px;
-                border-bottom: 1px solid #f8fafc;
-            }
-
-            #order-table tbody tr:last-child td {
-                border-bottom: none;
-            }
-
-            .text-indigo {
-                color: #6366f1;
-            }
-
-            .badge-soft-primary {
-                background-color: #eef2ff;
-                color: #6366f1;
-            }
-
-            .badge-soft-success {
-                background-color: #f0fdf4;
-                color: #22c55e;
-            }
-
-            .badge-soft-warning {
-                background-color: #fffbeb;
-                color: #f59e0b;
-            }
-
-            .badge-soft-danger {
-                background-color: #fef2f2;
-                color: #ef4444;
-            }
-
-            .badge-soft-info {
-                background-color: #f0f9ff;
-                color: #0ea5e9;
-            }
-
-            .badge-soft-secondary {
-                background-color: #f8fafc;
-                color: #64748b;
-            }
-
-            /*
-                                                                    .btn-soft-primary {
-                                                                        background-color: #eef2ff;
-                                                                        color: #6366f1;
-                                                                        border: none;
-                                                                    }
-
-                                                                    .btn-soft-primary:hover {
-                                                                        background-color: #6366f1;
-                                                                        color: white;
-                                                                    }
-
-                                                                    .btn-icon-only {
-                                                                        width: 32px;
-                                                                        height: 32px;
-                                                                        padding: 0;
-                                                                        display: inline-flex;
-                                                                        align-items: center;
-                                                                        justify-content: center;
-                                                                        border-radius: 8px;
-                                                                        transition: all 0.2s;
-                                                                    } */
-        </style>
-    @endpush
 @endsection

@@ -1,533 +1,274 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 
 <head>
     <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>{{ config('app.name') }} - @yield('title', 'Jasa Sablon Berkualitas')</title>
-    <meta name="description"
-        content="NClothing - Jasa Sablon Profesional dengan berbagai pilihan teknik sablon DTF, Manual, Polyflex, dan Sublim" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" href="{{ asset('frontend/assets/img/logo/logo.svg') }}" type="image/png" />
-    <link rel="stylesheet" href="{{ asset('frontend/assets/css/bootstrap-5.0.0-alpha-2.min.css') }}" />
+
+    <title>{{ config('app.name') }} - @yield('title', 'Jasa Sablon Berkualitas')</title>
+    <meta name="description"
+        content="SIPPS - Sistem Informasi Penjadwalan Produksi Sablon Profesional dengan berbagai pilihan teknik sablon DTF, Manual, Polyflex, dan Sublim" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('backend/assets/images/sipps.png') }}" type="image/png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/LineIcons.2.0.css') }}" />
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/animate.css') }}" />
-    <style>
-        /* Navbar Modern */
-        .navbar-modern {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            padding: 1.2rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
 
-        .navbar-modern.scrolled {
-            padding: 0.8rem 0;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo-wrapper {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .logo-wrapper img {
-            height: 50px;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-wrapper:hover img {
-            transform: scale(1.05);
-        }
-
-        /* Search Bar Modern */
-        .search-modern {
-            position: relative;
-            flex: 1;
-            max-width: 550px;
-            margin: 0 2rem;
-        }
-
-        .search-modern input {
-            width: 100%;
-            padding: 0.75rem 3rem 0.75rem 1.25rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 50px;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: #f9fafb;
-        }
-
-        .search-modern input:focus {
-            outline: none;
-            border-color: #6366f1;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .search-modern .search-icon {
-            position: absolute;
-            right: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-            font-size: 1.2rem;
-        }
-
-        /* Icon Navigation */
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .icon-btn {
-            position: relative;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: #f3f4f6;
-            color: #374151;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .icon-btn:hover {
-            background: #6366f1;
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .icon-btn i {
-            font-size: 1.3rem;
-        }
-
-        .badge-notification {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: 700;
-            padding: 0.2rem 0.45rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        /* Button Login Modern */
-        .btn-login-modern {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: #fff;
-            padding: 0.65rem 1.75rem;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border: none;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-login-modern:hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-            color: #fff;
-        }
-
-        /* User Avatar Modern */
-        .user-profile {
-            position: relative;
-        }
-
-        .avatar-circle {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .avatar-circle:hover {
-            transform: scale(1.08);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
-
-        .dropdown-menu-modern {
-            background: #fff;
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            padding: 0.75rem;
-            margin-top: 0.75rem;
-            min-width: 200px;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .dropdown-menu-modern .dropdown-item {
-            padding: 0.65rem 1rem;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-        }
-
-        .dropdown-menu-modern .dropdown-item:hover {
-            background: #f3f4f6;
-            color: #6366f1;
-            transform: translateX(4px);
-        }
-
-        .dropdown-menu-modern .dropdown-divider {
-            margin: 0.5rem 0;
-            border-color: #e5e7eb;
-        }
-
-        /* Category Navigation Modern */
-        .category-nav-modern {
-            background: #fff;
-            padding: 0.5rem 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            /* margin-top: 40px; */
-        }
-
-        .category-link {
-            color: #6b7280;
-            text-decoration: none;
-            padding: 0.65rem 1.25rem;
-            margin: 0 0.25rem;
-            border-radius: 50px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-
-        .category-link:hover {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-            color: #6366f1;
-            transform: translateY(-1px);
-        }
-
-        .category-link.active {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        /* Footer Modern */
-        .footer-modern {
-            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
-            color: #94a3b8;
-            padding: 4rem 0 2rem;
-            margin-top: 6rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .footer-modern::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #6366f1, transparent);
-        }
-
-        .footer-title {
-            color: #fff;
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            position: relative;
-            padding-bottom: 0.75rem;
-        }
-
-        .footer-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 40px;
-            height: 3px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6);
-            border-radius: 2px;
-        }
-
-        .footer-link-modern {
-            color: #94a3b8;
-            text-decoration: none;
-            display: block;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
-            position: relative;
-            padding-left: 1rem;
-        }
-
-        .footer-link-modern::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0;
-            height: 2px;
-            background: #6366f1;
-            transition: width 0.3s ease;
-        }
-
-        .footer-link-modern:hover {
-            color: #6366f1;
-            padding-left: 1.5rem;
-        }
-
-        .footer-link-modern:hover::before {
-            width: 12px;
-        }
-
-        .social-modern {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .social-icon-modern {
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(99, 102, 241, 0.1);
-            color: #6366f1;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .social-icon-modern:hover {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: #fff;
-            transform: translateY(-4px) rotate(360deg);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(148, 163, 184, 0.1);
-            margin-top: 3rem;
-            padding-top: 2rem;
-            text-align: center;
-            color: #64748b;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .search-modern {
-                display: none;
-            }
-
-            .nav-actions {
-                gap: 1rem;
-            }
-
-            .icon-btn {
-                width: 38px;
-                height: 38px;
-            }
-        }
-    </style>
     @livewireStyles
     @stack('styles')
 </head>
 
-<body>
-    <!-- Navbar Modern -->
-    <nav class="navbar-modern">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between w-100">
+<body class="bg-gray-50 text-slate-900 font-sans">
+
+    <!-- Header / Navbar -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="main-header">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="glass-morphism rounded-2xl md:rounded-full px-6 py-2 flex items-center justify-between">
                 <!-- Logo -->
-                <a href="{{ route('home') }}" style="text-decoration: none" class="logo-wrapper">
-                    {{-- <img src="{{ asset('frontend/assets/img/logo/logo.svg') }}" alt="NClothing Logo" />
-                     --}}
-                    <h3 class="text-primary">NClothing</h3>
+                <a href="{{ route('home') }}"
+                    class="flex items-center gap-2 group transition-transform duration-300 hover:scale-102">
+                    <img src="{{ asset('backend/assets/images/sipps.png') }}" alt="SIPPS Logo"
+                        class="h-10 w-auto object-contain" />
+                    <span
+                        class="text-xl font-extrabold tracking-tight bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">SIPPS</span>
                 </a>
 
-                <!-- Search Bar -->
-                <div class="search-modern d-none d-lg-block">
-                    <input type="text" placeholder="Cari jenis layanan sablon...">
-                    <i class="lni lni-search search-icon"></i>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="{{ route('home') }}"
+                        class="nav-link-modern {{ request()->routeIs('home') ? 'text-primary after:w-full' : '' }}">Beranda</a>
+                    <a href="{{ route('layanan') }}"
+                        class="nav-link-modern {{ request()->routeIs('layanan') ? 'text-primary after:w-full' : '' }}">Layanan</a>
+                    <a href="{{ route('portfolio') }}"
+                        class="nav-link-modern {{ request()->routeIs('portfolio') ? 'text-primary after:w-full' : '' }}">Portfolio</a>
+                    <a href="{{ route('home') }}#faq" class="nav-link-modern">FAQ</a>
                 </div>
 
-                <!-- Navigation Actions -->
-                <div class="nav-actions">
+                <!-- Right Actions -->
+                <div class="flex items-center gap-4">
                     @auth
-                        <a href="{{ route('customer.orders.index') }}" class="icon-btn">
-                            <i class="lni lni-cart"></i>
-                            <span class="badge-notification">3</span>
-                        </a>
-
-                        <div class="user-profile dropdown">
-                            <button type="button" class="avatar-circle" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ substr(auth()->user()->name, 0, 1) }}
-                            </button>
-                            <ul class="dropdown-menu    ">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('customer.dashboard') }}">
-                                        <i class="lni lni-dashboard me-2"></i> Dashboard
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('customer.dashboard') }}"
+                                class="hidden sm:flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
+                                <i class="lni lni-dashboard"></i> Dashboard
+                            </a>
+                            <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+                            <div class="relative group" id="user-dropdown-container">
+                                <button type="button"
+                                    class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition-colors">
+                                    <div
+                                        class="h-9 w-9 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                        {{ substr(auth()->user()->name, 0, 1) }}
+                                    </div>
+                                    <i class="lni lni-chevron-down text-xs text-slate-400"></i>
+                                </button>
+                                <!-- Dropdown Menu -->
+                                <div
+                                    class="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right py-2">
+                                    <a href="{{ route('customer.profile') }}"
+                                        class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary">
+                                        <i class="lni lni-user"></i> Profil Saya
                                     </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('customer.profile') }}">
-                                        <i class="lni lni-user me-2"></i> Profile
+                                    <a href="{{ route('customer.orders.index') }}"
+                                        class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary">
+                                        <i class="lni lni-cart"></i> Pesanan Saya
                                     </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
+                                    <hr class="my-1 border-slate-100">
                                     <form action="{{ route('logout') }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="dropdown-item">
-                                            <i class="lni lni-exit me-2"></i> Logout
+                                        <button type="submit"
+                                            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                            <i class="lni lni-exit"></i> Keluar
                                         </button>
                                     </form>
-                                </li>
-                            </ul>
+                                </div>
+                            </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="btn-login-modern">
-                            Masuk
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('login') }}"
+                                class="text-sm font-bold text-slate-700 hover:text-primary px-4 py-2 transition-colors">Masuk</a>
+                            <a href="{{ route('register') }}" class="btn-premium px-6! py-2! text-sm shadow-md">Daftar</a>
+                        </div>
                     @endauth
+
+                    <!-- Mobile Menu Toggle -->
+                    <button class="md:hidden p-2 text-slate-600" id="mobile-menu-btn">
+                        <i class="lni lni-menu text-2xl"></i>
+                    </button>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
+        <!-- Mobile Navigation Menu -->
+        <div class="md:hidden hidden absolute top-full left-0 right-0 mt-2 px-4" id="mobile-menu">
+            <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 flex flex-col gap-4">
+                <a href="{{ route('home') }}"
+                    class="text-lg font-semibold text-slate-700 hover:text-primary transition-colors">Beranda</a>
+                <a href="{{ route('home') }}#layanan"
+                    class="text-lg font-semibold text-slate-700 hover:text-primary transition-colors">Layanan</a>
+                <a href="{{ route('home') }}#portfolio"
+                    class="text-lg font-semibold text-slate-700 hover:text-primary transition-colors">Portfolio</a>
+                @guest
+                    <hr class="border-slate-100">
+                    <a href="{{ route('login') }}"
+                        class="text-lg font-semibold text-slate-700 hover:text-primary transition-colors">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn-premium w-full text-center">Daftar</a>
+                @endguest
+            </div>
+        </div>
+    </header>
 
     <!-- Main Content -->
-    <main class="py-4">
+    <main class="min-h-screen pt-24">
         @yield('content')
     </main>
 
     <!-- Footer Modern -->
-    <footer class="footer-modern">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="{{ asset('frontend/assets/img/logo/logo.svg') }}" alt="NClothing"
-                        style="height: 50px; margin-bottom: 1.5rem;">
-                    <p style="line-height: 1.8;">
-                        NClothing menyediakan jasa sablon berkualitas dengan berbagai teknik modern untuk hasil terbaik
-                        pesanan Anda.
+    <footer class="bg-slate-900 text-slate-400 mt-20 relative overflow-hidden">
+        <!-- Decoration Blowers -->
+        <div class="absolute -top-24 -left-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+                <!-- Brand Info -->
+                <div class="space-y-6">
+                    <a href="{{ route('home') }}" class="flex items-center gap-2 group">
+                        <img src="{{ asset('backend/assets/images/sipps.png') }}" alt="SIPPS Logo"
+                            class="h-12 w-auto brightness-0 invert" />
+                        <span class="text-2xl font-black tracking-tight text-white">SIPPS</span>
+                    </a>
+                    <p class="text-slate-400 leading-relaxed text-sm">
+                        Sistem Informasi Penjadwalan Produksi Sablon (SIPPS) menghadirkan kualitas terbaik dengan
+                        efisiensi penjadwalan cerdas untuk kebutuhan sandang Anda.
                     </p>
-                    <div class="social-modern">
-                        <a href="#" class="social-icon-modern">
+                    <div class="flex items-center gap-4">
+                        <a href="#"
+                            class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-primary hover:scale-110 transition-all">
                             <i class="lni lni-facebook-filled"></i>
                         </a>
-                        <a href="#" class="social-icon-modern">
+                        <a href="#"
+                            class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-accent hover:scale-110 transition-all">
                             <i class="lni lni-instagram-filled"></i>
                         </a>
-                        <a href="#" class="social-icon-modern">
+                        <a href="#"
+                            class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-green-500 hover:scale-110 transition-all">
                             <i class="lni lni-whatsapp"></i>
                         </a>
-                        <a href="#" class="social-icon-modern">
-                            <i class="lni lni-twitter-filled"></i>
-                        </a>
                     </div>
                 </div>
 
-                <div class="col-lg-2 col-md-6 mb-4">
-                    <h5 class="footer-title">Menu</h5>
-                    <a href="{{ route('home') }}" class="footer-link-modern">Beranda</a>
-                    <a href="#layanan" class="footer-link-modern">Layanan</a>
-                    <a href="#portfolio" class="footer-link-modern">Portfolio</a>
-                    <a href="#kontak" class="footer-link-modern">Kontak</a>
+                <!-- Navigation -->
+                <div>
+                    <h5 class="text-white font-bold text-lg mb-8 relative inline-block">
+                        Navigasi
+                        <div class="absolute -bottom-2 left-0 w-1/2 h-1 bg-primary rounded-full"></div>
+                    </h5>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="{{ route('home') }}" class="hover:text-white transition-colors">Beranda</a></li>
+                        <li><a href="{{ route('home') }}#layanan" class="hover:text-white transition-colors">Layanan
+                                Kami</a></li>
+                        <li><a href="{{ route('home') }}#portfolio" class="hover:text-white transition-colors">Galeri
+                                Karya</a></li>
+                        <li><a href="{{ route('home') }}#faq" class="hover:text-white transition-colors">Pertanyaan
+                                Umum</a></li>
+                    </ul>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5 class="footer-title">Layanan Sablon</h5>
-                    <a href="#layanan" class="footer-link-modern">Sablon DTF</a>
-                    <a href="#layanan" class="footer-link-modern">Sablon Manual</a>
-                    <a href="#layanan" class="footer-link-modern">Polyflex</a>
-                    <a href="#layanan" class="footer-link-modern">Sublim</a>
+                <!-- Services -->
+                <div>
+                    <h5 class="text-white font-bold text-lg mb-8 relative inline-block">
+                        Layanan
+                        <div class="absolute -bottom-2 left-0 w-1/2 h-1 bg-secondary rounded-full"></div>
+                    </h5>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Sablon DTF Modern</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Sablon Manual High-End</a>
+                        </li>
+                        <li><a href="#" class="hover:text-white transition-colors">Sublimation Full-Print</a>
+                        </li>
+                        <li><a href="#" class="hover:text-white transition-colors">Polyflex Precision</a></li>
+                    </ul>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5 class="footer-title">Hubungi Kami</h5>
-                    <div style="line-height: 2;">
-                        <p><i class="lni lni-phone me-2"></i> +62 812-3456-7890</p>
-                        <p><i class="lni lni-envelope me-2"></i> info@nclothing.com</p>
-                        <p><i class="lni lni-map-marker me-2"></i> Manado, Sulawesi Utara</p>
-                    </div>
+                <!-- Contact -->
+                <div>
+                    <h5 class="text-white font-bold text-lg mb-8 relative inline-block">
+                        Kontak Kami
+                        <div class="absolute -bottom-2 left-0 w-1/2 h-1 bg-accent rounded-full"></div>
+                    </h5>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="lni lni-map-marker text-primary text-xl"></i>
+                            <span>Jl. Jenderal Sudirman No. 123, Manado, Sulawesi Utara</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="lni lni-phone text-primary text-xl"></i>
+                            <span>+62 812 3456 7890</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="lni lni-envelope text-primary text-xl"></i>
+                            <span>hello@sipps-app.com</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="footer-bottom">
-                <p class="mb-0">&copy; {{ date('Y') }} NClothing. All rights reserved. Made with ❤️ in Manado
-                </p>
+            <div
+                class="mt-20 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium uppercase tracking-widest">
+                <p>&copy; {{ date('Y') }} SIPPS PRODUCTION. SELURUH HAK CIPTA DILINDUNGI.</p>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="hover:text-white transition-colors">KEBIJAKAN PRIVASI</a>
+                    <a href="#" class="hover:text-white transition-colors">SYARAT & KETENTUAN</a>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ asset('frontend/assets/js/bootstrap.5.0.0.alpha-2-min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/wow.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
 
     <script>
-        // Navbar scroll effect
+        // Header Scroll Effect
         window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar-modern');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 20) {
+                header.classList.add('py-2');
+                header.querySelector('nav').classList.remove('py-4');
+                header.querySelector('nav').classList.add('py-2');
             } else {
-                navbar.classList.remove('scrolled');
+                header.classList.remove('py-2');
+                header.querySelector('nav').classList.remove('py-2');
+                header.querySelector('nav').classList.add('py-4');
             }
         });
+
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn?.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = menuBtn.querySelector('i');
+            icon.classList.toggle('lni-menu');
+            icon.classList.toggle('lni-close');
+        });
+
+        // Initialize WOW
+        new WOW().init();
     </script>
 
     @livewireScripts

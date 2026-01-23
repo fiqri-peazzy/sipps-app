@@ -12,6 +12,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/layanan', [HomeController::class, 'layanan'])->name('layanan');
+Route::get('/portfolio', [HomeController::class, 'portfolio'])->name('portfolio');
 Route::post('/contact', [HomeController::class, 'contact'])->name('contact.store');
 
 Route::prefix('admin')
@@ -23,6 +25,7 @@ Route::prefix('admin')
         Route::get('/pesanan', [AdminController::class, 'dataPesanan'])->name('data.pesanan');
         Route::get('/users', \App\Livewire\Admin\UserManagement::class)->name('users.index');
         Route::get('/penjadwalan-prioritas', [AdminController::class, 'penjadwalan'])->name('penjadwalan.prioritas');
+        Route::get('/portfolio', \App\Livewire\Admin\ManajemenPortfolio::class)->name('portfolio.index');
 
         Route::get('/detail-pesanan/{id}', [AdminController::class, 'detailPesanan'])->name('detail.pesanan');
 

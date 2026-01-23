@@ -119,6 +119,69 @@ Terima kasih telah berbelanja! 🙏";
     }
 
     /**
+     * Kirim notifikasi pengajuan return
+     */
+    public function sendReturnRequestNotification($phoneNumber, $orderNumber, $itemName)
+    {
+        try {
+            $message = "*Pengajuan Pengembalian (Return) Diterima* 🔄\n\nNomor Order: *{$orderNumber}*\nItem: *{$itemName}*\n\nStatus: *Menunggu Review Admin*\n\nKami telah menerima pengajuan pengembalian Anda. Admin kami akan segera meninjau bukti yang Anda kirimkan. Mohon tunggu informasi selanjutnya.";
+
+            Log::info('WhatsApp Return Request (Placeholder)', [
+                'phone' => $phoneNumber,
+                'order_number' => $orderNumber,
+                'message' => $message,
+            ]);
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Return Request Error', ['phone' => $phoneNumber, 'error' => $e->getMessage()]);
+            return ['success' => false];
+        }
+    }
+
+    /**
+     * Kirim notifikasi return disetujui
+     */
+    public function sendReturnApprovalNotification($phoneNumber, $orderNumber, $itemName, $notes = null)
+    {
+        try {
+            $message = "*Pengajuan Return Disetujui* ✅\n\nNomor Order: *{$orderNumber}*\nItem: *{$itemName}*\n\nStatus: *Disetujui*\nCatatan Admin: _" . ($notes ?? 'Pesanan pengganti sedang diproses') . "_\n\nKabar baik! Pengajuan return Anda telah disetujui. Kami sedang memproses item pengganti untuk Anda dan akan segera diproduksi ulang.";
+
+            Log::info('WhatsApp Return Approval (Placeholder)', [
+                'phone' => $phoneNumber,
+                'order_number' => $orderNumber,
+                'message' => $message,
+            ]);
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Return Approval Error', ['phone' => $phoneNumber, 'error' => $e->getMessage()]);
+            return ['success' => false];
+        }
+    }
+
+    /**
+     * Kirim notifikasi return ditolak
+     */
+    public function sendReturnRejectionNotification($phoneNumber, $orderNumber, $itemName, $reason)
+    {
+        try {
+            $message = "*Pengajuan Return Ditolak* ❌\n\nNomor Order: *{$orderNumber}*\nItem: *{$itemName}*\n\nStatus: *Ditolak*\nAlasan: _" . $reason . "_\n\nMohon maaf, pengajuan return Anda belum dapat kami setujui. Jika ada pertanyaan lebih lanjut, silakan hubungi admin.";
+
+            Log::info('WhatsApp Return Rejection (Placeholder)', [
+                'phone' => $phoneNumber,
+                'order_number' => $orderNumber,
+                'message' => $message,
+            ]);
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Return Rejection Error', ['phone' => $phoneNumber, 'error' => $e->getMessage()]);
+            return ['success' => false];
+        }
+    }
+
+    /**
      * Format message untuk update tracking
      */
     private function formatTrackingUpdateMessage($orderNumber, $status, $description, $location)

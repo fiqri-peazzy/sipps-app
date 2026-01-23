@@ -20,6 +20,26 @@
     </div>
 
     <div class="row">
+        <!-- Return Warning -->
+        <div class="col-md-12 mb-4">
+            @if ($order->items->where('is_return_item', true)->isNotEmpty())
+                <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-0">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning text-white p-2 rounded-circle">
+                            <i class="ti ti-reload fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="alert-heading mb-1 fw-bold text-dark">Pesanan Kirim Ulang (Return Replacement)
+                            </h6>
+                            <p class="mb-0 small text-dark">Pesanan ini mengandung item yang diproduksi ulang karena
+                                pengembalian (return). Pastikan item pengganti diperiksa kembali sebelum dikirim ke
+                                pelanggan.</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
         <!-- Info Order -->
         <div class="col-md-8">
             <div class="card">
@@ -194,7 +214,14 @@
                 <div class="card-body">
                     @foreach ($order->items as $item)
                         <div class="mb-3 pb-3 border-bottom">
-                            <h6 class="mb-1">{{ $item->produk->jenisSablon->nama }}</h6>
+                            <h6 class="mb-1">
+                                {{ $item->produk->jenisSablon->nama }}
+                                @if ($item->is_return_item)
+                                    <span class="badge bg-info ms-1" style="font-size: 0.6rem;">REPLACEMENT</span>
+                                @elseif($item->customerReturns->where('status', 'approved')->isNotEmpty())
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.6rem;">RETURNED</span>
+                                @endif
+                            </h6>
                             <small class="text-muted">
                                 {{ $item->produk->ukuran->nama }} |
                                 Qty: {{ $item->quantity }} |
@@ -202,7 +229,14 @@
                                     Ukuran: {{ $item->ukuran_kaos }}
                                 @endif
                             </small>
-                            <p class="mb-0 mt-1"><strong>{{ number_format($item->subtotal, 0, ',', '.') }}</strong>
+                            <p class="mb-0 mt-1">
+                                <strong
+                                    class="{{ $item->customerReturns->where('status', 'approved')->isNotEmpty() ? 'text-muted text-decoration-line-through' : '' }}">
+                                    {{ number_format($item->subtotal, 0, ',', '.') }}
+                                </strong>
+                                @if ($item->is_return_item)
+                                    <small class="text-info font-weight-bold">(Garansi)</small>
+                                @endif
                             </p>
                         </div>
                     @endforeach

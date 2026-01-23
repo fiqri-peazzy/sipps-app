@@ -1,795 +1,517 @@
-<div>
+<div class="animate-in fade-in duration-700">
     <form wire:submit.prevent="submit">
-        <div class="row">
-            <!-- Left Column - Order Items -->
-            <div class="col-lg-8">
-                <!-- Items Section -->
-                <div class="section-header">
-                    <h4><i class="lni lni-package"></i> Detail Pesanan</h4>
+        @if ($errors->any())
+            <div
+                class="mb-8 p-6 rounded-4xl bg-red-50 border border-red-100 flex items-start gap-4 animate-in slide-in-from-top-4 duration-500">
+                <div
+                    class="h-10 w-10 rounded-xl bg-red-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-red-200">
+                    <i class="lni lni-warning text-xl"></i>
                 </div>
-                @foreach ($orderItems as $index => $item)
-                    <div class="order-item-card">
-                        @if (count($orderItems) > 1)
-                            <button type="button" class="remove-item-btn" wire:click="removeItem({{ $item['id'] }})"
-                                title="Hapus Item">
-                                <i class="lni lni-trash-can"></i>
-                            </button>
-                        @endif
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Jenis Sablon</label>
-                                <select class="form-control"
-                                    wire:model.live="orderItems.{{ $index }}.jenis_sablon_id">
-                                    <option value="">Pilih Jenis Sablon</option>
-                                    @foreach ($jenisSablons as $jenis)
-                                        <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
-                                    @endforeach
-                                </select>
-                                @error("orderItems.$index.jenis_sablon_id")
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+                <div>
+                    <h6 class="text-base font-black text-red-900">Pesanan Belum Lengkap</h6>
+                    <p class="text-sm text-red-700 font-medium mt-1">Harap periksa kembali isian formulir Anda:</p>
+                    <ul class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li class="flex items-center gap-2 text-xs text-red-600 font-bold">
+                                <span class="h-1 w-1 rounded-full bg-red-400"></span> {{ $error }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
+        @if (session()->has('error'))
+            <div
+                class="mb-8 p-6 rounded-4xl bg-red-50 border border-red-100 flex items-center gap-4 animate-in zoom-in-95">
+                <div class="h-10 w-10 rounded-xl bg-red-500 text-white flex items-center justify-center shrink-0">
+                    <i class="lni lni-warning text-xl"></i>
+                </div>
+                <p class="text-sm font-bold text-red-900">{{ session('error') }}</p>
+            </div>
+        @endif
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+            <!-- Left Column: Form Details -->
+            <div class="lg:col-span-8 space-y-10">
+
+                <!-- Order Items Card Section -->
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="inline-flex items-center gap-3">
+                            <div
+                                class="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                <i class="lni lni-package text-xl"></i>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Pilih Produk (Ukuran & Layanan)</label>
-                                <select class="form-control" wire:model.live="orderItems.{{ $index }}.produk_id">
-                                    <option value="">Pilih Produk</option>
-                                    @if (isset($item['jenis_sablon_id']))
-                                        @php
-                                            $jenis = $jenisSablons->find($item['jenis_sablon_id']);
-                                        @endphp
-                                        @if ($jenis)
-                                            @foreach ($jenis->produks as $produk)
-                                                <option value="{{ $produk->id }}">
-                                                    {{ $produk->ukuran->nama }} - {{ $produk->tipe_layanan_label }}
-                                                    ({{ $produk->formatted_harga }})
-                                                </option>
-                                            @endforeach
+                            <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Detail Pesanan</h2>
+                        </div>
+                        <button type="button" wire:click="addItem"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-dashed border-primary/30 text-primary font-bold text-sm hover:bg-primary/5 transition-all">
+                            <i class="lni lni-plus"></i> Tambah Item
+                        </button>
+                    </div>
+
+                    @foreach ($orderItems as $index => $item)
+                        <div
+                            class="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 p-8">
+                            <!-- Remove Button -->
+                            @if (count($orderItems) > 1)
+                                <button type="button" wire:click="removeItem({{ $item['id'] }})"
+                                    class="absolute top-6 right-6 h-10 w-10 rounded-full bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center transform scale-90 group-hover:scale-100">
+                                    <i class="lni lni-trash-can"></i>
+                                </button>
+                            @endif
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-black uppercase tracking-widest text-slate-400">Jenis
+                                        Sablon</label>
+                                    <select wire:model.live="orderItems.{{ $index }}.jenis_sablon_id"
+                                        class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold text-slate-700 appearance-none">
+                                        <option value="">Pilih Sablon</option>
+                                        @foreach ($jenisSablons as $jenis)
+                                            <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error("orderItems.$index.jenis_sablon_id")
+                                        <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-black uppercase tracking-widest text-slate-400">Pilih
+                                        Produk</label>
+                                    <select wire:model.live="orderItems.{{ $index }}.produk_id"
+                                        class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold text-slate-700 appearance-none">
+                                        <option value="">Pilih Ukuran & Layanan</option>
+                                        @if (isset($item['jenis_sablon_id']))
+                                            @php $jenis = $jenisSablons->find($item['jenis_sablon_id']); @endphp
+                                            @if ($jenis)
+                                                @foreach ($jenis->produks as $produk)
+                                                    <option value="{{ $produk->id }}">
+                                                        {{ $produk->ukuran->nama }} - {{ $produk->tipe_layanan_label }}
+                                                        ({{ $produk->formatted_harga }})
+                                                    </option>
+                                                @endforeach
+                                            @endif
                                         @endif
-                                    @endif
-                                </select>
-                                @error("orderItems.$index.produk_id")
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+                                    </select>
+                                    @error("orderItems.$index.produk_id")
+                                        <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label
+                                            class="text-xs font-black uppercase tracking-widest text-slate-400">Jumlah</label>
+                                        <input type="number" wire:model.live="orderItems.{{ $index }}.quantity"
+                                            min="1"
+                                            class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label
+                                            class="text-xs font-black uppercase tracking-widest text-slate-400">Ukuran</label>
+                                        <select wire:model="orderItems.{{ $index }}.ukuran_kaos"
+                                            class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 appearance-none">
+                                            @foreach (['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
+                                                <option value="{{ $size }}">{{ $size }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-black uppercase tracking-widest text-slate-400">Total
+                                        Biaya Item</label>
+                                    <div
+                                        class="h-14 bg-primary/5 rounded-2xl px-6 flex items-center font-black text-primary text-lg">
+                                        Rp {{ number_format($item['subtotal'], 0, ',', '.') }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Jumlah</label>
-                                <input type="number" class="form-control"
-                                    wire:model.live="orderItems.{{ $index }}.quantity" min="1"
-                                    placeholder="Jumlah">
-                                @error("orderItems.$index.quantity")
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Ukuran Kaos</label>
-                                <select class="form-control" wire:model="orderItems.{{ $index }}.ukuran_kaos">
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="L">L</option>
-                                    <option value="XL">XL</option>
-                                    <option value="XXL">XXL</option>
-                                    <option value="XXXL">XXXL</option>
-                                </select>
-                                @error("orderItems.$index.ukuran_kaos")
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Subtotal</label>
-                                <input type="text" class="form-control"
-                                    value="Rp {{ number_format($item['subtotal'], 0, ',', '.') }}" readonly>
-                            </div>
-                            <!-- Design Button -->
-                            <div class="col-12 mb-3">
-                                <button type="button" class="btn btn-design w-100 btn-open-design-editor"
+
+                            <!-- Design Actions -->
+                            <div
+                                class="mt-8 pt-8 border-t border-slate-50 flex flex-col md:flex-row items-center gap-6">
+                                <div class="flex-1">
+                                    <h5 class="text-sm font-bold text-slate-700">Kustomisasi Desain</h5>
+                                    <p class="text-xs text-slate-500">Unggah aset desain atau gunakan alat bantu editor
+                                        kami.</p>
+                                </div>
+
+                                <button type="button"
+                                    class="w-full md:w-auto btn-premium bg-slate-900! rounded-2xl! flex items-center gap-2 group btn-open-design-editor"
                                     data-item-index="{{ $index }}" wire:key="design-btn-{{ $index }}"
                                     @if (!isset($item['produk_id']) || empty($item['produk_id'])) disabled @endif>
-                                    <i class="lni lni-brush"></i>
-                                    @if (isset($item['design_config']) && $item['design_config'])
-                                        Edit Desain Kaos
-                                    @else
-                                        Desain Kaos Anda
-                                    @endif
+                                    <i class="lni lni-brush group-hover:rotate-12 transition-transform"></i>
+                                    {{ isset($item['design_config']) && $item['design_config'] ? 'Edit Desain Kaos' : 'Mulai Desain Kaos' }}
                                 </button>
-                                @if (!isset($item['produk_id']) || empty($item['produk_id']))
-                                    <small class="text-muted d-block mt-1">Pilih produk terlebih dahulu untuk
-                                        mendesain</small>
-                                @endif
-                                @if (isset($item['design_config']) && $item['design_config'])
-                                    <div class="design-preview-badge mt-2">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="lni lni-checkmark-circle text-success"></i>
-                                                <span class="text-success fw-bold">Desain sudah dibuat</span>
-                                                <small class="d-block text-muted">
-                                                    Ukuran: {{ $item['design_config']['ukuran_kaos'] ?? 'M' }} |
-                                                    Warna:
-                                                    {{ ucfirst($item['design_config']['warna_kaos'] ?? 'putih') }}
-                                                </small>
-                                            </div>
-                                            <button type="button" class="btn btn-sm btn-outline-danger"
-                                                wire:click="clearDesign({{ $index }})"
-                                                wire:confirm="Yakin ingin hapus desain ini?">
-                                                <i class="lni lni-trash"></i>
-                                            </button>
+                            </div>
+
+                            @if (isset($item['design_config']) && $item['design_config'])
+                                <div
+                                    class="mt-4 p-4 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs">
+                                            <i class="lni lni-checkmark"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold text-green-700">Desain Siap Produksi</p>
+                                            <p class="text-[10px] text-green-600 font-medium uppercase tracking-widest">
+                                                Warna: {{ $item['design_config']['warna_kaos'] }} | Ukuran:
+                                                {{ $item['design_config']['ukuran_kaos'] }}</p>
                                         </div>
                                     </div>
-                                    <input type="hidden" class="design-config-data"
-                                        data-item-index="{{ $index }}"
-                                        value="{{ json_encode($item['design_config']) }}">
-                                @else
-                                    <input type="hidden" class="design-config-data"
-                                        data-item-index="{{ $index }}" value="">
-                                @endif
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Catatan Item (Optional)</label>
-                                <textarea class="form-control" wire:model="orderItems.{{ $index }}.catatan_item" rows="2"
-                                    placeholder="Contoh: Warna merah, tulisan bold, dll"></textarea>
-                            </div>
+                                    <button type="button" wire:click="clearDesign({{ $index }})"
+                                        wire:confirm="Yakin ingin menghapus desain ini?"
+                                        class="text-green-700 hover:text-red-500">
+                                        <i class="lni lni-trash"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" class="design-config-data" data-item-index="{{ $index }}"
+                                    value="{{ json_encode($item['design_config']) }}">
+                            @else
+                                <input type="hidden" class="design-config-data" data-item-index="{{ $index }}"
+                                    value="">
+                            @endif
                         </div>
-                    </div>
-                @endforeach
-                <button type="button" class="btn btn-add-item mb-4" wire:click="addItem">
-                    <i class="lni lni-plus"></i> Tambah Item Pesanan
-                </button>
-                <!-- Shipping Address Section -->
-                <div class="section-header mt-5">
-                    <h4><i class="lni lni-map-marker"></i> Alamat Pengiriman</h4>
+                    @endforeach
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Nama Penerima</label>
-                        <input type="text" class="form-control" wire:model="penerima_nama"
-                            placeholder="Nama lengkap penerima">
-                        @error('penerima_nama')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
+
+                <!-- Shipping Details Card Section -->
+                <div class="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm space-y-8">
+                    <div class="inline-flex items-center gap-3">
+                        <div
+                            class="h-10 w-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+                            <i class="lni lni-map-marker text-xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Informasi Pengiriman</h2>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">No. Telepon</label>
-                        <input type="text" class="form-control" wire:model="penerima_telepon"
-                            placeholder="08xxxxxxxxxx">
-                        @error('penerima_telepon')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <!-- Provinsi -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Provinsi <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model.live="provinsi_id">
-                            <option value="">Pilih Provinsi</option>
-                            @foreach ($provinces as $province)
-                                <option value="{{ $province['id'] }}">{{ $province['name'] }}</option>
-                            @endforeach
-                        </select>
-                        @error('provinsi')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <!-- Kota/Kabupaten -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Kota/Kabupaten <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model.live="kota_id"
-                            {{ empty($cities) ? 'disabled' : '' }}>
-                            <option value="">
-                                @if ($loadingCities)
-                                    Memuat kota...
-                                @else
-                                    Pilih Kota
-                                @endif
-                            </option>
-                            @foreach ($cities as $city)
-                                <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
-                            @endforeach
-                        </select>
-                        @error('kota')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <!-- Kecamatan -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Kecamatan <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model.live="district_id"
-                            {{ empty($districts) ? 'disabled' : '' }}>
-                            <option value="">
-                                @if ($loadingDistricts)
-                                    Memuat kecamatan...
-                                @else
-                                    Pilih Kecamatan
-                                @endif
-                            </option>
-                            @foreach ($districts as $district)
-                                <option value="{{ $district['id'] }}">{{ $district['name'] }}</option>
-                            @endforeach
-                        </select>
-                        @error('district_id')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <!-- Kelurahan (Optional) -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Kelurahan/Desa</label>
-                        <select class="form-control" wire:model.live="subdistrict_id"
-                            {{ empty($subdistricts) ? 'disabled' : '' }}>
-                            <option value="">
-                                @if ($loadingSubdistricts)
-                                    Memuat kelurahan...
-                                @else
-                                    Pilih Kelurahan
-                                @endif
-                            </option>
-                            @foreach ($subdistricts as $subdistrict)
-                                <option value="{{ $subdistrict['id'] }}">{{ $subdistrict['name'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12 mb-3">
-                        <label class="form-label fw-bold">Alamat Lengkap</label>
-                        <textarea class="form-control" wire:model="alamat_lengkap" rows="3"
-                            placeholder="Jalan, No. Rumah, RT/RW, dll"></textarea>
-                        @error('alamat_lengkap')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Kode Pos</label>
-                        <input type="text" class="form-control" wire:model="kode_pos" placeholder="96xxx">
-                    </div>
-                    <!-- Tipe Pengiriman Info -->
-                    <div class="col-12 mb-3">
-                        <label class="form-label fw-bold">Tipe Pengiriman</label>
-                        @if ($loadingShippingCost)
-                            <div class="alert alert-info">
-                                <i class="lni lni-spinner-arrow spinning"></i> Menghitung ongkos kirim...
-                            </div>
-                        @elseif($tipe_pengiriman === 'dalam_kota')
-                            <div class="alert alert-success">
-                                <i class="lni lni-truck"></i> <strong>Pengiriman Dalam Kota Gorontalo</strong><br>
-                                <small>Ongkir: Rp {{ number_format($ongkir, 0, ',', '.') }} (Estimasi:
-                                    {{ $kurir_etd }})</small>
-                            </div>
-                        @elseif($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
-                            <div class="alert alert-success">
-                                <i class="lni lni-truck"></i> <strong>Pengiriman Antar Kota</strong><br>
-                                <small>Pilih layanan pengiriman di bawah</small>
-                            </div>
-                        @else
-                            <div class="alert alert-info">
-                                <i class="lni lni-information"></i> Pilih kota tujuan terlebih dahulu
-                            </div>
-                        @endif
-                    </div>
-                    <!-- Pilihan Kurir (Antar Kota) -->
-                    @if ($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
-                        <div class="col-12 mb-3">
-                            <label class="form-label fw-bold">Pilih Layanan Pengiriman <span
-                                    class="text-danger">*</span></label>
-                            <div class="row g-2">
-                                @foreach ($courierOptions as $index => $courier)
-                                    <div class="col-md-6 col-lg-4">
-                                        <div class="courier-option-card {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'border-primary' : '' }}"
-                                            wire:click="selectCourier({{ $index }})" style="cursor: pointer;">
-                                            <input type="radio" name="courier_option" value="{{ $index }}"
-                                                {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'checked' : '' }}>
-                                            <label style="pointer-events: none;">
-                                                <div class="courier-name">{{ $courier['name'] }}</div>
-                                                <div class="courier-service">{{ $courier['service'] }} -
-                                                    {{ $courier['description'] }}</div>
-                                                <div class="courier-cost">Rp
-                                                    {{ number_format($courier['cost'], 0, ',', '.') }}</div>
-                                                <div class="courier-etd"><i class="lni lni-timer"></i>
-                                                    {{ $courier['etd'] }}</div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            @error('kurir_code')
-                                <small class="text-danger d-block mt-2">{{ $message }}</small>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Nama
+                                Penerima</label>
+                            <input type="text" wire:model="penerima_nama" placeholder="Contoh: Siti Nurhaliza"
+                                class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold">
+                            @error('penerima_nama')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Nomor
+                                WhatsApp/Telepon</label>
+                            <input type="text" wire:model="penerima_telepon" placeholder="Contoh: 081234567890"
+                                class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold">
+                            @error('penerima_telepon')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Provinsi</label>
+                            <select wire:model.live="provinsi_id"
+                                class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold appearance-none">
+                                <option value="">Pilih Provinsi</option>
+                                @foreach ($provinces as $province)
+                                    <option value="{{ $province['id'] }}">{{ $province['name'] }}</option>
+                                @endforeach
+                            </select>
+                            @error('provinsi')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="text-xs font-black uppercase tracking-widest text-slate-400">Kota/Kabupaten</label>
+                            <select wire:model.live="kota_id" {{ empty($cities) ? 'disabled' : '' }}
+                                class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold appearance-none disabled:opacity-50">
+                                <option value="">{{ $loadingCities ? 'Memuat...' : 'Pilih Kota' }}</option>
+                                @foreach ($cities as $city)
+                                    <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
+                                @endforeach
+                            </select>
+                            @error('kota')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="text-xs font-black uppercase tracking-widest text-slate-400">Kecamatan</label>
+                            <select wire:model.live="district_id" {{ empty($districts) ? 'disabled' : '' }}
+                                class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold appearance-none disabled:opacity-50">
+                                <option value="">{{ $loadingDistricts ? 'Memuat...' : 'Pilih Kecamatan' }}
+                                </option>
+                                @foreach ($districts as $district)
+                                    <option value="{{ $district['id'] }}">{{ $district['name'] }}</option>
+                                @endforeach
+                            </select>
+                            @error('district_id')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Kelurahan
+                                (Opsional)</label>
+                            <select wire:model.live="subdistrict_id" {{ empty($subdistricts) ? 'disabled' : '' }}
+                                class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold appearance-none disabled:opacity-50">
+                                <option value="">{{ $loadingSubdistricts ? 'Memuat...' : 'Pilih Kelurahan' }}
+                                </option>
+                                @foreach ($subdistricts as $sub)
+                                    <option value="{{ $sub['id'] }}">{{ $sub['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Alamat
+                                Lengkap</label>
+                            <textarea wire:model="alamat_lengkap" rows="3" placeholder="Jl. Raya No. 123, RT 01/RW 02..."
+                                class="w-full bg-slate-50 border-none rounded-2xl p-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold"></textarea>
+                            @error('alamat_lengkap')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Catatan Pesanan
+                                (Opsional)</label>
+                            <textarea wire:model="catatan" rows="2" placeholder="Contoh: Tolong bungkus plastik masing-masing kaos..."
+                                class="w-full bg-slate-50 border-none rounded-2xl p-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold"></textarea>
+                            @error('catatan')
+                                <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Courier Selection -->
+                    @if ($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
+                        <div class="pt-8 border-t border-slate-50">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400 block mb-6">Pilih
+                                Layanan Kurir</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach ($courierOptions as $index => $courier)
+                                    <label
+                                        class="relative flex flex-col p-6 rounded-3xl border-2 transition-all cursor-pointer {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-primary/30' }}">
+                                        <input type="radio" wire:click="selectCourier({{ $index }})"
+                                            class="absolute top-6 right-6 h-5 w-5 text-primary border-slate-300 focus:ring-primary"
+                                            {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'checked' : '' }}>
+                                        <span
+                                            class="text-sm font-black text-slate-800 uppercase tracking-widest mb-1">{{ $courier['name'] }}</span>
+                                        <span
+                                            class="text-xs font-bold text-slate-400 mb-4">{{ $courier['service'] }}</span>
+                                        <span class="text-xl font-black text-primary mb-2">Rp
+                                            {{ number_format($courier['cost'], 0, ',', '.') }}</span>
+                                        <div
+                                            class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600">
+                                            <i class="lni lni-timer"></i> {{ $courier['etd'] }}
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
                     @endif
-                    <div class="col-12">
-                        <label class="form-label fw-bold">Catatan Tambahan (Optional)</label>
-                        <textarea class="form-control" wire:model="catatan" rows="2" placeholder="Catatan untuk pesanan Anda"></textarea>
-                    </div>
                 </div>
-                <style>
-                    .spinning {
-                        animation: spin 1s linear infinite;
-                    }
-
-                    @keyframes spin {
-                        from {
-                            transform: rotate(0deg);
-                        }
-
-                        to {
-                            transform: rotate(360deg);
-                        }
-                    }
-
-                    .courier-option-card {
-                        border: 2px solid #dee2e6;
-                        border-radius: 8px;
-                        padding: 15px;
-                        cursor: pointer;
-                        transition: all 0.3s ease;
-                        position: relative;
-                    }
-
-                    .courier-option-card:hover {
-                        border-color: #0d6efd;
-                        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
-                    }
-
-                    .courier-option-card.border-primary {
-                        border-color: #0d6efd !important;
-                        background-color: #f8f9ff;
-                    }
-
-                    .courier-option-card input[type="radio"] {
-                        position: absolute;
-                        opacity: 0;
-                    }
-
-                    .courier-option-card label {
-                        cursor: pointer;
-                        margin: 0;
-                        width: 100%;
-                    }
-
-                    .courier-name {
-                        font-weight: bold;
-                        font-size: 1rem;
-                        color: #212529;
-                        margin-bottom: 5px;
-                    }
-
-                    .courier-service {
-                        font-size: 0.85rem;
-                        color: #6c757d;
-                        margin-bottom: 8px;
-                    }
-
-                    .courier-cost {
-                        font-size: 1.1rem;
-                        font-weight: bold;
-                        color: #0d6efd;
-                        margin-bottom: 5px;
-                    }
-
-                    .courier-etd {
-                        font-size: 0.85rem;
-                        color: #6c757d;
-                    }
-                </style>
             </div>
-            <!-- Right Column - Price Summary -->
-            <div class="col-lg-4">
-                <div class="price-summary">
-                    <h4 class="mb-4"><i class="lni lni-calculator"></i> Ringkasan Pesanan</h4>
-                    <div class="price-row">
-                        <span>Subtotal ({{ count($orderItems) }} item)</span>
-                        <strong>Rp {{ number_format($subtotal, 0, ',', '.') }}</strong>
+
+            <!-- Right Column: Order Summary (Sticky) -->
+            <div class="lg:col-span-4 lg:sticky lg:top-28">
+                <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-primary/20 space-y-10">
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-black tracking-tight italic">Checkout</h2>
+                        <div class="h-1 w-12 bg-primary rounded-full"></div>
                     </div>
-                    <!-- Info Berat Total -->
-                    <div class="price-row">
-                        <span>Berat Total</span>
-                        <strong id="total-weight-display">{{ $totalWeight }} gram</strong>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm font-medium text-slate-400">
+                            <span>Total Item ({{ count($orderItems) }})</span>
+                            <span class="text-white font-bold">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm font-medium text-slate-400">
+                            <span>Berat Estimasi</span>
+                            <span class="text-white font-bold">{{ $totalWeight }}g</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm font-medium text-slate-400">
+                            <span>Biaya Kirim</span>
+                            <span class="text-white font-bold">Rp {{ number_format($ongkir, 0, ',', '.') }}</span>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-800 flex justify-between items-end">
+                            <div class="space-y-1">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Total
+                                    Pembayaran</span>
+                                <div class="text-3xl font-black text-white">Rp
+                                    {{ number_format($total, 0, ',', '.') }}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="price-row">
-                        <span>Ongkos Kirim</span>
-                        <strong id="ongkir-display">Rp {{ number_format($ongkir, 0, ',', '.') }}</strong>
-                    </div>
-                    <div class="price-row total">
-                        <span>Total</span>
-                        <strong>Rp {{ number_format($total, 0, ',', '.') }}</strong>
-                    </div>
-                    <button type="submit" class="btn btn-submit-order" wire:loading.attr="disabled"
-                        id="btn-submit-order">
-                        <span wire:loading.remove>
-                            <i class="lni lni-checkmark-circle"></i> Buat Pesanan
+
+                    <button type="submit" wire:loading.attr="disabled"
+                        class="w-full bg-primary hover:bg-primary-dark text-white h-16 rounded-[1.25rem] font-black text-lg shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-3">
+                        <span wire:loading.remove class="flex items-center gap-3">
+                            Konfirmasi Pesanan <i class="lni lni-chevron-right"></i>
                         </span>
-                        <span wire:loading>
-                            <i class="lni lni-spinner-arrow spinning"></i> Memproses...
+                        <span wire:loading class="flex items-center gap-3">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            Memproses...
                         </span>
                     </button>
-                    <div class="mt-3 text-center">
-                        <small style="opacity: 0.8;">
-                            <i class="lni lni-lock"></i> Transaksi Aman & Terpercaya
-                        </small>
+
+                    <div
+                        class="pt-6 flex items-center justify-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        <div class="flex items-center gap-1"><i class="lni lni-shield"></i> Aman</div>
+                        <div class="h-1 w-1 bg-slate-700 rounded-full"></div>
+                        <div class="flex items-center gap-1"><i class="lni lni-timer"></i> Terjadwal</div>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 rounded-4xl bg-amber-50 border border-amber-100 flex items-start gap-4">
+                    <i class="lni lni-information text-amber-500 text-xl mt-1"></i>
+                    <div>
+                        <h6 class="text-sm font-bold text-amber-800">Catatan Produksi</h6>
+                        <p class="text-xs text-amber-700 leading-relaxed mt-1">Estimasi pengerjaan dihitung sejak
+                            pembayaran dikonfirmasi oleh sistem kami.</p>
                     </div>
                 </div>
             </div>
         </div>
     </form>
-    <!-- Bootstrap Modal untuk Design Editor -->
-    <div class="modal fade" id="designEditorModal" tabindex="-1" aria-labelledby="designEditorModalLabel"
-        aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header"
-                    style="background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); color: white;">
-                    <h5 class="modal-title" id="designEditorModalLabel">
-                        <i class="lni lni-brush"></i> Desain Kaos - <span id="modal-item-title">Item #1</span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    @include('customer.partials.design-editor')
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="lni lni-close"></i> Tutup
+
+    <!-- Modal Design Editor -->
+    <div class="fixed inset-0 z-100 hidden overflow-y-auto" id="designEditorModal" role="dialog" aria-modal="true">
+        <div class="flex min-h-screen items-center justify-center p-0 md:p-6">
+            <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-xl transition-opacity"
+                onclick="closeDesignModal()"></div>
+
+            <div
+                class="relative w-full h-full md:h-auto md:max-w-6xl bg-white md:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-500">
+                <div class="bg-slate-900 p-6 md:p-8 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-2xl">
+                            <i class="lni lni-brush"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-black flex items-center gap-2" id="modal-item-title">Design
+                                Workspace <span class="hidden md:inline text-slate-500 font-medium">| SIPPS
+                                    Interactive</span></h4>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Sesuaikan desain
+                                kaos anda dengan mudah</p>
+                        </div>
+                    </div>
+                    <button type="button"
+                        class="h-12 w-12 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 transition-colors"
+                        onclick="closeDesignModal()">
+                        <i class="lni lni-close text-xl"></i>
                     </button>
-                    <button type="button" class="btn btn-primary" id="btn-save-design-final">
-                        <i class="lni lni-save"></i> Simpan Desain
-                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50">
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 md:p-8">
+                        @include('customer.partials.design-editor')
+                    </div>
+                </div>
+
+                <div
+                    class="p-6 md:p-8 bg-white border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-3 text-slate-400 text-sm font-medium">
+                        <i class="lni lni-save text-xl"></i> Desain tersimpan otomatis di browser selama sesi aktif
+                    </div>
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <button type="button"
+                            class="flex-1 md:flex-none px-10 py-4 rounded-2xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
+                            onclick="closeDesignModal()">Urungkan</button>
+                        <button type="button" id="btn-save-design-final"
+                            class="flex-1 md:flex-none btn-premium px-12!">Terapkan Desain</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    @push('scripts')
-        <script src="{{ asset('frontend/assets/js/design-editor.js') }}"></script>
-        <script>
-            console.log('===== SCRIPT INIT =====');
-            var currentItemIndex = null;
-            var selectedCityId = null;
-            var totalWeight = {{ $totalWeight }};
-            var courierOptions = [];
-            // Design Editor Scripts (existing)
-            $(document).on('click', '.btn-open-design-editor', function() {
-                if ($(this).is(':disabled')) return;
-                var itemIndex = parseInt($(this).data('item-index'));
-                currentItemIndex = itemIndex;
-                var existingConfigStr = $('.design-config-data[data-item-index="' + itemIndex + '"]').val();
-                var existingConfig = null;
-                if (existingConfigStr && existingConfigStr !== '' && existingConfigStr !== 'null') {
-                    try {
-                        existingConfig = JSON.parse(existingConfigStr);
-                    } catch (e) {
-                        console.error('Error parsing config:', e);
-                    }
-                }
-                $('#modal-item-title').text('Item #' + (itemIndex + 1));
-                $(this).data('parsed-config', existingConfig);
-                $('#designEditorModal').modal('show');
-            });
-            $('#designEditorModal').on('shown.bs.modal', function(event) {
-                if (currentItemIndex === null) return;
-                var existingConfig = $('.btn-open-design-editor[data-item-index="' + currentItemIndex + '"]').data(
-                    'parsed-config');
-                setTimeout(function() {
-                    if (typeof DesignEditor !== 'undefined' && typeof fabric !== 'undefined') {
-                        DesignEditor.init(currentItemIndex, existingConfig);
-                    }
-                }, 300);
-            });
-            $('#designEditorModal').on('hidden.bs.modal', function() {
-                currentItemIndex = null;
-                $('#upload-image').val('');
-                $('#text-input').val('');
-                $('.btn-open-design-editor').removeData('parsed-config');
-            });
-            $(document).on('click', '#btn-save-design-final', function() {
-                if (typeof DesignEditor === 'undefined' || currentItemIndex === null) return;
-                var itemIndex = DesignEditor.itemIndex;
-                var designConfig = DesignEditor.getDesignConfig();
-                $(this).prop('disabled', true).html('<i class="lni lni-spinner-arrow spinning"></i> Menyimpan...');
-                $('.design-config-data[data-item-index="' + itemIndex + '"]').val(JSON.stringify(designConfig));
-                @this.handleDesignConfigSaved(itemIndex, designConfig)
-                    .then(function() {
-                        $('#designEditorModal').modal('hide');
-                        setTimeout(function() {
-                            alert('Desain berhasil disimpan!');
-                        }, 300);
-                    })
-                    .finally(function() {
-                        $('#btn-save-design-final').prop('disabled', false).html(
-                            '<i class="lni lni-save"></i> Simpan Desain');
-                    });
-            });
-        </script>
-    @endpush
-    @push('styles')
-        <style>
-            @keyframes spin {
-                from {
-                    transform: rotate(0deg);
-                }
-
-                to {
-                    transform: rotate(360deg);
-                }
-            }
-
-            .spinning {
-                display: inline-block;
-                animation: spin 1s linear infinite;
-            }
-
-            .btn-design {
-                background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-                color: white;
-                border: none;
-                padding: 15px;
-                border-radius: 15px;
-                font-weight: 600;
-                font-size: 16px;
-                transition: all 0.3s;
-            }
-
-            .btn-design:hover:not(:disabled) {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
-                color: white;
-            }
-
-            .btn-design:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-            .design-preview-badge {
-                background: #f0fdf4;
-                border: 2px solid #86efac;
-                border-radius: 10px;
-                padding: 10px 15px;
-            }
-
-            /* Courier Option Card */
-            .courier-option-card {
-                border: 2px solid #e2e8f0;
-                border-radius: 12px;
-                padding: 15px;
-                margin-bottom: 15px;
-                cursor: pointer;
-                transition: all 0.3s;
-                position: relative;
-            }
-
-            .courier-option-card:hover {
-                border-color: #8B5CF6;
-                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-                transform: translateY(-2px);
-            }
-
-            .courier-option-card.border-primary {
-                border-color: #8B5CF6;
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
-            }
-
-            .courier-radio {
-                position: absolute;
-                top: 15px;
-                right: 15px;
-                width: 20px;
-                height: 20px;
-                cursor: pointer;
-            }
-
-            .courier-option-card label {
-                cursor: pointer;
-                margin: 0;
-                display: block;
-                padding-right: 35px;
-            }
-
-            .courier-name {
-                font-weight: 700;
-                font-size: 16px;
-                color: #1e293b;
-                margin-bottom: 5px;
-            }
-
-            .courier-service {
-                font-size: 13px;
-                color: #64748b;
-                margin-bottom: 8px;
-            }
-
-            .courier-cost {
-                font-size: 18px;
-                font-weight: 700;
-                color: #8B5CF6;
-                margin-bottom: 5px;
-            }
-
-            .courier-etd {
-                font-size: 13px;
-                color: #10b981;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-            }
-
-            /* Select2 Style Override (if needed) */
-            #provinsi-select,
-            #kota-select {
-                height: 45px;
-                border-radius: 8px;
-                border: 2px solid #e2e8f0;
-                padding: 8px 15px;
-                font-size: 14px;
-            }
-
-            #provinsi-select:focus,
-            #kota-select:focus {
-                border-color: #8B5CF6;
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-            }
-
-            /* Alert Styles */
-            .alert {
-                border-radius: 10px;
-                border: none;
-                padding: 15px;
-            }
-
-            .alert-info {
-                background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
-                color: #0369a1;
-            }
-
-            .alert-success {
-                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-                color: #047857;
-            }
-
-            .alert-danger {
-                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-                color: #dc2626;
-            }
-
-            /* Price Summary Enhancement */
-            .price-summary {
-                background: white;
-                border-radius: 20px;
-                padding: 30px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-                sticky: top;
-                top: 20px;
-                color: var(--color-primary);
-            }
-
-            .price-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px 0;
-                border-bottom: 1px solid #f1f5f9;
-            }
-
-            .price-row.total {
-                border-bottom: none;
-                padding: 20px 0;
-                margin-top: 10px;
-                border-top: 2px solid #e2e8f0;
-            }
-
-            .price-row.total span,
-            .price-row.total strong {
-                font-size: 20px;
-                color: #1e293b;
-            }
-
-            .btn-submit-order {
-                width: 100%;
-                padding: 18px;
-                border-radius: 15px;
-                font-weight: 700;
-                font-size: 16px;
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                border: none;
-                color: white;
-                transition: all 0.3s;
-                margin-top: 20px;
-            }
-
-            .btn-submit-order:hover:not(:disabled) {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-            }
-
-            .btn-submit-order:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-
-            /* Section Header */
-            .section-header {
-                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-                padding: 20px;
-                border-radius: 15px;
-                margin-bottom: 20px;
-                border-left: 5px solid #8B5CF6;
-            }
-
-            .section-header h4 {
-                margin: 0;
-                color: #1e293b;
-                font-weight: 700;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            /* Order Item Card */
-            .order-item-card {
-                background: white;
-                border: 2px solid #e2e8f0;
-                border-radius: 15px;
-                padding: 25px;
-                margin-bottom: 20px;
-                position: relative;
-                transition: all 0.3s;
-            }
-
-            .order-item-card:hover {
-                border-color: #8B5CF6;
-                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
-            }
-
-            .remove-item-btn {
-                position: absolute;
-                top: 15px;
-                right: 15px;
-                background: #fee2e2;
-                color: #dc2626;
-                border: none;
-                width: 35px;
-                height: 35px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: all 0.3s;
-            }
-
-            .remove-item-btn:hover {
-                background: #dc2626;
-                color: white;
-                transform: rotate(90deg);
-            }
-
-            .btn-add-item {
-                width: 100%;
-                padding: 15px;
-                border: 2px dashed #8B5CF6;
-                background: transparent;
-                color: #8B5CF6;
-                border-radius: 12px;
-                font-weight: 600;
-                transition: all 0.3s;
-            }
-
-            .btn-add-item:hover {
-                background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-                color: white;
-                border-style: solid;
-            }
-
-            /* Weight Display */
-            #total-weight-display {
-                color: #0ea5e9;
-                font-weight: 600;
-            }
-
-            /* Responsive */
-            @media (max-width: 768px) {
-                .courier-option-card {
-                    margin-bottom: 10px;
-                }
-
-                .price-summary {
-                    margin-top: 30px;
-                }
-            }
-        </style>
-    @endpush
 </div>
+
+@push('scripts')
+    <script>
+        window.DesignEditorConfig = {
+            baseUrl: "{{ asset('frontend/assets/img/kaos-templates') }}/"
+        };
+    </script>
+    <script src="{{ asset('frontend/assets/js/design-editor.js') }}"></script>
+    <script>
+        var currentItemIndex = null;
+
+        function closeDesignModal() {
+            $('#designEditorModal').addClass('hidden');
+            $('body').removeClass('overflow-hidden');
+            currentItemIndex = null;
+        }
+
+        $(document).on('click', '.btn-open-design-editor', function() {
+            if ($(this).is(':disabled')) return;
+            var itemIndex = parseInt($(this).data('item-index'));
+            console.log('Opening design editor for item index:', itemIndex);
+
+            currentItemIndex = itemIndex;
+            var existingConfigStr = $('.design-config-data[data-item-index="' + itemIndex + '"]').val();
+            var existingConfig = null;
+            if (existingConfigStr && existingConfigStr !== '' && existingConfigStr !== 'null') {
+                try {
+                    existingConfig = JSON.parse(existingConfigStr);
+                } catch (e) {
+                    console.error('Error parsing config:', e);
+                }
+            }
+
+            $(this).data('parsed-config', existingConfig);
+
+            var $modal = $('#designEditorModal');
+            if ($modal.length) {
+                $modal.removeClass('hidden');
+                $('body').addClass('overflow-hidden');
+                console.log('Modal element found and show command executed');
+            } else {
+                console.error('Modal element #designEditorModal not found in DOM!');
+            }
+
+            setTimeout(function() {
+                if (typeof DesignEditor !== 'undefined' && typeof fabric !== 'undefined') {
+                    DesignEditor.init(currentItemIndex, existingConfig);
+                } else {
+                    console.error('DesignEditor or Fabric.js not found during initialization');
+                }
+            }, 300);
+        });
+
+        $(document).on('click', '#btn-save-design-final', function() {
+            if (typeof DesignEditor === 'undefined' || currentItemIndex === null) return;
+            var itemIndex = DesignEditor.itemIndex;
+            var designConfig = DesignEditor.getDesignConfig();
+
+            $(this).prop('disabled', true).html(
+                '<i class="lni lni-spinner-arrow animate-spin mr-2"></i> Menyimpan...');
+
+            @this.handleDesignConfigSaved(itemIndex, designConfig)
+                .then(function() {
+                    $('.design-config-data[data-item-index="' + itemIndex + '"]').val(JSON.stringify(
+                        designConfig));
+                    closeDesignModal();
+                })
+                .finally(function() {
+                    $('#btn-save-design-final').prop('disabled', false).text('Terapkan Desain');
+                });
+        });
+    </script>
+@endpush

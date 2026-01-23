@@ -1,4 +1,29 @@
 <x-app-layout>
+    @push('styles')
+        <style>
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.5;
+                }
+
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .animate-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+
+            .table-info {
+                background-color: rgba(63, 135, 245, 0.1) !important;
+            }
+        </style>
+    @endpush
     <div class="page-header">
         <div class="page-block">
             <div class="row align-items-center">
@@ -96,11 +121,22 @@
                             </thead>
                             <tbody>
                                 @forelse($orders as $order)
-                                    <tr>
+                                    <tr class="{{ $order->status === 'ready_to_ship' ? 'table-info' : '' }}">
                                         <td>
-                                            <strong>{{ $order->order_number }}</strong>
-                                            <br>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <strong>{{ $order->order_number }}</strong>
+                                                @if ($order->status === 'ready_to_ship' && $order->updated_at->diffInMinutes(now()) < 60)
+                                                    <span class="badge bg-danger animate-pulse">BARU</span>
+                                                @endif
+                                                @if ($order->items->where('is_return_item', true)->isNotEmpty())
+                                                    <span class="badge bg-warning text-dark">KIRIM ULANG</span>
+                                                @endif
+                                            </div>
                                             <small class="text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                            @if ($order->status === 'ready_to_ship')
+                                                <br><small class="text-info font-weight-bold">Selesai Produksi:
+                                                    {{ $order->updated_at->diffForHumans() }}</small>
+                                            @endif
                                         </td>
                                         <td>
                                             {{ $order->penerima_nama }}

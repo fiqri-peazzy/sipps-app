@@ -1,106 +1,118 @@
-{{-- FILE: resources/views/customer/dashboard.blade.php --}}
 @extends('layouts.customer')
 
 @section('customer-content')
-    <div class="content-header">
-        <h1 class="content-title">
-            <i class="lni lni-dashboard"></i>
-            Dashboard
-        </h1>
-        <p class="content-subtitle">Selamat datang kembali, {{ Auth::user()->name }}!</p>
+    <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Dashboard <span
+                class="text-primary italic">Utama</span></h1>
+        <p class="text-slate-500 mt-2 text-lg">Pantau status pesanan dan aktivitas produksi Anda secara real-time.</p>
     </div>
 
-    <div class="row">
-        {{-- Stats Cards --}}
-        <div class="col-md-3 mb-4">
-            <div class="content-card text-center">
-                <div
-                    style="width: 60px; height: 60px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                    <i class="lni lni-cart" style="font-size: 2rem; color: #fff;"></i>
-                </div>
-                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">{{ $totalOrders ?? 0 }}</h3>
-                <p style="color: #64748b; margin: 0;">Total Pesanan</p>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div class="card-modern !p-6 flex items-center gap-6">
+            <div class="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <i class="lni lni-cart text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Total Pesanan</p>
+                <h3 class="text-2xl font-black text-slate-900">{{ array_sum($orderStats) }}</h3>
             </div>
         </div>
 
-        <div class="col-md-3 mb-4">
-            <div class="content-card text-center">
-                <div
-                    style="width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                    <i class="lni lni-timer" style="font-size: 2rem; color: #fff;"></i>
-                </div>
-                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">{{ $pendingOrders ?? 0 }}</h3>
-                <p style="color: #64748b; margin: 0;">Belum Bayar</p>
+        <div class="card-modern !p-6 flex items-center gap-6">
+            <div class="h-14 w-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                <i class="lni lni-timer text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Menunggu Bayar</p>
+                <h3 class="text-2xl font-black text-slate-900">{{ $orderStats['pending_payment'] ?? 0 }}</h3>
             </div>
         </div>
 
-        <div class="col-md-3 mb-4">
-            <div class="content-card text-center">
-                <div
-                    style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                    <i class="lni lni-package" style="font-size: 2rem; color: #fff;"></i>
-                </div>
-                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">{{ $processingOrders ?? 0 }}</h3>
-                <p style="color: #64748b; margin: 0;">Diproses</p>
+        <div class="card-modern !p-6 flex items-center gap-6">
+            <div class="h-14 w-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <i class="lni lni-package text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Dalam Produksi</p>
+                <h3 class="text-2xl font-black text-slate-900">{{ $orderStats['in_production'] ?? 0 }}</h3>
             </div>
         </div>
 
-        <div class="col-md-3 mb-4">
-            <div class="content-card text-center">
-                <div
-                    style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                    <i class="lni lni-checkmark-circle" style="font-size: 2rem; color: #fff;"></i>
-                </div>
-                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">{{ $completedOrders ?? 0 }}</h3>
-                <p style="color: #64748b; margin: 0;">Selesai</p>
+        <div class="card-modern !p-6 flex items-center gap-6">
+            <div class="h-14 w-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                <i class="lni lni-checkmark-circle text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Sudah Selesai</p>
+                <h3 class="text-2xl font-black text-slate-900">{{ $orderStats['completed'] ?? 0 }}</h3>
             </div>
         </div>
     </div>
 
-    {{-- Recent Orders --}}
-    <div class="content-card">
-        <div class="card-header-custom">
-            <h5>
-                <i class="lni lni-package"></i>
-                Pesanan Terbaru
-            </h5>
+    <!-- Recent Activity -->
+    <div class="card-modern">
+        <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-50">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                    <i class="lni lni-package text-xl"></i>
+                </div>
+                <h4 class="text-xl font-black text-slate-900">Pesanan Terbaru</h4>
+            </div>
+            <a href="{{ route('customer.orders.index') }}" class="text-sm font-bold text-primary hover:underline">Lihat
+                Semua &rarr;</a>
         </div>
 
         @if (isset($recentOrders) && $recentOrders->count() > 0)
-            @foreach ($recentOrders as $order)
-                <div class="order-card">
-                    <div class="order-header">
-                        <div>
-                            <div class="order-number">{{ $order->order_number }}</div>
-                            <small style="color: #64748b;">{{ $order->created_at->format('d M Y, H:i') }}</small>
+            <div class="space-y-4">
+                @foreach ($recentOrders as $order)
+                    <div
+                        class="group flex flex-col md:flex-row md:items-center justify-between p-6 rounded-3xl border border-slate-50 hover:border-primary/20 hover:bg-primary/5 transition-all duration-300">
+                        <div class="flex items-center gap-4 mb-4 md:mb-0">
+                            <div
+                                class="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                                <i class="lni lni-cart-full text-xl"></i>
+                            </div>
+                            <div>
+                                <h6 class="font-bold text-slate-900">{{ $order->order_number }}</h6>
+                                <p class="text-xs text-slate-400 font-medium">{{ $order->created_at->format('d M Y, H:i') }}
+                                </p>
+                            </div>
                         </div>
-                        <span class="status-badge status-{{ $order->status }}">
-                            {{ $order->status_label }}
-                        </span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong style="color: #1e293b;">{{ $order->formatted_total_harga }}</strong>
-                        </div>
-                        <a href="{{ route('customer.orders.show', $order->id) }}" class="btn-primary-custom">
-                            Lihat Detail
-                        </a>
-                    </div>
-                </div>
-            @endforeach
 
-            <div class="text-center mt-3">
-                <a href="{{ route('customer.orders.index') }}" class="btn-primary-custom">
-                    Lihat Semua Pesanan
-                </a>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="text-right">
+                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Total Harga</p>
+                                <p class="font-black text-slate-900">{{ $order->formatted_total_harga }}</p>
+                            </div>
+
+                            <div
+                                class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] 
+                                @if ($order->status == 'completed') bg-green-100 text-green-700
+                                @elseif($order->status == 'pending_payment') bg-amber-100 text-amber-700
+                                @elseif($order->status == 'cancelled') bg-red-100 text-red-700
+                                @else bg-blue-100 text-blue-700 @endif">
+                                {{ $order->status_label }}
+                            </div>
+
+                            <a href="{{ route('customer.orders.show', $order->id) }}"
+                                class="h-10 w-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">
+                                <i class="lni lni-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         @else
-            <div class="empty-state">
-                <i class="lni lni-package"></i>
-                <h4>Belum Ada Pesanan</h4>
-                <p>Anda belum memiliki pesanan. Mulai pesan sekarang!</p>
-                <a href="{{ route('customer.order.create') }}" class="btn-primary-custom">
-                    <i class="lni lni-plus"></i> Buat Pesanan Pertama
+            <div class="py-20 flex flex-col items-center text-center">
+                <div class="h-24 w-24 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 mb-6">
+                    <i class="lni lni-package text-5xl"></i>
+                </div>
+                <h5 class="text-xl font-bold text-slate-900 mb-2">Belum Ada Pesanan</h5>
+                <p class="text-slate-500 max-w-sm mb-8">Anda belum melakukan pesanan apapun. Mulai kustomisasi kaos Anda
+                    sekarang!</p>
+                <a href="{{ route('customer.order.create') }}" class="btn-premium">
+                    <i class="lni lni-plus mr-2"></i> Buat Pesanan Pertama
                 </a>
             </div>
         @endif
