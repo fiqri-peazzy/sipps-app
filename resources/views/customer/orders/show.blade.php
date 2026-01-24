@@ -49,9 +49,9 @@
                     </div>
                     <div
                         class="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border-2 border-white/10
-                        @if ($order->status == 'completed') bg-green-500/10 text-green-400 border-green-500/20
-                        @elseif($order->status == 'pending_payment') bg-amber-500/10 text-amber-400 border-amber-500/20
-                        @else bg-primary/10 text-primary border-primary/20 @endif">
+                        @if ($order->status == 'completed') bg-green-500/10 text-green-400
+                        @elseif($order->status == 'pending_payment') bg-amber-500/10 text-amber-400
+                        @else bg-primary/10 text-primary @endif">
                         {{ $order->status_label }}
                     </div>
                 </div>
@@ -291,7 +291,7 @@
                     </div>
 
                     <div class="space-y-4">
-                        <div class="bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden">
+                        <div class="bg-slate-900 rounded-4xl p-8 text-white relative overflow-hidden">
                             <i class="lni lni-delivery text-6xl absolute -bottom-4 -right-4 opacity-10"></i>
                             <h6 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Informasi Kurir
                             </h6>
@@ -345,7 +345,7 @@
         <div class="lg:col-span-4 space-y-8">
 
             <!-- Summary Card -->
-            <div class="card-modern !bg-primary !text-white !p-10 shadow-xl shadow-primary/20 relative overflow-hidden">
+            <div class="card-modern bg-primary! text-white! p-10! shadow-xl shadow-primary/20 relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                 <div class="relative z-10 space-y-6">
                     <h5 class="text-lg font-black italic tracking-tight">Ringkasan Pembayaran</h5>
