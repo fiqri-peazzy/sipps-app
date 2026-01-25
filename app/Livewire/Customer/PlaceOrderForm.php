@@ -441,14 +441,14 @@ class PlaceOrderForm extends Component
 
     public function calculateTotalWeight()
     {
-        $totalQty = collect($this->orderItems)->sum('quantity');
+        $totalQty = collect($this->orderItems)->sum(fn($item) => (int) ($item['quantity'] ?? 0));
         $this->totalWeight = $totalQty * self::WEIGHT_PER_ITEM;
         return $this->totalWeight;
     }
 
     public function calculateTotal()
     {
-        $this->subtotal = collect($this->orderItems)->sum('subtotal');
+        $this->subtotal = collect($this->orderItems)->sum(fn($item) => (int) ($item['subtotal'] ?? 0));
         $this->total = $this->subtotal + $this->ongkir;
     }
 

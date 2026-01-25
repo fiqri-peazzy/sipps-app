@@ -53,6 +53,12 @@
                         <span class="pc-mtext">Metode DPS</span>
                     </a>
                 </li>
+                <li class="pc-item">
+                    <a href="{{ route('admin.bobot-prioritas.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-settings-automation"></i></span>
+                        <span class="pc-mtext">Bobot Prioritas</span>
+                    </a>
+                </li>
 
                 <li class="pc-item pc-caption">
                     <label>Produksi & Pengiriman</label>

@@ -25,6 +25,7 @@ Route::prefix('admin')
         Route::get('/pesanan', [AdminController::class, 'dataPesanan'])->name('data.pesanan');
         Route::get('/users', \App\Livewire\Admin\UserManagement::class)->name('users.index');
         Route::get('/penjadwalan-prioritas', [AdminController::class, 'penjadwalan'])->name('penjadwalan.prioritas');
+        Route::get('/bobot-prioritas', \App\Livewire\Admin\ManajemenBobotPrioritas::class)->name('bobot-prioritas.index');
         Route::get('/portfolio', \App\Livewire\Admin\ManajemenPortfolio::class)->name('portfolio.index');
 
         Route::get('/detail-pesanan/{id}', [AdminController::class, 'detailPesanan'])->name('detail.pesanan');

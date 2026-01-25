@@ -405,7 +405,7 @@
                             <i class="lni lni-brush"></i>
                         </div>
                         <div>
-                            <h4 class="text-xl font-black flex items-center gap-2" id="modal-item-title">Design
+                            <h4 class="text-xl text-white flex items-center gap-2" id="modal-item-title">Design
                                 Workspace <span class="hidden md:inline text-slate-500 font-medium">| SIPPS
                                     Interactive</span></h4>
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Sesuaikan desain

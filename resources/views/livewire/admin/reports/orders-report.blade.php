@@ -262,10 +262,11 @@
                                     <th>Kode Pesanan</th>
                                     <th>Tgl Pesan</th>
                                     <th>Deadline</th>
-                                    <th>Sisa Waktu ($T_i$)</th>
-                                    <th>Kompleksitas ($C_i$) [1-5]</th>
-                                    <th>Urgensi ($U_i$) [1-5]</th>
-                                    <th>Keterangan</th>
+                                    <th>T<sub>i</sub> (Hari)</th>
+                                    <th>U<sub>i</sub> (Sisa Jam)</th>
+                                    <th>C<sub>i</sub> (Komp. 0-10)</th>
+                                    <th>W<sub>i</sub> (Jam Tunggu)</th>
+                                    <th>Q<sub>i</sub> (Qty)</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -277,13 +278,17 @@
                                             ? round(now()->diffInDays($item->deadline, false))
                                             : 0;
 
-                                        // Map scores to 1-5 scale
-                                        $ciScale = round(($item->complexity_score ?? 0) / 2, 1);
+                                        // Map scores to 1-5 scale (Original scores are 0-100)
                                         $uiScale = round(($factors['urgency']['raw_score'] ?? 0) / 20, 1);
+                                        $ciScale = round(($factors['complexity']['raw_score'] ?? 0) / 20, 1);
+                                        $wiScale = round(($factors['waiting_time']['raw_score'] ?? 0) / 20, 1);
+                                        $qiScale = round(($factors['quantity']['raw_score'] ?? 0) / 20, 1);
 
                                         // Ensure min scale 1 if data exists
-                                        $ciScale = max(1, $ciScale);
                                         $uiScale = max(1, $uiScale);
+                                        $ciScale = max(1, $ciScale);
+                                        $wiScale = max(1, $wiScale);
+                                        $qiScale = max(1, $qiScale);
                                     @endphp
                                     <tr>
                                         <td>{{ $orders->firstItem() + $index }}</td>
@@ -294,31 +299,26 @@
                                         <td>{{ $item->deadline ? $item->deadline->format('d/m/y') : '-' }}</td>
                                         <td>
                                             <span
-                                                class="badge bg-{{ $remainingDays < 2 ? 'danger' : ($remainingDays < 5 ? 'warning' : 'info') }}">
-                                                {{ $remainingDays }} Hari
+                                                class="badge bg-{{ $remainingDays < 1 ? 'danger' : ($remainingDays < 3 ? 'warning' : 'info') }}">
+                                                {{ (float) $factors['urgency']['remaining_days'] }} Hari
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <span class="fw-bold me-2">{{ $ciScale }}</span>
-                                                <div class="progress w-100" style="height: 4px;">
-                                                    <div class="progress-bar bg-info"
-                                                        style="width: {{ ($ciScale / 5) * 100 }}%"></div>
-                                                </div>
-                                            </div>
+                                            <span
+                                                class="fw-bold text-danger">{{ (float) $factors['urgency']['remaining_hours'] }}
+                                                Jam</span>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <span class="fw-bold me-2">{{ $uiScale }}</span>
-                                                <div class="progress w-100" style="height: 4px;">
-                                                    <div class="progress-bar bg-danger"
-                                                        style="width: {{ ($uiScale / 5) * 100 }}%"></div>
-                                                </div>
-                                            </div>
+                                            <span
+                                                class="fw-bold text-info">{{ (float) $factors['complexity']['complexity_score_original'] }}</span>
                                         </td>
                                         <td>
-                                            <small
-                                                class="text-muted">{{ Str::limit($item->catatan_item ?? '-', 30) }}</small>
+                                            <span
+                                                class="fw-bold text-warning">{{ (float) $factors['waiting_time']['waiting_hours'] }}
+                                                Jam</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-success">{{ $item->quantity }} Pcs</span>
                                         </td>
                                         <td>
                                             <span class="badge bg-{{ $item->order->status_color }}">

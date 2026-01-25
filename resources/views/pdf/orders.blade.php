@@ -370,11 +370,13 @@
                     <th style="width: 12%;">Kode Pesanan</th>
                     <th style="width: 10%;">Tgl Pesan</th>
                     <th style="width: 10%;">Deadline</th>
-                    <th style="width: 8%;">Sisa Waktu ($T_i$)</th>
-                    <th style="width: 10%;">Kompleksitas ($C_i$) [1-5]</th>
-                    <th style="width: 10%;">Urgensi ($U_i$) [1-5]</th>
-                    <th style="width: 22%;">Keterangan / Item</th>
-                    <th style="width: 15%;">Status Order</th>
+                    <th style="width: 5%; text-align: center;">T<sub>i</sub> (Hari)</th>
+                    <th style="width: 8%; text-align: center;">U<sub>i</sub> (Jam)</th>
+                    <th style="width: 8%; text-align: center;">C<sub>i</sub> (0-10)</th>
+                    <th style="width: 8%; text-align: center;">W<sub>i</sub> (Jam)</th>
+                    <th style="width: 8%; text-align: center;">Q<sub>i</sub> (Qty)</th>
+                    <th style="width: 13%;">Item</th>
+                    <th style="width: 15%;">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -383,9 +385,11 @@
                         $factors = \App\Services\PriorityCalculator::getFactorsBreakdown($item);
                         $remainingDays = $item->deadline ? round(now()->diffInDays($item->deadline, false)) : 0;
 
-                        // Map scores to 1-5 scale
-                        $ciScale = max(1, round(($item->complexity_score ?? 0) / 2, 1));
+                        // Map scores to 1-5 scale (Original scores are 0-100)
                         $uiScale = max(1, round(($factors['urgency']['raw_score'] ?? 0) / 20, 1));
+                        $ciScale = max(1, round(($factors['complexity']['raw_score'] ?? 0) / 20, 1));
+                        $wiScale = max(1, round(($factors['waiting_time']['raw_score'] ?? 0) / 20, 1));
+                        $qiScale = max(1, round(($factors['quantity']['raw_score'] ?? 0) / 20, 1));
                     @endphp
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
@@ -393,15 +397,18 @@
                         <td>{{ $item->order->created_at->format('d/m/Y') }}</td>
                         <td>{{ $item->deadline ? $item->deadline->format('d/m/Y') : '-' }}</td>
                         <td class="text-center">
-                            {{ $remainingDays }} Hari
+                            {{ (float) $factors['urgency']['remaining_days'] }}
                         </td>
-                        <td class="text-center font-weight-bold">{{ $ciScale }}</td>
-                        <td class="text-center font-weight-bold">{{ $uiScale }}</td>
+                        <td class="text-center font-weight-bold">{{ (float) $factors['urgency']['remaining_hours'] }}
+                            Jam</td>
+                        <td class="text-center font-weight-bold">
+                            {{ (float) $factors['complexity']['complexity_score_original'] }}</td>
+                        <td class="text-center font-weight-bold">{{ (float) $factors['waiting_time']['waiting_hours'] }}
+                            Jam</td>
+                        <td class="text-center font-weight-bold">{{ $item->quantity }} Pcs</td>
                         <td>
                             <div style="font-weight: bold;">{{ $item->produk->jenisSablon->nama }}
-                                ({{ $item->quantity }} pcs)
                             </div>
-                            <div class="text-muted" style="font-size: 7pt;">{{ $item->catatan_item ?? '-' }}</div>
                         </td>
                         <td>
                             @php
