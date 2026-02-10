@@ -178,7 +178,25 @@ class Order extends Model
         return $colors[$this->status] ?? 'secondary';
     }
 
-    // Static method untuk generate order number
+    public function getLatestStatusTimeAttribute()
+    {
+        $time = match ($this->status) {
+            'paid' => $this->paid_at,
+            'verified' => $this->verified_at,
+            'shipped' => $this->shipped_at,
+            'completed' => $this->completed_at,
+            'cancelled' => $this->cancelled_at,
+            'return_requested' => $this->updated_at,
+            'returned' => $this->updated_at,
+            default => $this->updated_at,
+        };
+
+        return $time ?? $this->updated_at;
+    }
+
+    /**
+     * Static method untuk generate order number
+     */
     public static function generateOrderNumber($date = null)
     {
         $date = $date ? Carbon::parse($date) : now();

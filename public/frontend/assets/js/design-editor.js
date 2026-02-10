@@ -157,10 +157,16 @@
 
         switchArea: function (area) {
             this.currentArea = area;
-            $(".area-btn").removeClass("active");
-            $('.area-btn[data-area="' + area + '"]').addClass("active");
+            
+            // Handle Area Buttons Active State
+            $(".area-btn").removeClass("active bg-white text-primary shadow-sm").addClass("text-slate-500 hover:text-slate-700");
+            const $activeBtn = $('.area-btn[data-area="' + area + '"]');
+            $activeBtn.addClass("active bg-white text-primary shadow-sm").removeClass("text-slate-500 hover:text-slate-700");
+            
+            // Handle Canvas Area Visibility
             $(".canvas-area").hide();
-            $('.canvas-area[data-area="' + area + '"]').show();
+            $('.canvas-area[data-area="' + area + '"]').css('display', 'flex');
+            
             this.updateSummary();
         },
 
@@ -174,9 +180,9 @@
 
             const iconColor = colorName === "putih" ? "#000" : "#fff";
             $selected.append(
-                '<i class="lni lni-checkmark" style="color: ' +
+                '<div class="absolute inset-0 flex items-center justify-center pointer-events-none"><i class="lni lni-checkmark text-xs" style="color: ' +
                     iconColor +
-                    ';"></i>',
+                    ';"></i></div>',
             );
 
             this.updateTemplateImages();
@@ -253,8 +259,9 @@
                             self.currentArea,
                             metadata,
                         );
+                        const imgCount = self.canvases[self.currentArea].getObjects().filter(o => o.type === 'image').length + 1;
                         self.showAlert(
-                            "Gambar berhasil ditambahkan",
+                            "Gambar berhasil ditambahkan (" + imgCount + " Gbr di area ini)",
                             "success",
                         );
                         fileInput.value = "";
@@ -373,7 +380,8 @@
             canvas.setActiveObject(fabricText);
             canvas.renderAll();
 
-            this.showAlert("Teks berhasil ditambahkan", "success");
+            const textCount = canvas.getObjects().filter(o => o.type === 'text').length;
+            this.showAlert("Teks berhasil ditambahkan (" + textCount + " Teks di area ini)", "success");
             this.updateSummary();
         },
 
@@ -426,35 +434,33 @@
         },
 
         updateSummary: function () {
-            const areas = {
-                front: "Depan",
-                back: "Belakang",
-                left_sleeve: "Lengan Kiri",
-                right_sleeve: "Lengan Kanan",
-            };
-
             const self = this;
-            Object.keys(areas).forEach(function (area) {
+            const areas = ["front", "back", "left_sleeve", "right_sleeve"];
+
+            areas.forEach(function (area) {
                 const canvas = self.canvases[area];
                 if (!canvas) return;
 
-                const hasObjects = canvas.getObjects().length > 0;
-                const $summaryItem = $(
-                    '.summary-item[data-summary-area="' + area + '"]',
-                );
+                const objects = canvas.getObjects();
+                const count = objects.length;
+                const $summaryItem = $('.summary-item[data-summary-area="' + area + '"]');
+                const $badge = $summaryItem.find('.status-badge');
 
-                if (hasObjects) {
-                    $summaryItem.html(
-                        "<strong>" +
-                            areas[area] +
-                            ':</strong> <span class="badge bg-success"><i class="lni lni-checkmark"></i> Ada Desain</span>',
-                    );
+                if (count > 0) {
+                    const imgCount = objects.filter(o => o.type === 'image').length;
+                    const textCount = objects.filter(o => o.type === 'text').length;
+                    
+                    let summaryText = "";
+                    if (imgCount > 0) summaryText += imgCount + " Gbr";
+                    if (textCount > 0) summaryText += (summaryText ? ", " : "") + textCount + " Teks";
+
+                    $badge.text(summaryText)
+                        .removeClass('text-slate-400 bg-white border-slate-100')
+                        .addClass('text-green-600 bg-green-50 border-green-200 font-black');
                 } else {
-                    $summaryItem.html(
-                        "<strong>" +
-                            areas[area] +
-                            ':</strong> <span class="badge bg-secondary">Belum ada desain</span>',
-                    );
+                    $badge.text('Belum ada')
+                        .removeClass('text-green-600 bg-green-50 border-green-200 font-black')
+                        .addClass('text-slate-400 bg-white border-slate-100');
                 }
             });
         },

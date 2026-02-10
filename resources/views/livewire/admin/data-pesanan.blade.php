@@ -49,7 +49,11 @@
                             </thead>
                             <tbody>
                                 @forelse($orders as $order)
-                                    <tr>
+                                    @php
+                                        $isNew = $order->created_at->diffInHours(now()) < 1;
+                                        $isRecentlyUpdated = $order->latest_status_time && $order->latest_status_time->diffInMinutes(now()) < 60;
+                                    @endphp
+                                    <tr class="{{ $isNew ? 'bg-primary/5 highlight-new-order' : '' }}" style="{{ $isNew ? 'border-left: 4px solid #4361ee;' : '' }}">
                                         <td>
                                             <strong>{{ $order->order_number }}</strong><br>
                                             <small class="text-muted">{{ $order->total_item }} item</small>
@@ -58,12 +62,22 @@
                                             {{ $order->user->name }}<br>
                                             <small class="text-muted">{{ $order->penerima_telepon }}</small>
                                         </td>
-                                        <td>{{ $order->created_at->format('d M Y, H:i') }}</td>
+                                        <td>
+                                            {{ $order->created_at->format('d M Y, H:i') }}
+                                            @if($isNew)
+                                                <br><span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem;">BARU</span>
+                                            @endif
+                                        </td>
                                         <td>{{ $order->formatted_total_harga }}</td>
                                         <td>
                                             <span class="badge bg-{{ $order->status_color }}">
                                                 {{ $order->status_label }}
                                             </span>
+                                            @if($isRecentlyUpdated && $order->status !== 'pending_payment')
+                                                <br><small class="text-muted" style="font-size: 0.7rem;">
+                                                    <i class="ti ti-clock"></i> {{ $order->latest_status_time->diffForHumans() }}
+                                                </small>
+                                            @endif
                                         </td>
                                         <td>
                                             @if ($order->payment_status == 'settlement')

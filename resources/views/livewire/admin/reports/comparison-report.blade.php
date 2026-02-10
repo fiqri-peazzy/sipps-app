@@ -346,8 +346,7 @@
                                                     $priorityColor = 'info';
                                                 }
                                             @endphp
-                                            <span
-                                                class="badge bg-{{ $priorityColor }}">{{ $item->priority_score }}</span>
+                                            <span class="badge bg-{{ $priorityColor }}">{{ $item->priority_score }}</span>
                                         </td>
                                         <td>
                                             @php

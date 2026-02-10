@@ -102,32 +102,42 @@ class PlaceOrderForm extends Component
         $this->ukurans = $ukurans;
         $this->selectedJenis = $selectedJenis;
 
-        $user = Auth::user();
-        $this->penerima_nama = $user->name;
-        $this->penerima_telepon = $user->phone ?? '';
-
-        // Add first item
-        $this->addItem();
-
-        // Load designs from session if exists
-        $sessionKey = 'order_designs_' . Auth::id();
-        if (session()->has($sessionKey)) {
-            $savedDesigns = session($sessionKey);
-            foreach ($savedDesigns as $index => $designConfig) {
-                if (isset($this->orderItems[$index])) {
-                    $this->orderItems[$index]['design_config'] = $designConfig;
-                    if (isset($designConfig['ukuran_kaos'])) {
-                        $this->orderItems[$index]['ukuran_kaos'] = $designConfig['ukuran_kaos'];
-                    }
+        // Restore from session if exists
+        if (session()->has('place_order_form_state')) {
+            $state = session('place_order_form_state');
+            foreach ($state as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->{$key} = $value;
                 }
             }
+
+            // Re-fetch options to populate selects
+            try {
+                $service = new RajaOngkirService();
+                if ($this->provinsi_id) {
+                    $this->provinces = $service->getProvinces();
+                    $this->cities = $service->getCities($this->provinsi_id);
+                }
+                if ($this->kota_id) {
+                    $this->districts = $service->getDistricts($this->kota_id);
+                }
+            } catch (\Exception $e) {
+                \Log::error("Failed to restore RajaOngkir options: " . $e->getMessage());
+            }
+
+            $this->calculateTotal();
+            $this->calculateTotalWeight();
+        } else {
+            $user = Auth::user();
+            $this->penerima_nama = $user->name;
+            $this->penerima_telepon = $user->phone ?? '';
+
+            if (empty($this->orderItems)) {
+                $this->addItem();
+            }
+            
+            $this->loadProvinces();
         }
-
-        // Calculate initial weight
-        $this->calculateTotalWeight();
-
-        // TAMBAHKAN: Load provinces on mount
-        $this->loadProvinces();
     }
 
     // ==================== RAJAONGKIR METHODS ====================
@@ -394,26 +404,39 @@ class PlaceOrderForm extends Component
         }
     }
 
-    public function handleDesignConfigSaved($itemIndex, $designConfig)
+    public function goToDesignEditor($index)
     {
-        if (!isset($this->orderItems[$itemIndex])) {
-            session()->flash('error', 'Item tidak ditemukan!');
-            return;
-        }
+        // Pastikan index ada
+        if (!isset($this->orderItems[$index])) return;
 
-        $this->orderItems[$itemIndex]['design_config'] = $designConfig;
+        // Simpan state form saat ini ke session sebelum pindah halaman
+        session(['place_order_form_state' => [
+            'orderItems' => $this->orderItems,
+            'itemIndex' => $this->itemIndex,
+            'selectedJenis' => $this->selectedJenis,
+            'penerima_nama' => $this->penerima_nama,
+            'penerima_telepon' => $this->penerima_telepon,
+            'alamat_lengkap' => $this->alamat_lengkap,
+            'provinsi_id' => $this->provinsi_id,
+            'kota_id' => $this->kota_id,
+            'district_id' => $this->district_id,
+            'tipe_pengiriman' => $this->tipe_pengiriman,
+            'provinsi' => $this->provinsi,
+            'kota' => $this->kota,
+            'kecamatan' => $this->kecamatan,
+            'kelurahan' => $this->kelurahan,
+            'kode_pos' => $this->kode_pos,
+            'kurir_code' => $this->kurir_code,
+            'kurir_service' => $this->kurir_service,
+            'kurir_name' => $this->kurir_name,
+            'kurir_etd' => $this->kurir_etd,
+            'ongkir' => $this->ongkir,
+            'subtotal' => $this->subtotal,
+            'total' => $this->total,
+            'totalWeight' => $this->totalWeight,
+        ]]);
 
-        if (isset($designConfig['ukuran_kaos'])) {
-            $this->orderItems[$itemIndex]['ukuran_kaos'] = $designConfig['ukuran_kaos'];
-        }
-
-        $sessionKey = 'order_designs_' . Auth::id();
-        $sessionData = session($sessionKey, []);
-        $sessionData[$itemIndex] = $designConfig;
-        session([$sessionKey => $sessionData]);
-
-        session()->flash('message', 'Desain berhasil disimpan!');
-        $this->dispatch('$refresh');
+        return redirect()->route('customer.design-editor.page', ['index' => $index]);
     }
 
     public function updatedOrderItems($value, $key)
@@ -537,6 +560,7 @@ class PlaceOrderForm extends Component
             // Clear session
             $sessionKey = 'order_designs_' . Auth::id();
             session()->forget($sessionKey);
+            session()->forget('place_order_form_state');
 
             session()->flash('success', 'Pesanan berhasil dibuat!');
             return redirect()->route('customer.orders.show', $order->id);
@@ -613,10 +637,14 @@ class PlaceOrderForm extends Component
 
             $this->orderItems[$itemIndex]['design_config'] = null;
 
-            $sessionKey = 'order_designs_' . Auth::id();
-            $sessionData = session($sessionKey, []);
-            unset($sessionData[$itemIndex]);
-            session([$sessionKey => $sessionData]);
+            // Sync dengan session state utama
+            if (session()->has('place_order_form_state')) {
+                $state = session('place_order_form_state');
+                if (isset($state['orderItems'][$itemIndex])) {
+                    $state['orderItems'][$itemIndex]['design_config'] = null;
+                    session(['place_order_form_state' => $state]);
+                }
+            }
 
             session()->flash('message', 'Desain berhasil dihapus!');
         }

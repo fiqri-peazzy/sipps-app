@@ -244,7 +244,7 @@
 
     <script>
         // Header Scroll Effect
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             const header = document.getElementById('main-header');
             if (window.scrollY > 20) {
                 header.classList.add('py-2');
@@ -272,6 +272,7 @@
     </script>
 
     @livewireScripts
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
 </body>
 

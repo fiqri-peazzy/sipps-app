@@ -202,6 +202,8 @@ class ManajemenCustomerReturn extends Component
             // Update order status KEMBALI KE PRODUKSI
             $return->order->update([
                 'status' => 'in_production',
+                'resi' => null,           // Reset resi agar bisa input baru
+                'status_pengiriman' => 'pending', // Reset status pengiriman
                 'shipped_at' => null,     // Reset agar timeline akurat
                 'completed_at' => null,   // Reset agar timeline akurat
             ]);

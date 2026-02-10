@@ -18,21 +18,22 @@ class CustomerReturnForm extends Component
     use WithFileUploads;
 
     public Order $order;
-    public $selectedItemId;
+    public $selectedItemIds = [];
     public $reason = '';
     public $reasonDetail = '';
     public $evidencePhotos = [];
     public $uploadedPhotos = [];
 
     protected $rules = [
-        'selectedItemId' => 'required|exists:order_items,id',
+        'selectedItemIds' => 'required|array|min:1',
+        'selectedItemIds.*' => 'exists:order_items,id',
         'reason' => 'required|in:wrong_size,wrong_color,print_quality,damage,not_as_described,other',
         'reasonDetail' => 'required|string|max:1000',
         'evidencePhotos.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
     ];
 
-    protected $message = [
-        'selectedItemId.required'   => 'Pilih Item yang ingin di return',
+    protected $messages = [
+        'selectedItemIds.required'   => 'Pilih minimal satu item yang ingin di-return',
         'reason.required'           => 'Pilih Alasan Return',
         'reasonDetail.required'     => 'Jelaskan detail alasan return',
         'evidencePhotos.*.required' => 'Upload Minimal 1 bukti foto',
@@ -74,23 +75,27 @@ class CustomerReturnForm extends Component
     public function submit()
     {
         $this->validate();
-        $orderItem = OrderItem::where('id', $this->selectedItemId)
+        
+        $orderItems = OrderItem::whereIn('id', $this->selectedItemIds)
             ->where('order_id', $this->order->id)
-            ->first();
-        if (!$orderItem) {
+            ->get();
+
+        if ($orderItems->count() !== count($this->selectedItemIds)) {
             $this->dispatch('show-alert', [
                 'type'      => 'error',
-                'message'   => 'Order Item tidak valid'
+                'message'   => 'Terdapat item yang tidak valid'
             ]);
             return;
         }
 
-        if ($orderItem->customerReturns()->exists()) {
-            $this->dispatch('show-alert', [
-                'type'      => 'success',
-                'message'   => 'Item Ini sudah pernah di ajukan'
-            ]);
-            return;
+        foreach ($orderItems as $item) {
+            if ($item->customerReturns()->exists()) {
+                $this->dispatch('show-alert', [
+                    'type'      => 'error',
+                    'message'   => 'Item ' . $item->produk->jenisSablon->nama . ' sudah pernah diajukan'
+                ]);
+                return;
+            }
         }
 
         DB::beginTransaction();
@@ -101,15 +106,18 @@ class CustomerReturnForm extends Component
                 $photoPaths[] = $path;
             }
 
-            CustomerReturn::create([
-                'order_id'          => $this->order->id,
-                'order_item_id'     => $orderItem->id,
-                'user_id'           => Auth::id(),
-                'reason'            => $this->reason,
-                'reason_detail'     => $this->reasonDetail,
-                'evidence_photos'   => $photoPaths,
-                'status'            => 'pending'
-            ]);
+            foreach ($orderItems as $orderItem) {
+                CustomerReturn::create([
+                    'order_id'          => $this->order->id,
+                    'order_item_id'     => $orderItem->id,
+                    'user_id'           => Auth::id(),
+                    'reason'            => $this->reason,
+                    'reason_detail'     => $this->reasonDetail,
+                    'evidence_photos'   => $photoPaths,
+                    'status'            => 'pending'
+                ]);
+            }
+
             $this->order->update([
                 'status' => 'return_requested',
             ]);
@@ -119,10 +127,11 @@ class CustomerReturnForm extends Component
             // Kirim Notifikasi WA
             try {
                 $whatsapp = app(WhatsAppService::class);
+                $itemsLabel = $orderItems->map(fn($item) => $item->produk->jenisSablon->nama)->implode(', ');
                 $whatsapp->sendReturnRequestNotification(
                     $this->order->penerima_telepon,
                     $this->order->order_number,
-                    $orderItem->produk->jenisSablon->nama
+                    $itemsLabel
                 );
             } catch (\Exception $e) {
                 Log::error('Gagal kirim WA return request: ' . $e->getMessage());
@@ -130,7 +139,7 @@ class CustomerReturnForm extends Component
 
             $this->dispatch('show-alert', [
                 'type'      => 'success',
-                'message'   => 'Permintaan return berhasil diajukan. Mohon tunggu review dari admin.'
+                'message'   => 'Permintaan return berhasil diajukan untuk ' . $orderItems->count() . ' item. Mohon tunggu review dari admin.'
             ]);
 
             return redirect()->route('customer.orders.show', $this->order->id);

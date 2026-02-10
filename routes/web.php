@@ -84,8 +84,11 @@ Route::prefix('customer')
         Route::get('/orders', [CustomerController::class, 'orders'])->name('orders.index');
         Route::get('/orders/create', [CustomerController::class, 'createOrder'])->name('order.create');
         Route::get('/orders/{order}', [CustomerController::class, 'showOrder'])->name('orders.show');
+        Route::post('/orders/{order}/cancel', [CustomerController::class, 'cancelOrder'])->name('orders.cancel');
 
-        // Design Editor Routes (AJAX)
+        // Design Editor Routes
+        Route::get('/design-editor/{index}', [DesignEditorController::class, 'index'])->name('design-editor.page');
+        Route::post('/design-editor/save', [DesignEditorController::class, 'saveDesign'])->name('design-editor.save');
         Route::post('/design-editor/upload-image', [DesignEditorController::class, 'uploadImage'])->name('design-editor.upload');
         Route::post('/design-editor/delete-image', [DesignEditorController::class, 'deleteImage'])->name('design-editor.delete');
 

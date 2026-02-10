@@ -18,7 +18,8 @@
                 <div class="text-center md:text-right">
                     <p class="text-[10px] font-black uppercase tracking-widest text-amber-600">Batas Waktu Return</p>
                     <p class="text-xs font-bold text-amber-900 uppercase">
-                        {{ $order->completed_at->addDays(7)->format('d F Y') }}</p>
+                        {{ $order->completed_at->addDays(7)->format('d F Y') }}
+                    </p>
                 </div>
             </div>
 
@@ -26,17 +27,18 @@
                 <!-- Item Selection -->
                 <div class="space-y-4">
                     <label class="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Pilih Item
-                        Bermasalah</label>
+                        Bermasalah (Bisa pilih lebih dari satu)</label>
                     <div class="grid grid-cols-1 gap-4">
                         @foreach ($order->items as $item)
                             <label
-                                class="relative flex items-center gap-6 p-6 rounded-3xl border-2 transition-all cursor-pointer {{ $selectedItemId == $item->id ? 'border-primary bg-primary/5' : 'border-slate-50 hover:border-slate-100' }}">
-                                <input type="radio" wire:model.live="selectedItemId" value="{{ $item->id }}"
-                                    class="h-5 w-5 text-primary border-slate-300 focus:ring-primary">
+                                class="relative flex items-center gap-6 p-6 rounded-3xl border-2 transition-all cursor-pointer {{ in_array($item->id, $selectedItemIds) ? 'border-primary bg-primary/5' : 'border-slate-50 hover:border-slate-100' }}">
+                                <input type="checkbox" wire:model.live="selectedItemIds" value="{{ $item->id }}"
+                                    class="h-5 w-5 text-primary border-slate-300 rounded focus:ring-primary">
                                 <div class="flex-1">
                                     <h6 class="font-black text-slate-900">{{ $item->produk->jenisSablon->nama }}</h6>
                                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                        {{ $item->produk->ukuran->nama }} | Qty: {{ $item->quantity }} @if ($item->ukuran_kaos)
+                                        {{ $item->produk->ukuran->nama }} | Qty: {{ $item->quantity }}
+                                        @if ($item->ukuran_kaos)
                                             | Size: {{ $item->ukuran_kaos }}
                                         @endif
                                     </p>
@@ -48,7 +50,7 @@
                             </label>
                         @endforeach
                     </div>
-                    @error('selectedItemId')
+                    @error('selectedItemIds')
                         <p class="text-xs text-red-500 font-bold ml-4">{{ $message }}</p>
                     @enderror
                 </div>
@@ -105,8 +107,7 @@
                         @if (count($evidencePhotos) < 5)
                             <label
                                 class="h-32 w-32 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all cursor-pointer">
-                                <input type="file" wire:model="evidencePhotos" class="hidden" multiple
-                                    accept="image/*">
+                                <input type="file" wire:model="evidencePhotos" class="hidden" multiple accept="image/*">
                                 <i class="lni lni-plus text-2xl mb-1"></i>
                                 <span class="text-[10px] font-black uppercase tracking-widest">Tambah</span>
                             </label>
@@ -142,7 +143,7 @@
                         <i class="lni lni-arrow-left"></i> Kembali ke Detail
                     </a>
                     <button type="submit" wire:loading.attr="disabled"
-                        class="btn-premium !bg-amber-500 hover:!bg-amber-600 !shadow-amber-500/20 w-full md:w-auto !px-12 flex items-center gap-3">
+                        class="btn-premium bg-amber-500! hover:bg-amber-600! shadow-amber-500/20! w-full md:w-auto px-12! flex items-center gap-3">
                         <span wire:loading.remove>Kirim Pengajuan</span>
                         <span wire:loading class="flex items-center gap-2">
                             <i class="lni lni-spinner-arrow animate-spin"></i> Memproses...

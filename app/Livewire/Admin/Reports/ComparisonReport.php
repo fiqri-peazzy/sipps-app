@@ -30,7 +30,7 @@ class ComparisonReport extends Component
         // Get order items dalam periode
         $items = OrderItem::with(['order', 'produk'])
             ->whereHas('order', function ($q) {
-                $q->whereBetween('verified_at', [$this->startDate, $this->endDate]);
+                $q->whereBetween('verified_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
             })
             ->latest()
             ->paginate(20);
@@ -38,7 +38,7 @@ class ComparisonReport extends Component
         // Get all items untuk simulasi
         $allItems = OrderItem::with(['order', 'produk'])
             ->whereHas('order', function ($q) {
-                $q->whereBetween('verified_at', [$this->startDate, $this->endDate]);
+                $q->whereBetween('verified_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
             })
             ->get();
 
@@ -292,6 +292,7 @@ class ComparisonReport extends Component
             'completed_items' => 0,
             'on_time_items' => 0,
             'late_items' => 0,
+            'real_completed_count' => 0,
         ];
     }
 
@@ -305,7 +306,7 @@ class ComparisonReport extends Component
     {
         $allItems = OrderItem::with(['order', 'produk'])
             ->whereHas('order', function ($q) {
-                $q->whereBetween('verified_at', [$this->startDate, $this->endDate]);
+                $q->whereBetween('verified_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
             })
             ->get();
 

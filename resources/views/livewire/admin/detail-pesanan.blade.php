@@ -95,37 +95,39 @@
                                         </div>
                                     @endif
                                     <!-- Preview Design Area -->
-                                    <div class="row g-2">
+                                    <div class="row g-2 mb-2">
                                         @php
                                             $areas = [
                                                 'front' => ['label' => 'Depan', 'icon' => 'ti-square'],
                                                 'back' => ['label' => 'Belakang', 'icon' => 'ti-square-rotated'],
                                                 'left_sleeve' => ['label' => 'Lengan Kiri', 'icon' => 'ti-arrows-left'],
-                                                'right_sleeve' => [
-                                                    'label' => 'Lengan Kanan',
-                                                    'icon' => 'ti-arrows-right',
-                                                ],
+                                                'right_sleeve' => ['label' => 'Lengan Kanan', 'icon' => 'ti-arrows-right'],
                                             ];
                                         @endphp
                                         @foreach ($areas as $areaKey => $areaData)
                                             @if ($this->hasDesignInArea($item->id, $areaKey))
-                                                <div class="col-md-3">
-                                                    <div class="card border-primary">
-                                                        <div class="card-body text-center p-2">
-                                                            <i class="ti {{ $areaData['icon'] }} text-primary"
-                                                                style="font-size: 2rem;"></i>
-                                                            <p class="mb-2 mt-2">
-                                                                <small><strong>{{ $areaData['label'] }}</strong></small>
-                                                            </p>
-                                                            <button
-                                                                wire:click="showDesignPreview({{ $item->id }}, '{{ $areaKey }}')"
-                                                                class="btn btn-sm btn-primary w-100 mb-1">
-                                                                <i class="ti ti-eye"></i> Preview
-                                                            </button>
-                                                            <a href="{{ route('admin.download.design.area', [$order->id, $item->id, $areaKey]) }}"
-                                                                class="btn btn-sm btn-outline-primary w-100">
-                                                                <i class="ti ti-download"></i> Download
-                                                            </a>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-primary h-100 mb-0 shadow-none">
+                                                        <div
+                                                            class="card-body text-center p-2 d-flex flex-column justify-content-between">
+                                                            <div>
+                                                                <i class="ti {{ $areaData['icon'] }} text-primary mb-1"
+                                                                    style="font-size: 1.5rem;"></i>
+                                                                <p class="mb-2 text-truncate">
+                                                                    <small><strong>{{ $areaData['label'] }}</strong></small>
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <button
+                                                                    wire:click="showDesignPreview({{ $item->id }}, '{{ $areaKey }}')"
+                                                                    class="btn btn-xs btn-primary w-100 mb-1">
+                                                                    <i class="ti ti-eye"></i> Preview
+                                                                </button>
+                                                                <a href="{{ route('admin.download.design.area', [$order->id, $item->id, $areaKey]) }}"
+                                                                    class="btn btn-xs btn-outline-primary w-100">
+                                                                    <i class="ti ti-download"></i> Doc
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -228,21 +230,22 @@
         </div>
         <!-- Modal Preview Design -->
         @if ($showDesignModal && $selectedItem)
-            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 1060;">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-fullscreen-md-down">
+                    <div class="modal-content overflow-hidden">
                         <div class="modal-header">
-                            <h5 class="modal-title">Preview Design -
-                                {{ ucwords(str_replace('_', ' ', $selectedArea)) }}</h5>
+                            <h5 class="modal-title font-bold">Preview Design -
+                                {{ ucwords(str_replace('_', ' ', $selectedArea)) }}
+                            </h5>
                             <button type="button" class="btn-close" wire:click="closeModal"></button>
                         </div>
-                        <div class="modal-body">
-                            <div class="text-center">
+                        <div class="modal-body p-0 overflow-auto" style="max-height: 85vh;">
+                            <div class="text-center p-3">
                                 @if ($selectedItem)
                                     <div id="design-preview-container"
-                                        style="position: relative; width: 100%; min-height:600px; margin: 0 auto;">
-                                        <canvas id="preview-canvas" width="500" height="600"
-                                            style="border: 1px solid #ddd;"></canvas>
+                                        class="bg-light rounded-3 d-flex align-items-center justify-content-center"
+                                        style="position: relative; width: 100%; min-height: 400px; max-width: 600px; margin: 0 auto; overflow: hidden;">
+                                        <canvas id="preview-canvas" width="500" height="600"></canvas>
                                     </div>
                                     <div class="mt-3">
                                         <p class="text-muted mb-2">
@@ -377,10 +380,10 @@
             try {
                 // Parse canvas JSON string
                 const canvasJsonRaw = JSON.parse(data.canvasJson);
-                previewCanvas.loadFromJSON(canvasJsonRaw, function() {
+                previewCanvas.loadFromJSON(canvasJsonRaw, function () {
                     const objectCount = previewCanvas.getObjects().length;
                     // Set all objects non-selectable
-                    previewCanvas.forEachObject(function(obj) {
+                    previewCanvas.forEachObject(function (obj) {
                         obj.set({
                             selectable: false,
                             evented: false
@@ -388,14 +391,36 @@
                     });
                     const templateUrl = '/frontend/assets/img/kaos-templates/' + data.warna + '-' + data.area +
                         '.png';
-                    fabric.Image.fromURL(templateUrl, function(img) {
+                    fabric.Image.fromURL(templateUrl, function (img) {
                         if (img && img.width) {
                             console.log('Template loaded, dimensions:', img.width, 'x', img.height);
-                            const scale = Math.min(500 / img.width, 600 / img.height);
-                            img.scale(scale);
+                            // SET Canvas to 1200x600 (Fixed Coordinate System to match Design Editor)
+                            const workspaceWidth = 1200;
+                            const workspaceHeight = 600;
+
+                            // Scale factors to fit container (max 500x600 or responsive)
+                            // However, we must maintain internal 1200x600 for coordinate mapping
+                            previewCanvas.setDimensions({
+                                width: workspaceWidth,
+                                height: workspaceHeight
+                            }, { backstoreOnly: true });
+
+                            // Calculate CSS scale to fit the container visually
+                            const targetWidth = Math.min(600, $('.modal-body').width() - 40);
+                            const cssScale = targetWidth / workspaceWidth;
+
+                            previewCanvas.setDimensions({
+                                width: workspaceWidth * cssScale,
+                                height: workspaceHeight * cssScale
+                            });
+                            previewCanvas.setZoom(cssScale);
+
+                            // Scale template to fill internal workspace area
                             img.set({
                                 left: 0,
                                 top: 0,
+                                scaleX: workspaceWidth / img.width,
+                                scaleY: workspaceHeight / img.height,
                                 selectable: false,
                                 evented: false
                             });
@@ -409,7 +434,7 @@
                     }, {
                         crossOrigin: 'anonymous'
                     });
-                }, function(o, object) {
+                }, function (o, object) {
                     console.log('Loading object:', object.type);
                 });
             } catch (error) {

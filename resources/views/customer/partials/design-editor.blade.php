@@ -36,7 +36,7 @@
 
                 <!-- Canvas Preview Area -->
                 <div
-                    class="relative bg-slate-50 rounded-2xl overflow-hidden flex-1 min-h-[400px] md:min-h-[500px] flex items-center justify-center">
+                    class="relative bg-slate-50 rounded-2xl overflow-hidden flex-1 min-h-[350px] md:min-h-[450px] flex items-center justify-center">
                     <!-- Front -->
                     <div class="canvas-area relative w-full h-full flex items-center justify-center" data-area="front"
                         style="display: flex;">
@@ -141,9 +141,9 @@
                                     data-color="{{ $name }}" title="{{ ucfirst($name) }}"
                                     style="background-color: {{ $data['hex'] }}; border: 1px solid rgba(0,0,0,0.1);">
                                     <div
-                                        class="absolute inset-0 flex items-center justify-center opacity-0 group-[.active]:opacity-100 transition-opacity">
+                                        class="absolute inset-0 flex items-center justify-center opacity-0 group-[.active]:opacity-100 transition-opacity pointer-events-none">
                                         <i
-                                            class="lni lni-checkmark text-sm {{ $name == 'putih' || $name == 'kuning' ? 'text-slate-900' : 'text-white' }}"></i>
+                                            class="lni lni-checkmark text-xs {{ $name == 'putih' || $name == 'kuning' ? 'text-slate-900' : 'text-white' }}"></i>
                                     </div>
                                 </div>
                             @endforeach
@@ -203,12 +203,13 @@
                 </h6>
                 <div class="space-y-2">
                     @foreach (['front' => 'Depan', 'back' => 'Belakang', 'left_sleeve' => 'Lengan Kiri', 'right_sleeve' => 'Lengan Kanan'] as $area => $label)
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl summary-item"
                             data-summary-area="{{ $area }}">
                             <span class="text-xs font-bold text-slate-600">{{ $label }}</span>
                             <span
-                                class="text-[10px] font-black uppercase text-slate-400 px-2 py-1 bg-white rounded-lg border border-slate-100 status-badge">Belum
-                                ada</span>
+                                class="text-[10px] font-black uppercase px-2 py-1 rounded-lg border border-slate-100 text-slate-400 bg-white status-badge">
+                                Belum ada
+                            </span>
                         </div>
                     @endforeach
                 </div>

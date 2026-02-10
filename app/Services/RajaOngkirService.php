@@ -21,23 +21,34 @@ class RajaOngkirService
      */
     public function getProvinces()
     {
-        return Cache::remember('rajaongkir_provinces', 86400, function () {
-            try {
-                $response = Http::withoutVerifying()->withHeaders([
-                    'key' => $this->apiKey,
-                    'accept' => 'application/json',
-                ])->get($this->baseUrl . '/destination/province');
+        $cached = Cache::get('rajaongkir_provinces');
+        if ($cached) {
+            return $cached;
+        }
 
-                if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
-                    return $response->json('data');
+        try {
+            $response = Http::withoutVerifying()->withHeaders([
+                'key' => $this->apiKey,
+                'accept' => 'application/json',
+            ])->get($this->baseUrl . '/destination/province');
+
+            if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                $data = $response->json('data');
+                if (!empty($data)) {
+                    Cache::put('rajaongkir_provinces', $data, 86400);
+                    return $data;
                 }
-
-                return [];
-            } catch (\Exception $e) {
-                Log::error('RajaOngkir Get Provinces Error: ' . $e->getMessage());
-                return [];
             }
-        });
+
+            Log::warning('RajaOngkir Get Provinces Empty or Failed: ', [
+                'status' => $response->status(),
+                'json' => $response->json()
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            Log::error('RajaOngkir Get Provinces Error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -46,29 +57,40 @@ class RajaOngkirService
     public function getCities($provinceId = null)
     {
         $cacheKey = $provinceId ? "rajaongkir_cities_{$provinceId}" : "rajaongkir_cities_all";
+        $cached = Cache::get($cacheKey);
+        if ($cached) {
+            return $cached;
+        }
 
-        return Cache::remember($cacheKey, 86400, function () use ($provinceId) {
-            try {
-                $url = $this->baseUrl . '/destination/city';
-                if ($provinceId) {
-                    $url .= '/' . urlencode($provinceId);
-                }
-
-                $response = Http::withoutVerifying()->withHeaders([
-                    'key' => $this->apiKey,
-                    'accept' => 'application/json',
-                ])->get($url);
-
-                if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
-                    return $response->json('data');
-                }
-
-                return [];
-            } catch (\Exception $e) {
-                Log::error('RajaOngkir Get Cities Error: ' . $e->getMessage());
-                return [];
+        try {
+            $url = $this->baseUrl . '/destination/city';
+            if ($provinceId) {
+                $url .= '/' . urlencode($provinceId);
             }
-        });
+
+            $response = Http::withoutVerifying()->withHeaders([
+                'key' => $this->apiKey,
+                'accept' => 'application/json',
+            ])->get($url);
+
+            if ($response->json('meta.status') == 'success' && $response->json('meta.code') == 200) {
+                $data = $response->json('data');
+                if (!empty($data)) {
+                    Cache::put($cacheKey, $data, 86400);
+                    return $data;
+                }
+            }
+
+            Log::warning('RajaOngkir Get Cities Empty or Failed: ', [
+                'province_id' => $provinceId,
+                'status' => $response->status(),
+                'json' => $response->json()
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            Log::error('RajaOngkir Get Cities Error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**

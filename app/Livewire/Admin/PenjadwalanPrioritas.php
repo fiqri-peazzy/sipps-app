@@ -215,6 +215,9 @@ class PenjadwalanPrioritas extends Component
             });
         if ($this->filterStatus !== 'all') {
             $query->where('production_status', $this->filterStatus);
+        } else {
+            // Default: exclude completed items from the priority queue
+            $query->where('production_status', '!=', 'completed');
         }
         if ($this->filterJenisSablon) {
             $query->whereHas(

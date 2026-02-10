@@ -11,28 +11,25 @@
 @endpush
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div class="flex flex-col lg:flex-row gap-8">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-10 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- Sidebar -->
             <aside class="w-full lg:w-80 shrink-0">
                 <div class="sticky top-28 space-y-6">
                     <!-- User Profile Card -->
-                    <div class="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="bg-slate-900 p-8 text-white relative overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="bg-slate-900 p-6 text-white relative overflow-hidden">
                             <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
                             <div class="relative z-10 flex flex-col items-center">
                                 <div
                                     class="h-20 w-20 rounded-3xl bg-linear-to-br from-primary to-secondary p-1 shadow-xl mb-4">
                                     <div
-                                        class="h-full w-full rounded-[1.25rem] bg-slate-900 flex items-center justify-center text-3xl font-black">
+                                        class="h-full w-full rounded-[1.25rem] bg-slate-900 flex items-center justify-center text-3xl font-white">
                                         {{ substr(auth()->user()->name, 0, 1) }}
                                     </div>
                                 </div>
-                                <h5 class="text-xl font-black tracking-tight">{{ auth()->user()->name }}</h5>
-                                <div
-                                    class="mt-2 px-4 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-primary">
-                                    Reguler Member
-                                </div>
+                                <h5 class="text-xl text-white tracking-tight">{{ auth()->user()->name }}</h5>
+
                             </div>
                         </div>
 
@@ -83,7 +80,7 @@
 
                     <!-- Create Order Promo Card -->
                     <div
-                        class="bg-linear-to-br from-primary to-secondary p-8 rounded-4xl text-white shadow-xl shadow-primary/20 relative overflow-hidden group">
+                        class="bg-linear-to-br from-primary to-secondary p-6 rounded-3xl text-white shadow-xl shadow-primary/20 relative overflow-hidden group">
                         <div
                             class="absolute -bottom-6 -right-6 h-32 w-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700">
                         </div>

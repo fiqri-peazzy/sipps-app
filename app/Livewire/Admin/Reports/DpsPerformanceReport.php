@@ -32,7 +32,7 @@ class DpsPerformanceReport extends Component
         // Query order items dengan filter
         $query = OrderItem::with(['order', 'produk'])
             ->whereHas('order', function ($q) {
-                $q->whereBetween('verified_at', [$this->startDate, $this->endDate]);
+                $q->whereBetween('verified_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
             });
 
         if ($this->productionStatus) {
@@ -44,7 +44,7 @@ class DpsPerformanceReport extends Component
         // Calculate metrics
         $allItems = OrderItem::with('order')
             ->whereHas('order', function ($q) {
-                $q->whereBetween('verified_at', [$this->startDate, $this->endDate]);
+                $q->whereBetween('verified_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
             })
             ->when($this->productionStatus, fn($q) => $q->where('production_status', $this->productionStatus))
             ->get();
@@ -92,7 +92,7 @@ class DpsPerformanceReport extends Component
 
         // 5. Priority Recalculation Stats
         $totalRecalculations = PriorityLog::whereIn('order_item_id', $items->pluck('id'))
-            ->whereBetween('created_at', [$this->startDate, $this->endDate])
+            ->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
             ->count();
 
         // 6. Production Status Breakdown
@@ -122,7 +122,7 @@ class DpsPerformanceReport extends Component
     {
         $query = OrderItem::with(['order', 'produk'])
             ->whereHas('order', function ($q) {
-                $q->whereBetween('verified_at', [$this->startDate, $this->endDate]);
+                $q->whereBetween('verified_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
             });
 
         if ($this->productionStatus) {

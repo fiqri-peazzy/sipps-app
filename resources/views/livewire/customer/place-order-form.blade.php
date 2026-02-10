@@ -22,8 +22,7 @@
         @endif
 
         @if (session()->has('error'))
-            <div
-                class="mb-8 p-6 rounded-4xl bg-red-50 border border-red-100 flex items-center gap-4 animate-in zoom-in-95">
+            <div class="mb-8 p-6 rounded-4xl bg-red-50 border border-red-100 flex items-center gap-4 animate-in zoom-in-95">
                 <div class="h-10 w-10 rounded-xl bg-red-500 text-white flex items-center justify-center shrink-0">
                     <i class="lni lni-warning text-xl"></i>
                 </div>
@@ -106,8 +105,7 @@
                                     <div class="space-y-2">
                                         <label
                                             class="text-xs font-black uppercase tracking-widest text-slate-400">Jumlah</label>
-                                        <input type="number" wire:model.live="orderItems.{{ $index }}.quantity"
-                                            min="1"
+                                        <input type="number" wire:model.live="orderItems.{{ $index }}.quantity" min="1"
                                             class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700">
                                     </div>
                                     <div class="space-y-2">
@@ -122,8 +120,8 @@
                                         </select>
                                     </div>
                                     <div class="space-y-2">
-                                        <label
-                                            class="text-xs font-black uppercase tracking-widest text-slate-400">Tipe Lengan</label>
+                                        <label class="text-xs font-black uppercase tracking-widest text-slate-400">Tipe
+                                            Lengan</label>
                                         <select wire:model.live="orderItems.{{ $index }}.tipe_lengan"
                                             class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 appearance-none tipe-lengan-select"
                                             data-index="{{ $index }}">
@@ -144,20 +142,18 @@
                             </div>
 
                             <!-- Design Actions -->
-                            <div
-                                class="mt-8 pt-8 border-t border-slate-50 flex flex-col md:flex-row items-center gap-6">
+                            <div class="mt-8 pt-8 border-t border-slate-50 flex flex-col md:flex-row items-center gap-6">
                                 <div class="flex-1">
                                     <h5 class="text-sm font-bold text-slate-700">Kustomisasi Desain</h5>
                                     <p class="text-xs text-slate-500">Unggah aset desain atau gunakan alat bantu editor
                                         kami.</p>
                                 </div>
 
-                                <button type="button"
-                                    class="w-full md:w-auto btn-premium bg-slate-900! rounded-2xl! flex items-center gap-2 group btn-open-design-editor"
-                                    data-item-index="{{ $index }}" wire:key="design-btn-{{ $index }}"
-                                    @if (!isset($item['produk_id']) || empty($item['produk_id'])) disabled @endif>
+                                <button type="button" wire:click="goToDesignEditor({{ $index }})"
+                                    class="w-full md:w-auto btn-premium bg-slate-900! rounded-2xl! flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                    @if(!isset($item['produk_id']) || empty($item['produk_id'])) disabled @endif>
                                     <i class="lni lni-brush group-hover:rotate-12 transition-transform"></i>
-                                    {{ isset($item['design_config']) && $item['design_config'] ? 'Edit Desain Kaos' : 'Mulai Desain Kaos' }}
+                                    {{ (isset($item['design_config']) && $item['design_config']) ? 'Edit Desain Kaos' : 'Mulai Desain Kaos' }}
                                 </button>
                             </div>
 
@@ -173,7 +169,8 @@
                                             <p class="text-sm font-bold text-green-700">Desain Siap Produksi</p>
                                             <p class="text-[10px] text-green-600 font-medium uppercase tracking-widest">
                                                 Warna: {{ $item['design_config']['warna_kaos'] }} | Ukuran:
-                                                {{ $item['design_config']['ukuran_kaos'] }}</p>
+                                                {{ $item['design_config']['ukuran_kaos'] }}
+                                            </p>
                                         </div>
                                     </div>
                                     <button type="button" wire:click="clearDesign({{ $index }})"
@@ -185,8 +182,7 @@
                                 <input type="hidden" class="design-config-data" data-item-index="{{ $index }}"
                                     value="{{ json_encode($item['design_config']) }}">
                             @else
-                                <input type="hidden" class="design-config-data" data-item-index="{{ $index }}"
-                                    value="">
+                                <input type="hidden" class="design-config-data" data-item-index="{{ $index }}" value="">
                             @endif
                         </div>
                     @endforeach
@@ -253,8 +249,7 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                class="text-xs font-black uppercase tracking-widest text-slate-400">Kecamatan</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-400">Kecamatan</label>
                             <select wire:model.live="district_id" {{ empty($districts) ? 'disabled' : '' }}
                                 class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold appearance-none disabled:opacity-50">
                                 <option value="">{{ $loadingDistricts ? 'Memuat...' : 'Pilih Kecamatan' }}
@@ -284,7 +279,8 @@
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-xs font-black uppercase tracking-widest text-slate-400">Alamat
                                 Lengkap</label>
-                            <textarea wire:model="alamat_lengkap" rows="3" placeholder="Jl. Raya No. 123, RT 01/RW 02..."
+                            <textarea wire:model="alamat_lengkap" rows="3"
+                                placeholder="Jl. Raya No. 123, RT 01/RW 02..."
                                 class="w-full bg-slate-50 border-none rounded-2xl p-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold"></textarea>
                             @error('alamat_lengkap')
                                 <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
@@ -294,7 +290,8 @@
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-xs font-black uppercase tracking-widest text-slate-400">Catatan Pesanan
                                 (Opsional)</label>
-                            <textarea wire:model="catatan" rows="2" placeholder="Contoh: Tolong bungkus plastik masing-masing kaos..."
+                            <textarea wire:model="catatan" rows="2"
+                                placeholder="Contoh: Tolong bungkus plastik masing-masing kaos..."
                                 class="w-full bg-slate-50 border-none rounded-2xl p-6 focus:ring-2 focus:ring-primary/20 transition-all font-semibold"></textarea>
                             @error('catatan')
                                 <span class="text-xs text-red-500 font-bold ml-4">{{ $message }}</span>
@@ -304,25 +301,25 @@
 
                     <!-- Courier Selection -->
                     @if ($tipe_pengiriman === 'antar_kota' && !empty($courierOptions))
-                        <div class="pt-8 border-t border-slate-50">
-                            <label class="text-xs font-black uppercase tracking-widest text-slate-400 block mb-6">Pilih
-                                Layanan Kurir</label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="pt-6 border-t border-slate-50">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-4">Pilih Layanan Kurir</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 @foreach ($courierOptions as $index => $courier)
-                                    <label
-                                        class="relative flex flex-col p-6 rounded-3xl border-2 transition-all cursor-pointer {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-primary/30' }}">
+                                    <label class="relative flex items-center p-4 rounded-xl border-2 transition-all cursor-pointer {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'border-primary bg-primary/5' : 'border-slate-50 hover:border-slate-200' }}">
                                         <input type="radio" wire:click="selectCourier({{ $index }})"
-                                            class="absolute top-6 right-6 h-5 w-5 text-primary border-slate-300 focus:ring-primary"
+                                            class="h-5 w-5 text-primary border-slate-300 focus:ring-primary mr-4"
                                             {{ $kurir_code === $courier['code'] && $kurir_service === $courier['service'] ? 'checked' : '' }}>
-                                        <span
-                                            class="text-sm font-black text-slate-800 uppercase tracking-widest mb-1">{{ $courier['name'] }}</span>
-                                        <span
-                                            class="text-xs font-bold text-slate-400 mb-4">{{ $courier['service'] }}</span>
-                                        <span class="text-xl font-black text-primary mb-2">Rp
-                                            {{ number_format($courier['cost'], 0, ',', '.') }}</span>
-                                        <div
-                                            class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600">
-                                            <i class="lni lni-timer"></i> {{ $courier['etd'] }}
+                                        <div class="flex-1">
+                                            <div class="flex flex-wrap items-baseline gap-2">
+                                                <span class="text-xs font-black text-slate-800 uppercase tracking-widest">{{ $courier['name'] }}</span>
+                                                <span class="text-[10px] font-bold text-slate-400">{{ $courier['service'] }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-4 mt-1">
+                                                <span class="text-sm font-black text-primary">Rp {{ number_format($courier['cost'], 0, ',', '.') }}</span>
+                                                <div class="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-green-600">
+                                                    <i class="lni lni-timer"></i> {{ $courier['etd'] }}
+                                                </div>
+                                            </div>
                                         </div>
                                     </label>
                                 @endforeach
@@ -336,7 +333,7 @@
             <div class="lg:col-span-4 lg:sticky lg:top-28">
                 <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-primary/20 space-y-10">
                     <div class="space-y-2">
-                        <h2 class="text-2xl font-black tracking-tight italic">Checkout</h2>
+                        <h2 class="text-2xl text-white tracking-tight italic">Checkout</h2>
                         <div class="h-1 w-12 bg-primary rounded-full"></div>
                     </div>
 
@@ -359,7 +356,8 @@
                                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Total
                                     Pembayaran</span>
                                 <div class="text-3xl font-black text-white">Rp
-                                    {{ number_format($total, 0, ',', '.') }}</div>
+                                    {{ number_format($total, 0, ',', '.') }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -370,10 +368,10 @@
                             Konfirmasi Pesanan <i class="lni lni-chevron-right"></i>
                         </span>
                         <span wire:loading class="flex items-center gap-3">
-                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10"
-                                    stroke="currentColor" stroke-width="4"></circle>
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor"
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                 </path>
@@ -402,56 +400,6 @@
         </div>
     </form>
 
-    <!-- Modal Design Editor -->
-    <div class="fixed inset-0 z-100 hidden overflow-y-auto" id="designEditorModal" role="dialog" aria-modal="true">
-        <div class="flex min-h-screen items-center justify-center p-0 md:p-6">
-            <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-xl transition-opacity"
-                onclick="closeDesignModal()"></div>
-
-            <div
-                class="relative w-full h-full md:h-auto md:max-w-6xl bg-white md:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-500">
-                <div class="bg-slate-900 p-6 md:p-8 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-2xl">
-                            <i class="lni lni-brush"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xl text-white flex items-center gap-2" id="modal-item-title">Design
-                                Workspace <span class="hidden md:inline text-slate-500 font-medium">| SIPPS
-                                    Interactive</span></h4>
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Sesuaikan desain
-                                kaos anda dengan mudah</p>
-                        </div>
-                    </div>
-                    <button type="button"
-                        class="h-12 w-12 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 transition-colors"
-                        onclick="closeDesignModal()">
-                        <i class="lni lni-close text-xl"></i>
-                    </button>
-                </div>
-
-                <div class="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50">
-                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 md:p-8">
-                        @include('customer.partials.design-editor')
-                    </div>
-                </div>
-
-                <div
-                    class="p-6 md:p-8 bg-white border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="flex items-center gap-3 text-slate-400 text-sm font-medium">
-                        <i class="lni lni-save text-xl"></i> Desain tersimpan otomatis di browser selama sesi aktif
-                    </div>
-                    <div class="flex items-center gap-4 w-full md:w-auto">
-                        <button type="button"
-                            class="flex-1 md:flex-none px-10 py-4 rounded-2xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
-                            onclick="closeDesignModal()">Urungkan</button>
-                        <button type="button" id="btn-save-design-final"
-                            class="flex-1 md:flex-none btn-premium px-12!">Terapkan Desain</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @push('scripts')
@@ -461,89 +409,4 @@
         };
     </script>
     <script src="{{ asset('frontend/assets/js/design-editor.js') }}"></script>
-    <script>
-        var currentItemIndex = null;
-
-        function closeDesignModal() {
-            $('#designEditorModal').addClass('hidden');
-            $('body').removeClass('overflow-hidden');
-            currentItemIndex = null;
-        }
-
-        $(document).on('click', '.btn-open-design-editor', function() {
-            if ($(this).is(':disabled')) return;
-            var itemIndex = parseInt($(this).data('item-index'));
-            console.log('Opening design editor for item index:', itemIndex);
-
-            currentItemIndex = itemIndex;
-            
-            // Sync current size and sleeve from form
-            var $sizeSelect = $('.ukuran-kaos-select[data-index="' + itemIndex + '"]');
-            var $sleeveSelect = $('.tipe-lengan-select[data-index="' + itemIndex + '"]');
-            
-            var currentSize = $sizeSelect.val() || 'M';
-            var currentSleeve = $sleeveSelect.val() || 'pendek';
-
-            var existingConfigStr = $('.design-config-data[data-item-index="' + itemIndex + '"]').val();
-            var existingConfig = null;
-            if (existingConfigStr && existingConfigStr !== '' && existingConfigStr !== 'null') {
-                try {
-                    existingConfig = JSON.parse(existingConfigStr);
-                } catch (e) {
-                    console.error('Error parsing config:', e);
-                }
-            } else {
-                // Initial config if none exists
-                existingConfig = {
-                    ukuran_kaos: currentSize,
-                    tipe_lengan: currentSleeve,
-                    warna_kaos: 'putih'
-                };
-            }
-
-            // Ensure config is updated with current form values
-            if (existingConfig) {
-                existingConfig.ukuran_kaos = currentSize;
-                existingConfig.tipe_lengan = currentSleeve;
-            }
-
-            $(this).data('parsed-config', existingConfig);
-
-            var $modal = $('#designEditorModal');
-            if ($modal.length) {
-                $modal.removeClass('hidden');
-                $('body').addClass('overflow-hidden');
-                console.log('Modal element found and show command executed');
-            } else {
-                console.error('Modal element #designEditorModal not found in DOM!');
-            }
-
-            setTimeout(function() {
-                if (typeof DesignEditor !== 'undefined' && typeof fabric !== 'undefined') {
-                    DesignEditor.init(currentItemIndex, existingConfig);
-                } else {
-                    console.error('DesignEditor or Fabric.js not found during initialization');
-                }
-            }, 300);
-        });
-
-        $(document).on('click', '#btn-save-design-final', function() {
-            if (typeof DesignEditor === 'undefined' || currentItemIndex === null) return;
-            var itemIndex = DesignEditor.itemIndex;
-            var designConfig = DesignEditor.getDesignConfig();
-
-            $(this).prop('disabled', true).html(
-                '<i class="lni lni-spinner-arrow animate-spin mr-2"></i> Menyimpan...');
-
-            @this.handleDesignConfigSaved(itemIndex, designConfig)
-                .then(function() {
-                    $('.design-config-data[data-item-index="' + itemIndex + '"]').val(JSON.stringify(
-                        designConfig));
-                    closeDesignModal();
-                })
-                .finally(function() {
-                    $('#btn-save-design-final').prop('disabled', false).text('Terapkan Desain');
-                });
-        });
-    </script>
 @endpush

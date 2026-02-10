@@ -78,6 +78,25 @@ class CustomerController extends Controller
         return view('customer.orders.show', compact('order'));
     }
 
+    public function cancelOrder(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($order->status !== 'pending_payment') {
+            return back()->with('error', 'Hanya pesanan yang belum dibayar yang dapat dibatalkan.');
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancel_reason' => 'Dibatalkan oleh pelanggan'
+        ]);
+
+        return redirect()->route('customer.orders.index')->with('success', 'Pesanan berhasil dibatalkan.');
+    }
+
     /**
      * Halaman form return barang
      */

@@ -3,7 +3,7 @@
 @section('title', 'Buat Pesanan Baru')
 
 @section('content')
-    <div class="pt-32 pb-20 bg-slate-50 min-h-screen">
+    <div class="pt-12 pb-20 bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header Section -->
             <div class="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -34,7 +34,7 @@
                     'ukurans' => $ukurans,
                     'selectedJenis' => $selectedJenis,
                 ])
+                </div>
             </div>
         </div>
-    </div>
 @endsection

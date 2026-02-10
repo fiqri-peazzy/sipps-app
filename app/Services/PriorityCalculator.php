@@ -29,11 +29,20 @@ class PriorityCalculator
         $quantityScore = self::calculateQuantityScore($orderItem);
 
         // Apply weights and calculate final score
-        $priorityScore =
+        $priorityBaseScore =
             ($urgencyScore * $weights->weight_urgency) +
             ($complexityScore * $weights->weight_complexity) +
             ($waitingTimeScore * $weights->weight_waiting_time) +
             ($quantityScore * $weights->weight_quantity);
+
+        $priorityScore = $priorityBaseScore;
+
+        // Boost for return items (Significantly boost to ensure they are at the top)
+        if ($orderItem->is_return_item || ($orderItem->returned_count ?? 0) > 0) {
+            // Factor is based on urgency weight to make it consistent with the scoring system
+            // Adding a flat 100 points (normalized scale) times urgency weight
+            $priorityScore += (100 * $weights->weight_urgency);
+        }
 
         return (int) round($priorityScore);
     }

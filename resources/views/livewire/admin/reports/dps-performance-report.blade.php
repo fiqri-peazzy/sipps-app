@@ -50,10 +50,10 @@
                     <div class="card bg-primary text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <i class="ti ti-package" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Total Item</h6>
                                     <h3 class="text-white mb-0">{{ $stats['total_items'] }}</h3>
                                 </div>
@@ -65,10 +65,10 @@
                     <div class="card bg-warning text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <i class="ti ti-clock" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Rata-rata Waiting Time</h6>
                                     <h3 class="text-white mb-0">{{ $stats['avg_waiting_time'] }} jam</h3>
                                 </div>
@@ -80,10 +80,10 @@
                     <div class="card bg-success text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <i class="ti ti-check" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">On-Time Delivery</h6>
                                     <h3 class="text-white mb-0">{{ $stats['on_time_rate'] }}%</h3>
                                 </div>
@@ -95,10 +95,10 @@
                     <div class="card bg-info text-white">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <i class="ti ti-star" style="font-size: 48px; opacity: 0.3;"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
+                                <div class="grow ms-3">
                                     <h6 class="text-white mb-1">Avg Priority Score</h6>
                                     <h3 class="text-white mb-0">{{ $stats['avg_priority_score'] }}</h3>
                                 </div>
@@ -192,7 +192,9 @@
                                 @forelse($stats['status_breakdown'] as $status => $count)
                                     <tr>
                                         <td>
-                                            <span class="badge bg-{{ $statusLabels[$status]['color'] ?? 'secondary' }}">
+                                            <span
+                                                class="badg
+                                                                       e bg-{{ $statusLabels[$status]['color'] ?? 'secondary' }}">
                                                 {{ $statusLabels[$status]['label'] ?? ucfirst($status) }}
                                             </span>
                                         </td>
@@ -255,8 +257,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>Detail Item Produksi ({{ $items->total() }} data)</h5>
-                    <button type="button" wire:click="exportPdf" class="btn btn-danger"
-                        wire:loading.attr="disabled">
+                    <button type="button" wire:click="exportPdf" class="btn btn-danger" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="exportPdf">
                             <i class="ti ti-file-type-pdf"></i> Export PDF
                         </span>

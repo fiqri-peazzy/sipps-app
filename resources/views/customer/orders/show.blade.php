@@ -23,53 +23,50 @@
 @endpush
 
 @section('customer-content')
-    <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Detail <span
+    <div class="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Detail <span
                 class="text-primary italic">Pesanan</span></h1>
-        <p class="text-slate-500 mt-2 text-lg">Informasi lengkap mengenai status dan progres produksi pesanan Anda.</p>
+        <p class="text-slate-500 mt-1 text-base">Informasi lengkap mengenai status dan progres produksi pesanan Anda.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         <!-- Left Content -->
-        <div class="lg:col-span-8 space-y-8">
+        <div class="lg:col-span-8 space-y-6">
 
             <!-- Order Status Banner -->
-            <div class="card-modern p-0! overflow-hidden">
-                <div class="bg-slate-900 p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="flex items-center gap-4">
-                        <div class="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center text-2xl">
+            <div class="card-modern p-0! overflow-hidden rounded-2xl!">
+                <div class="bg-slate-900 p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-3">
+                        <div class="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-xl">
                             <i class="lni lni-cart"></i>
                         </div>
                         <div>
-                            <h4 class="text-xl font-black">{{ $order->order_number }}</h4>
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Dipesan pada
-                                {{ $order->created_at->format('d M Y, H:i') }} WIB</p>
+                            <h4 class="text-xl text-white">{{ $order->order_number }}</h4>
+                            <p class="text-xs font-bold text-white uppercase tracking-widest mt-1">Dipesan pada
+                                {{ $order->created_at->format('d M Y, H:i') }} WIB
+                            </p>
                         </div>
                     </div>
                     <div
                         class="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border-2 border-white/10
-                        @if ($order->status == 'completed') bg-green-500/10 text-green-400
-                        @elseif($order->status == 'pending_payment')
-                        @else @endif">
+                                            bg-{{ $order->status_color }}/20 text-{{ $order->status_color === 'warning' ? 'amber-400' : ($order->status_color === 'info' ? 'blue-400' : ($order->status_color === 'primary' ? 'indigo-400' : ($order->status_color === 'success' ? 'green-400' : 'slate-400'))) }}">
                         {{ $order->status_label }}
                     </div>
                 </div>
 
                 <!-- Step Timeline -->
-                <div class="p-10 bg-white">
-                    <div class="relative flex justify-between items-start max-w-4xl mx-auto">
+                <div class="p-6 md:p-8 bg-white">
+                    <div class="relative flex justify-between items-start max-w-3xl mx-auto">
                         <!-- Connecting Lines -->
                         <div class="absolute top-6 left-0 w-full h-1 bg-slate-50 flex">
-                            <div class="h-full bg-primary transition-all duration-1000"
-                                style="width: 
-                                @if ($order->status == 'completed') 100% 
-                                 @elseif($order->status == 'shipped') 80%
-                                 @elseif($order->status == 'ready_to_ship') 80%
-                                 @elseif($order->status == 'in_production') 60%
-                                 @elseif($order->status == 'verified') 40%
-                                 @elseif($order->status == 'paid') 20%
-                                 @else 0% @endif">
+                            <div class="h-full bg-primary transition-all duration-1000" style="width: 
+                                                @if ($order->status == 'completed' || $order->status == 'returned') 100% 
+                                                 @elseif($order->status == 'shipped' || $order->status == 'ready_to_ship') 80%
+                                                 @elseif($order->status == 'in_production') 60%
+                                                 @elseif($order->status == 'verified') 40%
+                                                 @elseif($order->status == 'paid' || $order->status == 'return_requested') 20%
+                                                 @else 0% @endif">
                             </div>
                         </div>
 
@@ -86,11 +83,11 @@
                             $currentStatus = $order->status;
                             $reachedSteps = match ($currentStatus) {
                                 'pending_payment' => [],
-                                'paid' => ['paid'],
+                                'paid', 'return_requested' => ['paid'],
                                 'verified' => ['paid', 'verified'],
                                 'in_production' => ['paid', 'verified', 'in_production'],
                                 'ready_to_ship', 'shipped' => ['paid', 'verified', 'in_production', 'shipped'],
-                                'completed' => ['paid', 'verified', 'in_production', 'shipped', 'completed'],
+                                'completed', 'returned' => ['paid', 'verified', 'in_production', 'shipped', 'completed'],
                                 default => [],
                             };
                         @endphp
@@ -98,12 +95,12 @@
                         @foreach ($steps as $step)
                             <div class="relative z-10 flex flex-col items-center gap-3">
                                 <div
-                                    class="h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500
-                                    {{ in_array($step['id'], $reachedSteps) ? 'bg-primary text-white shadow-lg shadow-primary/30 rotate-3' : 'bg-slate-50 text-slate-300' }}">
-                                    <i class="lni {{ $step['icon'] }} text-lg"></i>
+                                    class="h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all duration-500
+                                                                {{ in_array($step['id'], $reachedSteps) ? 'bg-primary text-white shadow-lg shadow-primary/30 rotate-3' : 'bg-slate-50 text-slate-300' }}">
+                                    <i class="lni {{ $step['icon'] }} text-base md:text-lg"></i>
                                 </div>
                                 <span
-                                    class="text-[10px] font-black uppercase tracking-widest {{ in_array($step['id'], $reachedSteps) ? 'text-primary' : 'text-slate-400' }}">
+                                    class="text-[9px] md:text-[10px] font-black uppercase tracking-widest {{ in_array($step['id'], $reachedSteps) ? 'text-primary' : 'text-slate-400' }}">
                                     {{ $step['label'] }}
                                 </span>
                             </div>
@@ -118,10 +115,10 @@
             @endphp
 
             @if ($returns->isNotEmpty())
-                <div class="card-modern bg-amber-50/50! border-amber-100">
-                    <div class="inline-flex items-center gap-3 mb-6">
+                <div class="card-modern bg-amber-50/50! border-amber-100 p-6!">
+                    <div class="inline-flex items-center gap-2 mb-4">
                         <div
-                            class="h-10 w-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-200">
+                            class="h-8 w-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-200">
                             <i class="lni lni-reload text-xl"></i>
                         </div>
                         <h2 class="text-xl font-black text-slate-900 tracking-tight">Informasi Pengembalian (Return)</h2>
@@ -129,12 +126,12 @@
 
                     <div class="space-y-4">
                         @foreach ($returns as $ret)
-                            <div
-                                class="p-5 rounded-2xl bg-white border border-amber-100 shadow-sm transition-all hover:shadow-md">
+                            <div class="p-5 rounded-2xl bg-white border border-amber-100 shadow-sm transition-all hover:shadow-md">
                                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                     <div>
                                         <h5 class="font-black text-slate-900">
-                                            {{ $ret->orderItem->produk->jenisSablon->nama }}</h5>
+                                            {{ $ret->orderItem->produk->jenisSablon->nama }}
+                                        </h5>
                                         <p class="text-sm text-slate-500 mt-1">Alasan: <span
                                                 class="font-bold text-slate-700">{{ $ret->reason_label }}</span></p>
                                         <p class="text-xs text-slate-400 mt-1 italic">"{{ $ret->reason_detail }}"</p>
@@ -145,7 +142,8 @@
                                             {{ $ret->status_label }}
                                         </span>
                                         <p class="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-                                            {{ $ret->created_at->format('d M Y, H:i') }}</p>
+                                            {{ $ret->created_at->format('d M Y, H:i') }}
+                                        </p>
                                     </div>
                                 </div>
                                 @if ($ret->resolution_type)
@@ -160,8 +158,7 @@
                                         </div>
                                         @if ($ret->resolution_type === 'refund')
                                             <div class="flex items-center gap-2">
-                                                <span
-                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total
+                                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total
                                                     Refund:</span>
                                                 <span class="text-xs font-black text-green-600">Rp
                                                     {{ number_format($ret->refund_amount, 0, ',', '.') }}</span>
@@ -196,8 +193,7 @@
                         <div class="py-6 flex flex-col md:flex-row md:items-center gap-6 group">
                             <div
                                 class="h-20 w-20 rounded-3xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:rotate-3 transition-transform">
-                                <i
-                                    class="lni lni-brush text-3xl text-slate-300 group-hover:text-primary transition-colors"></i>
+                                <i class="lni lni-brush text-3xl text-slate-300 group-hover:text-primary transition-colors"></i>
                             </div>
                             <div class="flex-1">
                                 <h5 class="font-black text-slate-900 text-lg">{{ $item->produk->jenisSablon->nama }}</h5>
@@ -260,7 +256,7 @@
             </div>
 
             <!-- Shipping Information -->
-            <div class="card-modern">
+            <div class="card-modern rounded-2xl!">
                 <div class="inline-flex items-center gap-3 mb-8">
                     <div class="h-10 w-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
                         <i class="lni lni-map-marker text-xl"></i>
@@ -314,12 +310,10 @@
                                     </div>
                                     @if ($order->resi)
                                         <div class="mt-6 pt-6 border-t border-white/10">
-                                            <p
-                                                class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+                                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
                                                 Nomor Resi</p>
                                             <div class="flex items-center justify-between">
-                                                <span
-                                                    class="text-lg font-black tracking-widest">{{ $order->resi }}</span>
+                                                <span class="text-lg font-black tracking-widest">{{ $order->resi }}</span>
                                                 <button onclick="navigator.clipboard.writeText('{{ $order->resi }}')"
                                                     class="h-10 w-10 flex items-center justify-center rounded-xl bg-primary text-white hover:scale-110 active:scale-95 transition-all">
                                                     <i class="lni lni-files"></i>
@@ -372,36 +366,48 @@
             </div>
 
             <!-- Contextual Actions -->
-            <div class="card-modern space-y-4">
-                <h5 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 px-2">Aksi Pesanan</h5>
+            <div class="card-modern space-y-4 rounded-2xl!">
+                <h5 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 px-2">Aksi Pesanan</h5>
 
-                @if ($order->status == 'pending_payment')
-                    <button type="button" id="btn-pay-now"
-                        class="w-full btn-premium flex items-center justify-center gap-3">
-                        <i class="lni lni-credit-cards"></i> Bayar Sekarang
-                    </button>
+                <div class="flex flex-col gap-3">
+                    @if ($order->status == 'pending_payment')
+                        <button type="button" id="btn-pay-now"
+                            class="w-full btn-premium flex items-center justify-center gap-3 py-4!">
+                            <i class="lni lni-credit-cards"></i> Bayar Sekarang
+                        </button>
 
-                    @if ($order->payment_expired_at)
-                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-center">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Batas
-                                Pembayaran</p>
-                            <span
-                                class="text-xs font-bold text-amber-900">{{ $order->payment_expired_at->format('d M Y, H:i') }}</span>
-                        </div>
+                        <button type="button" onclick="confirmCancel()"
+                            class="w-full h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center font-black text-sm hover:bg-red-100 transition-all gap-2 border border-red-100">
+                            <i class="lni lni-close"></i> Batalkan Pesanan
+                        </button>
+
+                        <form id="cancel-order-form" action="{{ route('customer.orders.cancel', $order->id) }}" method="POST"
+                            class="hidden">
+                            @csrf
+                        </form>
+
+                        @if ($order->payment_expired_at)
+                            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-center">
+                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Batas
+                                    Pembayaran</p>
+                                <span
+                                    class="text-xs font-bold text-amber-900">{{ $order->payment_expired_at->format('d M Y, H:i') }}</span>
+                            </div>
+                        @endif
                     @endif
-                @endif
 
-                @if ($order->canRequestReturn())
-                    <a href="{{ route('customer.orders.return', $order->id) }}"
-                        class="w-full h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-sm hover:bg-amber-200 transition-all gap-2">
-                        <i class="lni lni-reload"></i> Ajukan Pengembalian
+                    @if ($order->canRequestReturn())
+                        <a href="{{ route('customer.orders.return', $order->id) }}"
+                            class="w-full h-14 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center font-black text-sm hover:bg-amber-100 transition-all gap-2 border border-amber-100">
+                            <i class="lni lni-reload"></i> Ajukan Pengembalian
+                        </a>
+                    @endif
+
+                    <a href="{{ route('customer.orders.index') }}"
+                        class="w-full h-14 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center font-black text-sm hover:bg-slate-100 transition-all gap-2 border border-slate-100">
+                        <i class="lni lni-arrow-left"></i> Kembali ke List
                     </a>
-                @endif
-
-                <a href="{{ route('customer.orders.index') }}"
-                    class="w-full h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm hover:bg-slate-200 transition-all gap-2">
-                    <i class="lni lni-arrow-left"></i> Kembali ke List
-                </a>
+                </div>
             </div>
 
             <!-- Production Timeline (Detailed) -->
@@ -428,10 +434,10 @@
                             [
                                 'label' =>
                                     $order->status === 'returned'
-                                        ? 'Pesanan Dikembalikan'
-                                        : ($order->items->where('is_return_item', true)->isNotEmpty()
-                                            ? 'Produksi Ulang (Return)'
-                                            : 'Dalam Produksi'),
+                                    ? 'Pesanan Dikembalikan'
+                                    : ($order->items->where('is_return_item', true)->isNotEmpty()
+                                        ? 'Produksi Ulang (Return)'
+                                        : 'Dalam Produksi'),
                                 'time' => null,
                                 'active' => in_array($order->status, [
                                     'in_production',
@@ -451,13 +457,12 @@
 
                     @foreach ($progress as $p)
                         <div class="relative pl-14 flex flex-col">
-                            <div
-                                class="absolute left-4 top-1 h-4 w-4 rounded-full border-4 border-white z-10 
-                                {{ $p['active'] ? 'bg-primary' : 'bg-slate-100' }}">
+                            <div class="absolute left-4 top-1 h-4 w-4 rounded-full border-4 border-white z-10 
+                                                                    {{ $p['active'] ? 'bg-primary' : 'bg-slate-100' }}">
                             </div>
                             <span
                                 class="text-xs font-black uppercase tracking-widest 
-                                {{ $p['active'] ? 'text-slate-900' : 'text-slate-300' }}">{{ $p['label'] }}</span>
+                                                                    {{ $p['active'] ? 'text-slate-900' : 'text-slate-300' }}">{{ $p['label'] }}</span>
                             @if ($p['time'])
                                 <span
                                     class="text-[10px] font-bold text-slate-400 mt-1 uppercase leading-none">{{ $p['time']->format('d M, H:i') }}</span>
@@ -475,11 +480,11 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             var orderId = {{ $order->id }};
 
-            $('#btn-pay-now').on('click', function(e) {
+            $('#btn-pay-now').on('click', function (e) {
                 e.preventDefault();
                 var $btn = $(this);
                 $btn.prop('disabled', true).html(
@@ -491,26 +496,26 @@
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             snap.pay(response.snap_token, {
-                                onSuccess: function(result) {
+                                onSuccess: function (result) {
                                     window.location.href =
                                         "{{ route('customer.payment.finish') }}?order_id=" +
                                         result.order_id;
                                 },
-                                onPending: function(result) {
+                                onPending: function (result) {
                                     window.location.href =
                                         "{{ route('customer.payment.unfinish') }}?order_id=" +
                                         result.order_id;
                                 },
-                                onError: function(result) {
+                                onError: function (result) {
                                     console.error('Payment Error:', result);
                                     $btn.prop('disabled', false).html(
                                         '<i class="lni lni-credit-cards"></i> Bayar Sekarang'
                                     );
                                 },
-                                onClose: function() {
+                                onClose: function () {
                                     $btn.prop('disabled', false).html(
                                         '<i class="lni lni-credit-cards"></i> Bayar Sekarang'
                                     );
@@ -521,5 +526,22 @@
                 });
             });
         });
+
+        function confirmCancel() {
+            Swal.fire({
+                title: 'Batalkan Pesanan?',
+                text: "Pesanan yang dibatalkan tidak dapat dikembalikan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Batalkan!',
+                cancelButtonText: 'Tutup'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#cancel-order-form').submit();
+                }
+            });
+        }
     </script>
 @endpush

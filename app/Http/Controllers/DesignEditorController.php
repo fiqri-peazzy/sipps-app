@@ -11,6 +11,57 @@ use Illuminate\Support\Facades\Auth;
 class DesignEditorController extends Controller
 {
     /**
+     * Show Standalone Design Editor Page
+     */
+    public function index($index)
+    {
+        $state = session('place_order_form_state');
+
+        // Jika tidak ada state di session, kemungkinan user akses langsung.
+        // Kita bisa ambil default atau arahkan balik.
+        if (!$state || !isset($state['orderItems'][$index])) {
+            return redirect()->route('customer.order.create');
+        }
+
+        $item = $state['orderItems'][$index];
+
+        return view('customer.design-editor.index', [
+            'itemIndex' => $index,
+            'item' => $item,
+            'existingConfig' => $item['design_config'] ?? null,
+        ]);
+    }
+
+    /**
+     * Save Design to Session
+     */
+    public function saveDesign(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'item_index' => 'required',
+            'design_config' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Data tidak valid']);
+        }
+
+        $index = $request->item_index;
+        $config = $request->design_config;
+
+        $state = session('place_order_form_state');
+        if ($state && isset($state['orderItems'][$index])) {
+            $state['orderItems'][$index]['design_config'] = $config;
+            // Update warna_kaos di orderItems agar sync
+            if (isset($config['warna_kaos'])) {
+                $state['orderItems'][$index]['warna_kaos'] = $config['warna_kaos'];
+            }
+            session(['place_order_form_state' => $state]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+    /**
      * Upload design image
      */
     public function uploadImage(Request $request)
