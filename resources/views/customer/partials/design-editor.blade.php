@@ -122,17 +122,6 @@
                 </h6>
                 <div class="space-y-4">
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Ukuran
-                            Default</label>
-                        <select class="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-slate-700"
-                            id="ukuran-kaos">
-                            @foreach (['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $sz)
-                                <option value="{{ $sz }}" {{ $sz == 'M' ? 'selected' : '' }}>
-                                    {{ $sz }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Warna
                             Dasar</label>
                         <div class="grid grid-cols-4 gap-3">

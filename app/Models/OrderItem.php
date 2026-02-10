@@ -14,6 +14,7 @@ class OrderItem extends Model
         'produk_id',
         'quantity',
         'ukuran_kaos',
+        'tipe_lengan',
         'warna_kaos',
         'harga_satuan',
         'subtotal',
@@ -29,19 +30,20 @@ class OrderItem extends Model
     ];
 
     protected $casts = [
-        'harga_satuan'                  => 'decimal:2',
-        'subtotal'                      => 'decimal:2',
-        'deadline'                      => 'datetime',
-        'design_config'                 => 'array',
-        'complexity_reviewed_at'        => 'datetime',
-        'production_started_at'         => 'datetime',
-        'last_priority_calculated_at'   => 'datetime',
-        'is_return_item'                => 'boolean'
+        'harga_satuan' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+        'deadline' => 'datetime',
+        'design_config' => 'array',
+        'complexity_reviewed_at' => 'datetime',
+        'production_started_at' => 'datetime',
+        'last_priority_calculated_at' => 'datetime',
+        'is_return_item' => 'boolean'
     ];
     // Helper methods
     public function hasDesign($area)
     {
-        if (!$this->design_config) return false;
+        if (!$this->design_config)
+            return false;
         return isset($this->design_config[$area]);
     }
 
@@ -128,11 +130,11 @@ class OrderItem extends Model
     // Accessors
     public function getFormattedSubtotalAttribute()
     {
-        return 'Rp ' . number_format($this->subtotal, 0, ',', '.');
+        return 'Rp ' . number_format((float) $this->subtotal, 0, ',', '.');
     }
 
     public function getFormattedHargaSatuanAttribute()
     {
-        return 'Rp ' . number_format($this->harga_satuan, 0, ',', '.');
+        return 'Rp ' . number_format((float) $this->harga_satuan, 0, ',', '.');
     }
 }

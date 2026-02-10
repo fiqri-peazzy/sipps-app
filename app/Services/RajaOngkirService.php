@@ -23,7 +23,7 @@ class RajaOngkirService
     {
         return Cache::remember('rajaongkir_provinces', 86400, function () {
             try {
-                $response = Http::withHeaders([
+                $response = Http::withoutVerifying()->withHeaders([
                     'key' => $this->apiKey,
                     'accept' => 'application/json',
                 ])->get($this->baseUrl . '/destination/province');
@@ -54,7 +54,7 @@ class RajaOngkirService
                     $url .= '/' . urlencode($provinceId);
                 }
 
-                $response = Http::withHeaders([
+                $response = Http::withoutVerifying()->withHeaders([
                     'key' => $this->apiKey,
                     'accept' => 'application/json',
                 ])->get($url);
@@ -82,7 +82,7 @@ class RajaOngkirService
             try {
                 $url = $this->baseUrl . '/destination/district/' . urlencode($cityId);
 
-                $response = Http::withHeaders([
+                $response = Http::withoutVerifying()->withHeaders([
                     'key' => $this->apiKey,
                     'accept' => 'application/json',
                 ])->get($url);
@@ -110,7 +110,7 @@ class RajaOngkirService
             try {
                 $url = $this->baseUrl . '/destination/sub-district/' . urlencode($districtId);
 
-                $response = Http::withHeaders([
+                $response = Http::withoutVerifying()->withHeaders([
                     'key' => $this->apiKey,
                     'accept' => 'application/json',
                 ])->get($url);
@@ -153,7 +153,7 @@ class RajaOngkirService
     public function calculateCost($originDistrictId, $destinationDistrictId, $weight)
     {
         try {
-            $response = Http::withHeaders([
+            $response = Http::withoutVerifying()->withHeaders([
                 'key' => $this->apiKey,
                 'accept' => 'application/json',
                 'Content-Type' => 'application/x-www-form-urlencoded',

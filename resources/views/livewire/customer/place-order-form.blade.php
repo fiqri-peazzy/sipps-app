@@ -102,7 +102,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div class="space-y-2">
                                         <label
                                             class="text-xs font-black uppercase tracking-widest text-slate-400">Jumlah</label>
@@ -114,10 +114,21 @@
                                         <label
                                             class="text-xs font-black uppercase tracking-widest text-slate-400">Ukuran</label>
                                         <select wire:model="orderItems.{{ $index }}.ukuran_kaos"
-                                            class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 appearance-none">
+                                            class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 appearance-none ukuran-kaos-select"
+                                            data-index="{{ $index }}">
                                             @foreach (['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
                                                 <option value="{{ $size }}">{{ $size }}</option>
                                             @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label
+                                            class="text-xs font-black uppercase tracking-widest text-slate-400">Tipe Lengan</label>
+                                        <select wire:model.live="orderItems.{{ $index }}.tipe_lengan"
+                                            class="w-full h-14 bg-slate-50 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 appearance-none tipe-lengan-select"
+                                            data-index="{{ $index }}">
+                                            <option value="pendek">Lengan Pendek</option>
+                                            <option value="panjang">Lengan Panjang</option>
                                         </select>
                                     </div>
                                 </div>
@@ -465,6 +476,14 @@
             console.log('Opening design editor for item index:', itemIndex);
 
             currentItemIndex = itemIndex;
+            
+            // Sync current size and sleeve from form
+            var $sizeSelect = $('.ukuran-kaos-select[data-index="' + itemIndex + '"]');
+            var $sleeveSelect = $('.tipe-lengan-select[data-index="' + itemIndex + '"]');
+            
+            var currentSize = $sizeSelect.val() || 'M';
+            var currentSleeve = $sleeveSelect.val() || 'pendek';
+
             var existingConfigStr = $('.design-config-data[data-item-index="' + itemIndex + '"]').val();
             var existingConfig = null;
             if (existingConfigStr && existingConfigStr !== '' && existingConfigStr !== 'null') {
@@ -473,6 +492,19 @@
                 } catch (e) {
                     console.error('Error parsing config:', e);
                 }
+            } else {
+                // Initial config if none exists
+                existingConfig = {
+                    ukuran_kaos: currentSize,
+                    tipe_lengan: currentSleeve,
+                    warna_kaos: 'putih'
+                };
+            }
+
+            // Ensure config is updated with current form values
+            if (existingConfig) {
+                existingConfig.ukuran_kaos = currentSize;
+                existingConfig.tipe_lengan = currentSleeve;
             }
 
             $(this).data('parsed-config', existingConfig);

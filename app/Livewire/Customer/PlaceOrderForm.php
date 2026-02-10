@@ -67,11 +67,13 @@ class PlaceOrderForm extends Component
     public $totalWeight = 0;
 
     const WEIGHT_PER_ITEM = 180;
+    const LONG_SLEEVE_EXTRA_PRICE = 10000;
 
     protected $rules = [
         'orderItems.*.produk_id' => 'required|exists:produks,id',
         'orderItems.*.quantity' => 'required|integer|min:1',
         'orderItems.*.ukuran_kaos' => 'required|in:S,M,L,XL,XXL,XXXL',
+        'orderItems.*.tipe_lengan' => 'required|in:pendek,panjang',
         'orderItems.*.catatan_item' => 'nullable|string',
         'penerima_nama' => 'required|string|max:255',
         'penerima_telepon' => 'required|string|max:20',
@@ -127,7 +129,7 @@ class PlaceOrderForm extends Component
         // TAMBAHKAN: Load provinces on mount
         $this->loadProvinces();
     }
-    
+
     // ==================== RAJAONGKIR METHODS ====================
 
     /**
@@ -144,7 +146,8 @@ class PlaceOrderForm extends Component
      */
     public function updatedProvinsiId($value)
     {
-        if (!$value) return;
+        if (!$value)
+            return;
 
         // Reset dependent fields
         $this->kota_id = null;
@@ -190,7 +193,8 @@ class PlaceOrderForm extends Component
      */
     public function updatedKotaId($value)
     {
-        if (!$value) return;
+        if (!$value)
+            return;
 
         // Reset dependent fields
         $this->district_id = null;
@@ -232,7 +236,8 @@ class PlaceOrderForm extends Component
      */
     public function updatedDistrictId($value)
     {
-        if (!$value) return;
+        if (!$value)
+            return;
 
         // Reset dependent fields
         $this->subdistrict_id = null;
@@ -272,7 +277,8 @@ class PlaceOrderForm extends Component
      */
     public function updatedSubdistrictId($value)
     {
-        if (!$value) return;
+        if (!$value)
+            return;
 
         // Get subdistrict name
         $subdistrict = collect($this->subdistricts)->firstWhere('id', $value);
@@ -362,6 +368,7 @@ class PlaceOrderForm extends Component
             'produk_id' => null,
             'quantity' => 1,
             'ukuran_kaos' => 'M',
+            'tipe_lengan' => 'pendek',
             'design_config' => null,
             'catatan_item' => '',
             'harga_satuan' => 0,
@@ -415,24 +422,23 @@ class PlaceOrderForm extends Component
         $index = $matches[1] ?? null;
         $field = $matches[2] ?? null;
 
-        if ($field === 'produk_id' && $index !== null) {
-            $produk = Produk::find($value);
-            if ($produk) {
-                $this->orderItems[$index]['harga_satuan'] = $produk->harga;
-                $this->orderItems[$index]['subtotal'] = $produk->harga * ($this->orderItems[$index]['quantity'] ?? 1);
-            }
-        }
+        if ($field === 'produk_id' || $field === 'tipe_lengan' || $field === 'quantity') {
+            if ($index !== null && isset($this->orderItems[$index]['produk_id'])) {
+                $produk = Produk::find($this->orderItems[$index]['produk_id']);
+                if ($produk) {
+                    $baseHarga = (int) $produk->harga;
+                    $extraHarga = ($this->orderItems[$index]['tipe_lengan'] === 'panjang') ? self::LONG_SLEEVE_EXTRA_PRICE : 0;
 
-        if ($field === 'quantity' && $index !== null) {
-            $qty = (int) $value;
-            $harga = (int) ($this->orderItems[$index]['harga_satuan'] ?? 0);
+                    $this->orderItems[$index]['harga_satuan'] = $baseHarga + $extraHarga;
+                    $this->orderItems[$index]['subtotal'] = ($baseHarga + $extraHarga) * (int) ($this->orderItems[$index]['quantity'] ?? 1);
 
-            $this->orderItems[$index]['subtotal'] = $harga * $qty;
-            $this->calculateTotalWeight();
+                    $this->calculateTotalWeight();
 
-            // Recalculate shipping jika ada perubahan quantity
-            if ($this->district_id) {
-                $this->calculateShippingCost();
+                    // Recalculate shipping jika ada perubahan quantity atau berat
+                    if ($this->district_id) {
+                        $this->calculateShippingCost();
+                    }
+                }
             }
         }
 
@@ -516,9 +522,10 @@ class PlaceOrderForm extends Component
                     'produk_id' => $item['produk_id'],
                     'quantity' => $item['quantity'],
                     'ukuran_kaos' => $item['ukuran_kaos'],
+                    'tipe_lengan' => $item['tipe_lengan'] ?? 'pendek',
                     'warna_kaos' => $designConfig['warna_kaos'] ?? 'putih',
-                    'harga_satuan' => $produk->harga,
-                    'subtotal' => $produk->harga * $item['quantity'],
+                    'harga_satuan' => $item['harga_satuan'],
+                    'subtotal' => $item['subtotal'],
                     'design_config' => $designConfig,
                     'catatan_item' => $item['catatan_item'],
                     'deadline' => now()->addDays($produk->estimasi_hari ?? 3),

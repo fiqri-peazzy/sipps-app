@@ -33,16 +33,6 @@ new #[Layout('layouts.guest')] class extends Component {
         <h2 class="text-secondary"><b>SIPPS Login</b></h2>
     </a>
 
-    {{-- <div class="row">
-        <div class="d-flex justify-content-center">
-            <div class="auth-header">
-                <h2 class="text-secondary mt-2"><b>Hi, Welcome Back</b></h2>
-                <p class="f-16 mt-2">Enter your credentials to continue</p>
-            </div>
-        </div>
-    </div> --}}
-
-
     <h5 class="my-4 d-flex justify-content-center">Sign in with Email address</h5>
 
     <form wire:submit="login">
@@ -55,11 +45,15 @@ new #[Layout('layouts.guest')] class extends Component {
             @enderror
         </div>
 
-        <div class="form-floating mb-3">
-            <input wire:model="form.password" type="password"
+        <div class="form-floating mb-3" x-data="{ show: false }">
+            <input wire:model="form.password" :type="show ? 'text' : 'password'"
                 class="form-control @error('form.password') is-invalid @enderror" id="floatingInput1"
                 placeholder="Password" required autocomplete="current-password" />
             <label for="floatingInput1">Password</label>
+            <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-secondary text-decoration-none py-0" 
+                @click="show = !show" style="z-index: 10;">
+                <i :class="show ? 'ti ti-eye-off' : 'ti ti-eye'" style="font-size: 1.25rem;"></i>
+            </button>
             @error('form.password')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror

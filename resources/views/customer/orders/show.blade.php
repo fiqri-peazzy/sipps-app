@@ -50,8 +50,8 @@
                     <div
                         class="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border-2 border-white/10
                         @if ($order->status == 'completed') bg-green-500/10 text-green-400
-                        @elseif($order->status == 'pending_payment') bg-amber-500/10 text-amber-400
-                        @else bg-primary/10 text-primary @endif">
+                        @elseif($order->status == 'pending_payment')
+                        @else @endif">
                         {{ $order->status_label }}
                     </div>
                 </div>
