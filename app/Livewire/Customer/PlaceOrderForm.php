@@ -137,6 +137,20 @@ class PlaceOrderForm extends Component
 
             $this->calculateTotal();
             $this->calculateTotalWeight();
+
+            // FALLBACK: Sync designs from alternative session key if missing
+            $altSessionKey = 'order_designs_' . Auth::id();
+            if (session()->has($altSessionKey)) {
+                $altDesigns = session($altSessionKey);
+                foreach ($this->orderItems as $idx => &$item) {
+                    if (empty($item['design_config']) && isset($altDesigns[$idx])) {
+                        $item['design_config'] = $altDesigns[$idx];
+                        if (isset($altDesigns[$idx]['warna_kaos'])) {
+                            $item['warna_kaos'] = $altDesigns[$idx]['warna_kaos'];
+                        }
+                    }
+                }
+            }
         } else {
             $user = Auth::user();
             $this->penerima_nama = $user->name;
@@ -462,6 +476,16 @@ class PlaceOrderForm extends Component
         // Sync warna_kaos if present
         if (isset($designConfig['warna_kaos'])) {
             $this->orderItems[$itemIndex]['warna_kaos'] = $designConfig['warna_kaos'];
+        }
+
+        // Sync with place_order_form_state for consistency
+        if (session()->has('place_order_form_state')) {
+            $state = session('place_order_form_state');
+            $state['orderItems'][$itemIndex]['design_config'] = $designConfig;
+            if (isset($designConfig['warna_kaos'])) {
+                $state['orderItems'][$itemIndex]['warna_kaos'] = $designConfig['warna_kaos'];
+            }
+            session(['place_order_form_state' => $state]);
         }
 
         // Simpan ke session juga agar persisten jika user refresh

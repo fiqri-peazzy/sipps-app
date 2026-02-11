@@ -52,12 +52,17 @@ class DesignEditorController extends Controller
         $state = session('place_order_form_state');
         if ($state && isset($state['orderItems'][$index])) {
             $state['orderItems'][$index]['design_config'] = $config;
-            // Update warna_kaos di orderItems agar sync
             if (isset($config['warna_kaos'])) {
                 $state['orderItems'][$index]['warna_kaos'] = $config['warna_kaos'];
             }
             session(['place_order_form_state' => $state]);
         }
+
+        // ALWAYS sync with standalone design session as backup
+        $sessionKey = 'order_designs_' . Auth::id();
+        $sessionData = session($sessionKey, []);
+        $sessionData[$index] = $config;
+        session([$sessionKey => $sessionData]);
 
         return response()->json(['success' => true]);
     }

@@ -72,8 +72,13 @@ class DetailPesanan extends Component
             return false;
         }
 
-        $hasDesign = $item->design_config['has_design'] ?? [];
-        return $hasDesign[$area] ?? false;
+        // Check in has_design map
+        if (isset($item->design_config['has_design'][$area])) {
+            return (bool) $item->design_config['has_design'][$area];
+        }
+
+        // Fallback: check if canvas_data exists for this area
+        return !empty($item->design_config['canvas_data'][$area]);
     }
 
     public function verifikasiPesanan()

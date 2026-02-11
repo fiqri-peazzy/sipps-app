@@ -240,12 +240,19 @@
                             <button type="button" class="btn-close" wire:click="closeModal"></button>
                         </div>
                         <div class="modal-body p-0 overflow-auto" style="max-height: 85vh;">
-                            <div class="text-center p-3">
+                            <div class="text-center p-4">
                                 @if ($selectedItem)
+                                    <!-- Container with 2:1 aspect ratio matching customer editor -->
                                     <div id="design-preview-container"
-                                        class="bg-light rounded-3 d-flex align-items-center justify-content-center"
-                                        style="position: relative; width: 100%; min-height: 400px; max-width: 600px; margin: 0 auto; overflow: hidden;">
-                                        <canvas id="preview-canvas" width="500" height="600"></canvas>
+                                        class="bg-slate-50 rounded-3 d-flex align-items-center justify-content-center mx-auto"
+                                        style="position: relative; width: 100%; max-width: 700px; aspect-ratio: 2/1; overflow: hidden;">
+                                        <!-- Kaos Template Layer (Background) -->
+                                        <img id="preview-template" src="" alt="Template"
+                                            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; pointer-events: none;">
+
+                                        <!-- Design Canvas Layer (Foreground) -->
+                                        <canvas id="preview-canvas" width="1200" height="600"
+                                            style="position: relative; z-index: 20; display: block;"></canvas>
                                     </div>
                                     <div class="mt-3">
                                         <p class="text-muted mb-2">
@@ -269,14 +276,18 @@
 @push('styles')
     <style>
         #design-preview-container {
-            background: #f8f9fa;
-            padding: 20px;
+            background: transparent;
+            padding: 0;
             border-radius: 8px;
         }
 
         #preview-canvas {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #preview-template {
+            display: block;
         }
     </style>
 @endpush
@@ -359,7 +370,7 @@
             // Create new canvas instance
             previewCanvas = new fabric.Canvas('preview-canvas', {
                 selection: false,
-                backgroundColor: 'rgba(255,255,255,0)'
+                backgroundColor: 'transparent'
             });
             console.log('New canvas created');
             // Check if has canvas data
@@ -367,11 +378,13 @@
                 console.warn('No canvas data available for area:', data.area);
                 previewCanvas.clear();
                 const text = new fabric.Text('Tidak ada design untuk area ini', {
-                    left: 150,
+                    left: 600,
                     top: 300,
-                    fontSize: 16,
+                    fontSize: 20,
                     fill: '#999',
-                    selectable: false
+                    selectable: false,
+                    originX: 'center',
+                    originY: 'center'
                 });
                 previewCanvas.add(text);
                 previewCanvas.renderAll();
@@ -381,7 +394,6 @@
                 // Parse canvas JSON string
                 const canvasJsonRaw = JSON.parse(data.canvasJson);
                 previewCanvas.loadFromJSON(canvasJsonRaw, function () {
-                    const objectCount = previewCanvas.getObjects().length;
                     // Set all objects non-selectable
                     previewCanvas.forEachObject(function (obj) {
                         obj.set({
@@ -389,51 +401,39 @@
                             evented: false
                         });
                     });
+
+                    // Load template image
                     const templateUrl = '/frontend/assets/img/kaos-templates/' + data.warna + '-' + data.area +
                         '.png';
-                    fabric.Image.fromURL(templateUrl, function (img) {
-                        if (img && img.width) {
-                            console.log('Template loaded, dimensions:', img.width, 'x', img.height);
-                            // SET Canvas to 1200x600 (Fixed Coordinate System to match Design Editor)
-                            const workspaceWidth = 1200;
-                            const workspaceHeight = 600;
 
-                            // Scale factors to fit container (max 500x600 or responsive)
-                            // However, we must maintain internal 1200x600 for coordinate mapping
-                            previewCanvas.setDimensions({
-                                width: workspaceWidth,
-                                height: workspaceHeight
-                            }, { backstoreOnly: true });
+                    const templateEl = document.getElementById('preview-template');
+                    if (templateEl) {
+                        templateEl.src = templateUrl;
+                    }
 
-                            // Calculate CSS scale to fit the container visually
-                            const targetWidth = Math.min(600, $('.modal-body').width() - 40);
-                            const cssScale = targetWidth / workspaceWidth;
+                    // Match Workspace Dimensions (same as customer editor)
+                    const workspaceWidth = 1200;
+                    const workspaceHeight = 600;
 
-                            previewCanvas.setDimensions({
-                                width: workspaceWidth * cssScale,
-                                height: workspaceHeight * cssScale
-                            });
-                            previewCanvas.setZoom(cssScale);
+                    // Get container width for scaling
+                    const container = document.getElementById('design-preview-container');
+                    const containerWidth = container ? container.offsetWidth - 40 : 660; // subtract padding
 
-                            // Scale template to fill internal workspace area
-                            img.set({
-                                left: 0,
-                                top: 0,
-                                scaleX: workspaceWidth / img.width,
-                                scaleY: workspaceHeight / img.height,
-                                selectable: false,
-                                evented: false
-                            });
-                            previewCanvas.setBackgroundImage(img, previewCanvas.renderAll.bind(
-                                previewCanvas));
-                        } else {
-                            console.warn('Template image failed to load');
-                        }
-                        previewCanvas.renderAll();
-                        console.log('✓ Canvas rendered successfully');
-                    }, {
-                        crossOrigin: 'anonymous'
+                    // Calculate scale to fit container (matching customer editor logic)
+                    const cssScale = containerWidth / workspaceWidth;
+
+                    // Set canvas dimensions with scaling
+                    previewCanvas.setDimensions({
+                        width: workspaceWidth * cssScale,
+                        height: workspaceHeight * cssScale
                     });
+                    previewCanvas.setZoom(cssScale);
+                    previewCanvas.renderAll();
+
+                    console.log('✓ Canvas rendered successfully');
+                    console.log('  - Workspace: ' + workspaceWidth + 'x' + workspaceHeight);
+                    console.log('  - Container width: ' + containerWidth);
+                    console.log('  - Scale: ' + cssScale);
                 }, function (o, object) {
                     console.log('Loading object:', object.type);
                 });
