@@ -102,6 +102,9 @@ class PlaceOrderForm extends Component
         $this->ukurans = $ukurans;
         $this->selectedJenis = $selectedJenis;
 
+        // Load provinces must be done first OR inside restoration
+        $this->loadProvinces();
+
         // Restore from session if exists
         if (session()->has('place_order_form_state')) {
             $state = session('place_order_form_state');
@@ -113,13 +116,20 @@ class PlaceOrderForm extends Component
 
             // Re-fetch options to populate selects
             try {
-                $service = new RajaOngkirService();
+                $service = app(RajaOngkirService::class);
                 if ($this->provinsi_id) {
-                    $this->provinces = $service->getProvinces();
                     $this->cities = $service->getCities($this->provinsi_id);
                 }
                 if ($this->kota_id) {
                     $this->districts = $service->getDistricts($this->kota_id);
+                }
+                if ($this->district_id) {
+                    $this->subdistricts = $service->getSubDistricts($this->district_id);
+
+                    // Re-populate courier options if it's antar_kota
+                    if ($this->tipe_pengiriman === 'antar_kota') {
+                        $this->calculateShippingCost();
+                    }
                 }
             } catch (\Exception $e) {
                 \Log::error("Failed to restore RajaOngkir options: " . $e->getMessage());
@@ -135,8 +145,6 @@ class PlaceOrderForm extends Component
             if (empty($this->orderItems)) {
                 $this->addItem();
             }
-            
-            $this->loadProvinces();
         }
     }
 
@@ -407,36 +415,63 @@ class PlaceOrderForm extends Component
     public function goToDesignEditor($index)
     {
         // Pastikan index ada
-        if (!isset($this->orderItems[$index])) return;
+        if (!isset($this->orderItems[$index]))
+            return;
 
         // Simpan state form saat ini ke session sebelum pindah halaman
-        session(['place_order_form_state' => [
-            'orderItems' => $this->orderItems,
-            'itemIndex' => $this->itemIndex,
-            'selectedJenis' => $this->selectedJenis,
-            'penerima_nama' => $this->penerima_nama,
-            'penerima_telepon' => $this->penerima_telepon,
-            'alamat_lengkap' => $this->alamat_lengkap,
-            'provinsi_id' => $this->provinsi_id,
-            'kota_id' => $this->kota_id,
-            'district_id' => $this->district_id,
-            'tipe_pengiriman' => $this->tipe_pengiriman,
-            'provinsi' => $this->provinsi,
-            'kota' => $this->kota,
-            'kecamatan' => $this->kecamatan,
-            'kelurahan' => $this->kelurahan,
-            'kode_pos' => $this->kode_pos,
-            'kurir_code' => $this->kurir_code,
-            'kurir_service' => $this->kurir_service,
-            'kurir_name' => $this->kurir_name,
-            'kurir_etd' => $this->kurir_etd,
-            'ongkir' => $this->ongkir,
-            'subtotal' => $this->subtotal,
-            'total' => $this->total,
-            'totalWeight' => $this->totalWeight,
-        ]]);
+        session([
+            'place_order_form_state' => [
+                'orderItems' => $this->orderItems,
+                'itemIndex' => $this->itemIndex,
+                'selectedJenis' => $this->selectedJenis,
+                'penerima_nama' => $this->penerima_nama,
+                'penerima_telepon' => $this->penerima_telepon,
+                'alamat_lengkap' => $this->alamat_lengkap,
+                'provinsi_id' => $this->provinsi_id,
+                'kota_id' => $this->kota_id,
+                'district_id' => $this->district_id,
+                'tipe_pengiriman' => $this->tipe_pengiriman,
+                'provinsi' => $this->provinsi,
+                'kota' => $this->kota,
+                'kecamatan' => $this->kecamatan,
+                'kelurahan' => $this->kelurahan,
+                'kode_pos' => $this->kode_pos,
+                'kurir_code' => $this->kurir_code,
+                'kurir_service' => $this->kurir_service,
+                'kurir_name' => $this->kurir_name,
+                'kurir_etd' => $this->kurir_etd,
+                'ongkir' => $this->ongkir,
+                'subtotal' => $this->subtotal,
+                'total' => $this->total,
+                'totalWeight' => $this->totalWeight,
+            ]
+        ]);
 
         return redirect()->route('customer.design-editor.page', ['index' => $index]);
+    }
+
+    public function handleDesignConfigSaved($itemIndex, $designConfig)
+    {
+        if (!isset($this->orderItems[$itemIndex])) {
+            session()->flash('error', 'Item tidak ditemukan!');
+            return;
+        }
+
+        $this->orderItems[$itemIndex]['design_config'] = $designConfig;
+        
+        // Sync warna_kaos if present
+        if (isset($designConfig['warna_kaos'])) {
+            $this->orderItems[$itemIndex]['warna_kaos'] = $designConfig['warna_kaos'];
+        }
+
+        // Simpan ke session juga agar persisten jika user refresh
+        $sessionKey = 'order_designs_' . Auth::id();
+        $sessionData = session($sessionKey, []);
+        $sessionData[$itemIndex] = $designConfig;
+        session([$sessionKey => $sessionData]);
+
+        session()->flash('success', 'Desain berhasil disimpan!');
+        $this->dispatch('$refresh');
     }
 
     public function updatedOrderItems($value, $key)
