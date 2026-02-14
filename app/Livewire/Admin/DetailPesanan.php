@@ -39,12 +39,17 @@ class DetailPesanan extends Component
         $canvasData = $this->selectedItem->design_config['canvas_data'][$area] ?? null;
         $warnaKaos = $this->selectedItem->warna_kaos ?? 'putih';
 
-        // Dispatch event dengan data canvas JSON
+        // Ambil snapshot path jika ada
+        $snapshotPath = $this->selectedItem->design_config['snapshots'][$area] ?? null;
+        $snapshotUrl = $snapshotPath ? \Illuminate\Support\Facades\Storage::url($snapshotPath) : null;
+
+        // Dispatch event dengan data canvas JSON dan snapshot
         $this->dispatch('designModalOpened', [
             'area' => $area,
             'warna' => $warnaKaos,
             'canvasJson' => $canvasData, // Kirim JSON string
-            'hasCanvas' => !empty($canvasData)
+            'snapshotUrl' => $snapshotUrl,
+            'hasCanvas' => !empty($canvasData) || !empty($snapshotUrl)
         ]);
     }
 

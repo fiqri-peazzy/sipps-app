@@ -12,6 +12,12 @@
             left_sleeve: null,
             right_sleeve: null,
         },
+        snapshots: {
+            front: null,
+            back: null,
+            left_sleeve: null,
+            right_sleeve: null,
+        },
         currentArea: "front",
         itemIndex: null,
         ukuranKaos: "M",
@@ -157,16 +163,16 @@
 
         switchArea: function (area) {
             this.currentArea = area;
-            
+
             // Handle Area Buttons Active State
             $(".area-btn").removeClass("active bg-white text-primary shadow-sm").addClass("text-slate-500 hover:text-slate-700");
             const $activeBtn = $('.area-btn[data-area="' + area + '"]');
             $activeBtn.addClass("active bg-white text-primary shadow-sm").removeClass("text-slate-500 hover:text-slate-700");
-            
+
             // Handle Canvas Area Visibility
             $(".canvas-area").hide();
             $('.canvas-area[data-area="' + area + '"]').css('display', 'flex');
-            
+
             this.updateSummary();
         },
 
@@ -181,8 +187,8 @@
             const iconColor = colorName === "putih" ? "#000" : "#fff";
             $selected.append(
                 '<div class="absolute inset-0 flex items-center justify-center pointer-events-none"><i class="lni lni-checkmark text-xs" style="color: ' +
-                    iconColor +
-                    ';"></i></div>',
+                iconColor +
+                ';"></i></div>',
             );
 
             this.updateTemplateImages();
@@ -325,8 +331,10 @@
 
                     // PERBAIKAN: Set semua custom properties dengan benar
                     img.set({
-                        left: canvas.width / 2 - (img.width * scale) / 2,
-                        top: canvas.height / 2 - (img.height * scale) / 2,
+                        left: canvas.width / 2,
+                        top: canvas.height / 2,
+                        originX: "center",
+                        originY: "center",
                         angle: 0,
                         originalFilePath: metadata.original_path,
                         originalFileName: metadata.original_name,
@@ -368,8 +376,10 @@
             }
 
             const fabricText = new fabric.Text(text, {
-                left: canvas.width / 2 - 100,
-                top: canvas.height / 2 - 25,
+                left: canvas.width / 2, // Center of 1200
+                top: canvas.height / 2, // Center of 600
+                originX: "center",
+                originY: "center",
                 fontSize: 48,
                 fontFamily: "Arial",
                 fill: "#000000",
@@ -449,7 +459,7 @@
                 if (count > 0) {
                     const imgCount = objects.filter(o => o.type === 'image').length;
                     const textCount = objects.filter(o => o.type === 'text').length;
-                    
+
                     let summaryText = "";
                     if (imgCount > 0) summaryText += imgCount + " Gbr";
                     if (textCount > 0) summaryText += (summaryText ? ", " : "") + textCount + " Teks";
@@ -522,10 +532,10 @@
                                 fileMetadata[area].push(imgMetadata);
                                 console.log(
                                     "Metadata extracted for " +
-                                        area +
-                                        " #" +
-                                        index +
-                                        ":",
+                                    area +
+                                    " #" +
+                                    index +
+                                    ":",
                                     imgMetadata,
                                 );
                             } else {
@@ -568,6 +578,7 @@
                         this.canvases.right_sleeve?.getObjects().length > 0 ||
                         false,
                 },
+                snapshots: this.snapshots,
             };
 
             console.log("Final design config:", config);
@@ -632,6 +643,80 @@
                 $alert.fadeOut();
             }, 3000);
         },
+
+        captureAndUploadSnapshot: async function (area) {
+            const self = this;
+            const $areaEl = $('.canvas-area[data-area="' + area + '"]');
+
+            if ($areaEl.length === 0) {
+                console.warn("Area element not found for snapshot:", area);
+                return null;
+            }
+
+            console.log("Starting snapshot capture for area:", area);
+
+            // Pastikan area terlihat agar html2canvas bisa menangkapnya
+            const originalDisplay = $areaEl.css('display');
+            $areaEl.css('display', 'flex');
+
+            try {
+                // Beri jeda kecil agar browser sempat render area yang baru saja di-show
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const canvas = await html2canvas($areaEl[0], {
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    scale: 1,
+                    logging: true // Aktifkan logging html2canvas ke console
+                });
+
+                const dataUrl = canvas.toDataURL('image/png');
+
+                if (dataUrl === "data:,") {
+                    throw new Error("Canvas is empty/blank after html2canvas");
+                }
+
+                // Upload snapshot
+                const response = await $.ajax({
+                    url: "/customer/design-editor/upload-snapshot",
+                    type: "POST",
+                    data: {
+                        image: dataUrl,
+                        area: area
+                    },
+                    headers: {
+                        "X-CSRF-TOKEN": self.csrfToken,
+                    }
+                });
+
+                if (response.success) {
+                    console.log("Snapshot uploaded for " + area + ":", response.temp_path);
+                    self.snapshots[area] = response.temp_path;
+                    return response.temp_path;
+                }
+            } catch (error) {
+                console.error("Error capturing/uploading snapshot for " + area + ":", error);
+            } finally {
+                $areaEl.css('display', originalDisplay);
+            }
+            return null;
+        },
+
+        generateAllSnapshots: async function () {
+            const self = this;
+            const areas = ["front", "back", "left_sleeve", "right_sleeve"];
+            const activeAreas = areas.filter(area => self.canvases[area] && self.canvases[area].getObjects().length > 0);
+
+            console.log("Generating snapshots for areas:", activeAreas);
+
+            for (const area of activeAreas) {
+                await self.captureAndUploadSnapshot(area);
+            }
+
+            console.log("All snapshots finished:", self.snapshots);
+            return true;
+        }
     };
 
     window.DesignEditor = DesignEditor;

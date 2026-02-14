@@ -117,6 +117,63 @@ class DesignEditorController extends Controller
     }
 
     /**
+     * Upload design snapshot (preview image)
+     */
+    public function uploadSnapshot(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|string', // Base64 string
+            'area' => 'required|in:front,back,left_sleeve,right_sleeve',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        try {
+            $userId = Auth::id();
+            $imageData = $request->image;
+            $area = $request->area;
+
+            // Remove header if exists
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]); // jpg, png, etc
+            } else {
+                return response()->json(['success' => false, 'message' => 'Format gambar tidak valid'], 422);
+            }
+
+            $imageData = base64_decode($imageData);
+
+            if ($imageData === false) {
+                return response()->json(['success' => false, 'message' => 'Gagal decode gambar'], 422);
+            }
+
+            $fileName = "snapshot_{$area}_" . time() . ".{$type}";
+            $tempPath = "designs/temp/{$userId}/snapshots/{$fileName}";
+
+            Storage::disk('public')->put($tempPath, $imageData);
+            $url = Storage::url($tempPath);
+
+            return response()->json([
+                'success' => true,
+                'url' => $url,
+                'temp_path' => $tempPath,
+                'area' => $area
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal simpan snapshot: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    /**
      * Delete temporary design image
      */
     public function deleteImage(Request $request)

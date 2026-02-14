@@ -38,40 +38,50 @@
             DesignEditor.init(itemIndex, existingConfig);
 
             // Save Design Button
-            $('#btn-save-design').on('click', function () {
+            $('#btn-save-design').on('click', async function () {
                 const $btn = $(this);
                 const originalHtml = $btn.html();
 
                 $btn.prop('disabled', true).html('<i class="lni lni-spinner-arrow spinning"></i> Menyimpan...');
 
-                const config = DesignEditor.getDesignConfig();
+                try {
+                    // Generate Snapshots first
+                    DesignEditor.showAlert("Menyiapkan preview desain...", "info");
+                    await DesignEditor.generateAllSnapshots();
 
-                $.ajax({
-                    url: "{{ route('customer.design-editor.save') }}",
-                    type: "POST",
-                    data: {
-                        item_index: itemIndex,
-                        design_config: config
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            DesignEditor.showAlert("Desain berhasil disimpan!", "success");
-                            setTimeout(() => {
-                                window.location.href = "{{ route('customer.order.create') }}";
-                            }, 1000);
-                        } else {
-                            DesignEditor.showAlert("Gagal menyimpan desain", "danger");
+                    const config = DesignEditor.getDesignConfig();
+
+                    $.ajax({
+                        url: "{{ route('customer.design-editor.save') }}",
+                        type: "POST",
+                        data: {
+                            item_index: itemIndex,
+                            design_config: config
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                DesignEditor.showAlert("Desain berhasil disimpan!", "success");
+                                setTimeout(() => {
+                                    window.location.href = "{{ route('customer.order.create') }}";
+                                }, 1000);
+                            } else {
+                                DesignEditor.showAlert("Gagal menyimpan desain", "danger");
+                                $btn.prop('disabled', false).html(originalHtml);
+                            }
+                        },
+                        error: function () {
+                            DesignEditor.showAlert("Terjadi kesalahan sistem", "danger");
                             $btn.prop('disabled', false).html(originalHtml);
                         }
-                    },
-                    error: function () {
-                        DesignEditor.showAlert("Terjadi kesalahan sistem", "danger");
-                        $btn.prop('disabled', false).html(originalHtml);
-                    }
-                });
+                    });
+                } catch (e) {
+                    console.error("Error in save flow:", e);
+                    DesignEditor.showAlert("Terjadi kesalahan saat proses simpan", "danger");
+                    $btn.prop('disabled', false).html(originalHtml);
+                }
             });
         });
     </script>

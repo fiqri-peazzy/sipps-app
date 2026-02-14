@@ -90,6 +90,7 @@ Route::prefix('customer')
         Route::get('/design-editor/{index}', [DesignEditorController::class, 'index'])->name('design-editor.page');
         Route::post('/design-editor/save', [DesignEditorController::class, 'saveDesign'])->name('design-editor.save');
         Route::post('/design-editor/upload-image', [DesignEditorController::class, 'uploadImage'])->name('design-editor.upload');
+        Route::post('/design-editor/upload-snapshot', [DesignEditorController::class, 'uploadSnapshot'])->name('design-editor.snapshot');
         Route::post('/design-editor/delete-image', [DesignEditorController::class, 'deleteImage'])->name('design-editor.delete');
 
         Route::prefix('payment')->name('payment.')->group(function () {

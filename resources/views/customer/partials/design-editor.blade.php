@@ -34,47 +34,47 @@
                     </div>
                 </div>
 
-                <!-- Canvas Preview Area -->
+                <!-- Canvas Preview Area Area -->
                 <div
-                    class="relative bg-slate-50 rounded-2xl overflow-hidden flex-1 min-h-[350px] md:min-h-[450px] flex items-center justify-center">
+                    class="relative bg-slate-50 flex-1 min-h-[400px] md:min-h-[500px] flex items-center justify-center p-4">
                     <!-- Front -->
-                    <div class="canvas-area relative w-full h-full flex items-center justify-center" data-area="front"
+                    <div class="canvas-area relative w-full aspect-[3/4] max-w-[500px] mx-auto flex items-center justify-center" data-area="front"
                         style="display: flex;">
                         <img src="{{ asset('frontend/assets/img/kaos-templates/putih-front.png') }}" alt="Kaos Depan"
                             class="kaos-template absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
-                            data-area="front" onerror="this.style.display='none'">
-                        <canvas id="canvas-front" width="1200" height="600" class="relative z-20"></canvas>
+                            data-area="front" crossorigin="anonymous" onerror="this.style.display='none'">
+                        <canvas id="canvas-front" width="1000" height="1333" class="relative z-20"></canvas>
                     </div>
 
                     <!-- Back -->
-                    <div class="canvas-area relative w-full h-full flex items-center justify-center" data-area="back"
+                    <div class="canvas-area relative w-full aspect-[3/4] max-w-[500px] mx-auto flex items-center justify-center" data-area="back"
                         style="display: none;">
                         <img src="{{ asset('frontend/assets/img/kaos-templates/putih-back.png') }}" alt="Kaos Belakang"
                             class="kaos-template absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
-                            data-area="back" onerror="this.style.display='none'">
-                        <canvas id="canvas-back" width="1200" height="600" class="relative z-20"></canvas>
+                            data-area="back" crossorigin="anonymous" onerror="this.style.display='none'">
+                        <canvas id="canvas-back" width="1000" height="1333" class="relative z-20"></canvas>
                     </div>
 
                     <!-- Left Sleeve -->
-                    <div class="canvas-area relative w-full h-full flex items-center justify-center"
+                    <div class="canvas-area relative w-full aspect-[3/4] max-w-[500px] mx-auto flex items-center justify-center"
                         data-area="left_sleeve" style="display: none;">
                         <div
                             class="absolute inset-x-8 inset-y-12 border-4 border-dashed border-slate-200 rounded-3xl flex items-center justify-center bg-white/50 z-10 pointer-events-none">
                             <span class="text-slate-400 font-bold uppercase tracking-widest text-xs">Area Lengan
                                 Kiri</span>
                         </div>
-                        <canvas id="canvas-left_sleeve" width="1200" height="600" class="relative z-20"></canvas>
+                        <canvas id="canvas-left_sleeve" width="1000" height="1333" class="relative z-20"></canvas>
                     </div>
 
                     <!-- Right Sleeve -->
-                    <div class="canvas-area relative w-full h-full flex items-center justify-center"
+                    <div class="canvas-area relative w-full aspect-[3/4] max-w-[500px] mx-auto flex items-center justify-center"
                         data-area="right_sleeve" style="display: none;">
                         <div
                             class="absolute inset-x-8 inset-y-12 border-4 border-dashed border-slate-200 rounded-3xl flex items-center justify-center bg-white/50 z-10 pointer-events-none">
                             <span class="text-slate-400 font-bold uppercase tracking-widest text-xs">Area Lengan
                                 Kanan</span>
                         </div>
-                        <canvas id="canvas-right_sleeve" width="1200" height="600" class="relative z-20"></canvas>
+                        <canvas id="canvas-right_sleeve" width="1000" height="1333" class="relative z-20"></canvas>
                     </div>
                 </div>
 
@@ -221,6 +221,16 @@
 <style>
     .canvas-area canvas {
         cursor: crosshair;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .canvas-area .canvas-container {
+        position: absolute !important;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 20;
     }
 
     .color-option.active {

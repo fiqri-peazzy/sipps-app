@@ -681,6 +681,29 @@ class PlaceOrderForm extends Component
         }
 
         $designConfig['file_metadata'] = $fileMetadata;
+
+        // PERBAIKAN: Handle Snapshots juga
+        if (isset($designConfig['snapshots'])) {
+            $snapshots = $designConfig['snapshots'];
+            foreach ($snapshots as $area => $tempPath) {
+                if (strpos($tempPath, 'designs/temp/') !== false) {
+                    $fileName = basename($tempPath);
+                    $permanentPath = "designs/snapshots/{$orderNumber}/{$fileName}";
+
+                    if (Storage::disk('public')->exists($tempPath)) {
+                        $permanentDir = dirname(Storage::disk('public')->path($permanentPath));
+                        if (!file_exists($permanentDir)) {
+                            mkdir($permanentDir, 0755, true);
+                        }
+
+                        Storage::disk('public')->copy($tempPath, $permanentPath);
+                        $snapshots[$area] = $permanentPath;
+                    }
+                }
+            }
+            $designConfig['snapshots'] = $snapshots;
+        }
+
         return $designConfig;
     }
 

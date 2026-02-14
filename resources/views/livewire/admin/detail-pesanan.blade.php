@@ -242,17 +242,21 @@
                         <div class="modal-body p-0 overflow-auto" style="max-height: 85vh;">
                             <div class="text-center p-4">
                                 @if ($selectedItem)
-                                    <!-- Container with 2:1 aspect ratio matching customer editor -->
+                                    <!-- Container with 3:4 aspect ratio matching customer editor -->
                                     <div id="design-preview-container"
                                         class="bg-slate-50 rounded-3 d-flex align-items-center justify-content-center mx-auto"
-                                        style="position: relative; width: 100%; max-width: 700px; aspect-ratio: 2/1; overflow: hidden;">
+                                        style="position: relative; width: 100%; max-width: 500px; aspect-ratio: 3/4; overflow: hidden; padding: 0;">
                                         <!-- Kaos Template Layer (Background) -->
                                         <img id="preview-template" src="" alt="Template"
-                                            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; pointer-events: none;">
+                                            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; pointer-events: none; margin: 0;">
 
-                                        <!-- Design Canvas Layer (Foreground) -->
-                                        <canvas id="preview-canvas" width="1200" height="600"
-                                            style="position: relative; z-index: 20; display: block;"></canvas>
+                                        <!-- Design Canvas Layer (Foreground) - Fallback -->
+                                        <canvas id="preview-canvas" width="1000" height="1333"
+                                            style="position: relative; z-index: 20; display: block; margin: 0;"></canvas>
+
+                                        <!-- Static Snapshot Layer (New) -->
+                                        <img id="preview-snapshot" src="" alt="Design Snapshot"
+                                            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 30; display: none; margin: 0;">
                                     </div>
                                     <div class="mt-3">
                                         <p class="text-muted mb-2">
@@ -358,24 +362,46 @@
 
         function renderDesignPreview(data) {
             const canvasEl = document.getElementById('preview-canvas');
-            if (!canvasEl) {
-                console.error('Canvas element not found!');
+            const snapshotEl = document.getElementById('preview-snapshot');
+            const templateEl = document.getElementById('preview-template');
+
+            if (!canvasEl || !snapshotEl) {
+                console.error('Core elements not found!');
                 return;
             }
+
+            // Reset visibility
+            canvasEl.style.display = 'block';
+            snapshotEl.style.display = 'none';
+
+            // Check if snapshot exists
+            if (data.snapshotUrl) {
+                console.log('Using snapshot preview:', data.snapshotUrl);
+                snapshotEl.src = data.snapshotUrl;
+                snapshotEl.style.display = 'block';
+                canvasEl.style.display = 'none';
+                if (templateEl) templateEl.style.display = 'none'; // Template already in snapshot
+
+                // Still init canvas for background consistency if needed, but hidden
+                if (previewCanvas) previewCanvas.dispose();
+                return;
+            }
+
+            // FALLBACK TO FABRIC.JS RENDERING
+            if (templateEl) templateEl.style.display = 'block';
+            
             // Destroy previous canvas instance
             if (previewCanvas) {
                 previewCanvas.dispose();
-                console.log('Previous canvas disposed');
             }
+
             // Create new canvas instance
             previewCanvas = new fabric.Canvas('preview-canvas', {
                 selection: false,
                 backgroundColor: 'transparent'
             });
-            console.log('New canvas created');
-            // Check if has canvas data
+
             if (!data.hasCanvas || !data.canvasJson) {
-                console.warn('No canvas data available for area:', data.area);
                 previewCanvas.clear();
                 const text = new fabric.Text('Tidak ada design untuk area ini', {
                     left: 600,
@@ -390,57 +416,32 @@
                 previewCanvas.renderAll();
                 return;
             }
+
             try {
-                // Parse canvas JSON string
                 const canvasJsonRaw = JSON.parse(data.canvasJson);
                 previewCanvas.loadFromJSON(canvasJsonRaw, function () {
-                    // Set all objects non-selectable
                     previewCanvas.forEachObject(function (obj) {
-                        obj.set({
-                            selectable: false,
-                            evented: false
-                        });
+                        obj.set({ selectable: false, evented: false });
                     });
 
-                    // Load template image
-                    const templateUrl = '/frontend/assets/img/kaos-templates/' + data.warna + '-' + data.area +
-                        '.png';
+                    const templateUrl = '/frontend/assets/img/kaos-templates/' + data.warna + '-' + data.area + '.png';
+                    if (templateEl) templateEl.src = templateUrl;
 
-                    const templateEl = document.getElementById('preview-template');
-                    if (templateEl) {
-                        templateEl.src = templateUrl;
-                    }
-
-                    // Match Workspace Dimensions (same as customer editor)
-                    const workspaceWidth = 1200;
-                    const workspaceHeight = 600;
-
-                    // Get container width for scaling
+                    const workspaceWidth = 1000;
+                    const workspaceHeight = 1333;
                     const container = document.getElementById('design-preview-container');
-                    const containerWidth = container ? container.offsetWidth - 40 : 660; // subtract padding
-
-                    // Calculate scale to fit container (matching customer editor logic)
+                    const containerWidth = container ? container.offsetWidth : 400; // Adjusted default
                     const cssScale = containerWidth / workspaceWidth;
 
-                    // Set canvas dimensions with scaling
                     previewCanvas.setDimensions({
-                        width: workspaceWidth * cssScale,
+                        width: containerWidth,
                         height: workspaceHeight * cssScale
                     });
                     previewCanvas.setZoom(cssScale);
                     previewCanvas.renderAll();
-
-                    console.log('✓ Canvas rendered successfully');
-                    console.log('  - Workspace: ' + workspaceWidth + 'x' + workspaceHeight);
-                    console.log('  - Container width: ' + containerWidth);
-                    console.log('  - Scale: ' + cssScale);
-                }, function (o, object) {
-                    console.log('Loading object:', object.type);
                 });
             } catch (error) {
-                console.error('Error loading canvas:', error);
-                console.error('Error stack:', error.stack);
-                alert('Gagal memuat preview design: ' + error.message);
+                console.error('Error loading fallback canvas:', error);
             }
         }
     </script>
