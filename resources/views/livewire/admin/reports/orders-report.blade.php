@@ -117,134 +117,13 @@
             </div>
         </div>
 
-        <!-- Breakdown Cards -->
-        <div wire:loading.remove class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Breakdown Status Order</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th class="text-end">Jumlah</th>
-                                    <th class="text-end">Persentase</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                    $statusColors = [
-                                        'pending_payment' => 'warning',
-                                        'paid' => 'info',
-                                        'verified' => 'primary',
-                                        'in_production' => 'secondary',
-                                        'ready_to_ship' => 'info',
-                                        'shipped' => 'primary',
-                                        'completed' => 'success',
-                                        'cancelled' => 'danger',
-                                        'return_requested' => 'warning',
-                                        'returned' => 'dark',
-                                    ];
-
-                                    $statusLabels = [
-                                        'pending_payment' => 'Menunggu Pembayaran',
-                                        'paid' => 'Sudah Dibayar',
-                                        'verified' => 'Diverifikasi',
-                                        'in_production' => 'Sedang Produksi',
-                                        'ready_to_ship' => 'Siap Kirim',
-                                        'shipped' => 'Sedang Dikirim',
-                                        'completed' => 'Selesai',
-                                        'cancelled' => 'Dibatalkan',
-                                        'return_requested' => 'Ajuan Return',
-                                        'returned' => 'Dikembalikan',
-                                    ];
-                                @endphp
-
-                                @forelse($stats['status_breakdown'] as $statusKey => $count)
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg-{{ $statusColors[$statusKey] ?? 'secondary' }}">
-                                                {{ $statusLabels[$statusKey] ?? ucfirst(str_replace('_', ' ', $statusKey)) }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end">{{ $count }}</td>
-                                        <td class="text-end">
-                                            {{ $stats['total_orders'] > 0 ? round(($count / $stats['total_orders']) * 100, 1) : 0 }}%
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div wire:loading.remove class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Breakdown Status Pembayaran</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th class="text-end">Jumlah</th>
-                                    <th class="text-end">Persentase</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                    $paymentColors = [
-                                        'pending' => 'secondary',
-                                        'settlement' => 'success',
-                                        'capture' => 'success',
-                                        'deny' => 'danger',
-                                        'cancel' => 'danger',
-                                        'expire' => 'warning',
-                                        'failure' => 'danger',
-                                    ];
-                                @endphp
-
-                                @forelse($stats['payment_breakdown'] as $paymentStatus => $count)
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg-{{ $paymentColors[$paymentStatus] ?? 'secondary' }}">
-                                                {{ ucfirst($paymentStatus) }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end">{{ $count }}</td>
-                                        <td class="text-end">
-                                            {{ $stats['total_orders'] > 0 ? round(($count / $stats['total_orders']) * 100, 1) : 0 }}%
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Data Table -->
         <div wire:loading.remove class="col-sm-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>Detail Pesanan ({{ $orders->total() }} data)</h5>
-                    <button type="button" wire:click="exportPdf" class="btn btn-danger"
-                        wire:loading.attr="disabled">
+                    <button type="button" wire:click="exportPdf" class="btn btn-danger" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="exportPdf">
                             <i class="ti ti-file-type-pdf"></i> Export PDF
                         </span>
@@ -345,6 +224,129 @@
                 </div>
             </div>
         </div>
+
+        <!-- Breakdown Cards -->
+        <div wire:loading.remove class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Breakdown Status Order</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="text-end">Jumlah</th>
+                                    <th class="text-end">Persentase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $statusColors = [
+                                        'pending_payment' => 'warning',
+                                        'paid' => 'info',
+                                        'verified' => 'primary',
+                                        'in_production' => 'secondary',
+                                        'ready_to_ship' => 'info',
+                                        'shipped' => 'primary',
+                                        'completed' => 'success',
+                                        'cancelled' => 'danger',
+                                        'return_requested' => 'warning',
+                                        'returned' => 'dark',
+                                    ];
+
+                                    $statusLabels = [
+                                        'pending_payment' => 'Menunggu Pembayaran',
+                                        'paid' => 'Sudah Dibayar',
+                                        'verified' => 'Diverifikasi',
+                                        'in_production' => 'Sedang Produksi',
+                                        'ready_to_ship' => 'Siap Kirim',
+                                        'shipped' => 'Sedang Dikirim',
+                                        'completed' => 'Selesai',
+                                        'cancelled' => 'Dibatalkan',
+                                        'return_requested' => 'Ajuan Return',
+                                        'returned' => 'Dikembalikan',
+                                    ];
+                                @endphp
+
+                                @forelse($stats['status_breakdown'] as $statusKey => $count)
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-{{ $statusColors[$statusKey] ?? 'secondary' }}">
+                                                {{ $statusLabels[$statusKey] ?? ucfirst(str_replace('_', ' ', $statusKey)) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">{{ $count }}</td>
+                                        <td class="text-end">
+                                            {{ $stats['total_orders'] > 0 ? round(($count / $stats['total_orders']) * 100, 1) : 0 }}%
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div wire:loading.remove class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Breakdown Status Pembayaran</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="text-end">Jumlah</th>
+                                    <th class="text-end">Persentase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $paymentColors = [
+                                        'pending' => 'secondary',
+                                        'settlement' => 'success',
+                                        'capture' => 'success',
+                                        'deny' => 'danger',
+                                        'cancel' => 'danger',
+                                        'expire' => 'warning',
+                                        'failure' => 'danger',
+                                    ];
+                                @endphp
+
+                                @forelse($stats['payment_breakdown'] as $paymentStatus => $count)
+                                    <tr>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ $paymentColors[$paymentStatus] ?? 'secondary' }}">
+                                                {{ ucfirst($paymentStatus) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">{{ $count }}</td>
+                                        <td class="text-end">
+                                            {{ $stats['total_orders'] > 0 ? round(($count / $stats['total_orders']) * 100, 1) : 0 }}%
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     @push('styles')

@@ -6,7 +6,7 @@
     <div class="pt-12 pb-20 bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header Section -->
-            <div class="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div class="mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <nav class="flex mb-6" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
@@ -21,10 +21,9 @@
                         </li>
                     </ol>
                 </nav>
-                <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Buat <span
+                <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Buat <span
                         class="text-primary italic">Pesanan</span> Baru</h1>
-                <p class="text-slate-500 mt-4 text-lg max-w-2xl leading-relaxed">Wujudkan desain impian Anda dengan kualitas
-                    sablon terbaik dari workshop kami. Proses cepat, hasil presisi.</p>
+
             </div>
 
             <!-- Form Area -->

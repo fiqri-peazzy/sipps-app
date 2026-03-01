@@ -330,7 +330,7 @@
             </div>
 
             <!-- Right Column: Order Summary (Sticky) -->
-            <div class="lg:col-span-4 lg:sticky lg:top-28">
+            <div class="lg:col-span-4 lg:sticky lg:top-18">
                 <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-primary/20 space-y-10">
                     <div class="space-y-2">
                         <h2 class="text-2xl text-white tracking-tight italic">Checkout</h2>
@@ -380,12 +380,7 @@
                         </span>
                     </button>
 
-                    <div
-                        class="pt-6 flex items-center justify-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                        <div class="flex items-center gap-1"><i class="lni lni-shield"></i> Aman</div>
-                        <div class="h-1 w-1 bg-slate-700 rounded-full"></div>
-                        <div class="flex items-center gap-1"><i class="lni lni-timer"></i> Terjadwal</div>
-                    </div>
+
                 </div>
 
                 <div class="mt-8 p-6 rounded-4xl bg-amber-50 border border-amber-100 flex items-start gap-4">

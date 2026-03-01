@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name') }} - @yield('title', 'Jasa Sablon Berkualitas')</title>
+    <title>{{ config('app.name') }} - @yield('title', 'Premium Custom Apparel')</title>
     <meta name="description"
-        content="SIPPS - Sistem Informasi Penjadwalan Produksi Sablon Profesional dengan berbagai pilihan teknik sablon DTF, Manual, Polyflex, dan Sublim" />
+        content="NNCLOTHING - Platform untuk custom apparel berkualitas premium dengan desain modern dan efisiensi penjadwalan terbaik" />
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('backend/assets/images/sipps.png') }}" type="image/png" />
@@ -37,11 +37,8 @@
             <div class="glass-morphism rounded-2xl md:rounded-full px-6 py-2 flex items-center justify-between">
                 <!-- Logo -->
                 <a href="{{ route('home') }}"
-                    class="flex items-center gap-2 group transition-transform duration-300 hover:scale-102">
-                    <img src="{{ asset('backend/assets/images/sipps.png') }}" alt="SIPPS Logo"
-                        class="h-10 w-auto object-contain" />
-                    <span
-                        class="text-xl font-extrabold tracking-tight bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">SIPPS</span>
+                    class="flex items-center gap-2 group transition-transform duration-300 hover:scale-105">
+                    <x-navbar-logo />
                 </a>
 
                 <!-- Desktop Navigation -->
@@ -145,14 +142,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
                 <!-- Brand Info -->
                 <div class="space-y-6">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2 group">
-                        <img src="{{ asset('backend/assets/images/sipps.png') }}" alt="SIPPS Logo"
-                            class="h-12 w-auto brightness-0 invert" />
-                        <span class="text-2xl font-black tracking-tight text-white">SIPPS</span>
+                    <a href="{{ route('home') }}" class="flex items-center gap-3 group">
+                        <div class="h-12 w-12">
+                            <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="w-full h-full brightness-0 invert">
+                                <defs>
+                                    <linearGradient id="footerLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="60" cy="60" r="58" fill="url(#footerLogoGradient)" />
+                                <text x="60" y="75" font-family="Arial, sans-serif" font-size="48" font-weight="900" fill="white" text-anchor="middle" letter-spacing="2">NN</text>
+                                <line x1="30" y1="95" x2="90" y2="95" stroke="white" stroke-width="2" opacity="0.8" />
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-black tracking-tight text-white">NNCLOTHING</span>
                     </a>
                     <p class="text-slate-400 leading-relaxed text-sm">
-                        Sistem Informasi Penjadwalan Produksi Sablon (SIPPS) menghadirkan kualitas terbaik dengan
-                        efisiensi penjadwalan cerdas untuk kebutuhan sandang Anda.
+                        NNCLOTHING menyediakan layanan cetak kustom berkualitas premium dengan efisiensi penjadwalan terbaik. 
+                        Wujudkan desain Anda menjadi karya yang memukau dengan teknologi sablon terdepan.
                     </p>
                     <div class="flex items-center gap-4">
                         <a href="#"

@@ -4,7 +4,7 @@
     <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Riwayat <span
                 class="text-primary italic">Pesanan</span></h1>
-        <p class="text-slate-500 mt-2 text-lg">Daftar riwayat dan status pesanan sablon Anda.</p>
+        <p class="text-slate-500 mt-2 text-lg">Daftar riwayat dan status pesanan custom apparel Anda bersama NNCLOTHING.</p>
     </div>
 
     <div class="card-modern p-0! overflow-hidden">
@@ -57,7 +57,7 @@
                                     </div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <div class="max-w-[200px] space-y-1">
+                                    <div class="max-w-50 space-y-1">
                                         @foreach ($order->items->take(2) as $item)
                                             <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
                                                 <span class="h-1 w-1 rounded-full bg-primary shrink-0"></span>

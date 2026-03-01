@@ -11,69 +11,97 @@ class ProdukSeeder extends Seeder
 {
     public function run(): void
     {
+        // Reset tabel
+        // Produk::truncate();
+
+        // Ukuran::truncate();
+        // JenisSablon::truncate();
+
+        // Jenis sablon
         $jenisSablons = [
-            ['nama' => 'DTF (Direct to Film)', 'deskripsi' => 'Sablon dengan teknologi digital printing langsung ke film transfer. Hasil tajam, detail, dan tahan lama. Cocok untuk desain full color.'],
-            ['nama' => 'Manual (Screen Printing)', 'deskripsi' => 'Sablon manual menggunakan screen/layar. Cocok untuk produksi massal dengan warna solid. Hasil awet dan tidak mudah luntur.'],
-            ['nama' => 'Polyflex', 'deskripsi' => 'Menggunakan bahan polyflex yang dipotong sesuai desain lalu ditempel dengan heat press. Cocok untuk desain simpel seperti text dan logo.'],
-            ['nama' => 'Sublim', 'deskripsi' => 'Teknik sablon untuk bahan polyester dengan tinta yang menyatu dengan serat kain. Hasil maksimal untuk desain full print pada kaos olahraga.'],
+            ['nama' => 'DTF', 'deskripsi' => 'Teknologi digital transfer full color.', 'is_active' => 1],
+            ['nama' => 'Manual', 'deskripsi' => 'Screen printing warna solid.', 'is_active' => 1],
+            ['nama' => 'Polyflex', 'deskripsi' => 'Cutting polyflex untuk teks/logo sederhana.', 'is_active' => 1],
+            ['nama' => 'Sublim', 'deskripsi' => 'Sablon sublimasi untuk bahan polyester.', 'is_active' => 1],
         ];
 
         foreach ($jenisSablons as $jenis) {
             JenisSablon::create($jenis);
         }
 
-        $ukurans = [
-            ['nama' => 'S'],
-            ['nama' => 'M'],
-            ['nama' => 'L'],
-            ['nama' => 'XL'],
-            ['nama' => 'XXL'],
-            ['nama' => 'Custom'],
+        // Ukuran sablon sesuai gambar (nama saja)
+        $ukuranSablon = [
+            'Small Area (8cm × 8cm)',
+            'A6 (14.8cm × 10.5cm)',
+            'A5 (21cm × 14.8cm)',
+            'A4 (21cm × 29.7cm)',
+            'A3 (29.7cm × 42cm)',
+            'A3+ (32.9cm × 48.3cm)',
+            'Custom Size',
         ];
 
-        foreach ($ukurans as $ukuran) {
-            Ukuran::create($ukuran);
+        foreach ($ukuranSablon as $uk) {
+            Ukuran::create([
+                'nama' => $uk,
+                'is_active' => 1,
+            ]);
         }
 
-        $jenisSablonData = JenisSablon::all();
+        $jenisData = JenisSablon::all();
         $ukuranData = Ukuran::all();
 
-        foreach ($jenisSablonData as $jenis) {
-            foreach ($ukuranData as $ukuran) {
-                $baseHarga = match ($jenis->id) {
-                    1 => 45000,
-                    2 => 35000,
-                    3 => 40000,
-                    4 => 50000,
-                    default => 40000,
-                };
+        // Harga tambahan berdasarkan ukuran (tanpa ubah struktur tabel!)
+        $hargaTambahan = [
+            'Small Area' => 0,
+            'A6' => 10000,
+            'A5' => 20000,
+            'A4' => 30000,
+            'A3' => 50000,
+            'A3+' => 75000,
+        ];
 
-                $tambahanUkuran = match ($ukuran->nama) {
-                    'S' => 0,
-                    'M' => 5000,
-                    'L' => 10000,
-                    'XL' => 15000,
-                    'XXL' => 20000,
-                    'Custom' => 25000,
-                    default => 0,
-                };
+        // Harga dasar jenis sablon
+        $hargaJenis = [
+            'DTF' => 45000,
+            'Manual' => 30000,
+            'Polyflex' => 35000,
+            'Sublim' => 40000,
+        ];
 
+        foreach ($jenisData as $jenis) {
+            foreach ($ukuranData as $uk) {
+
+                // ambil key ukuran dari nama
+                $key = explode(' ', $uk->nama)[0]; // Small, A6, A5, A4, A3
+
+                // fallback untuk nama "Small Area"
+                if ($key === 'Small') {
+                    $key = 'Small Area';
+                }
+
+                $base = $hargaJenis[$jenis->nama] ?? 30000;
+                $add  = $hargaTambahan[$key] ?? 0;
+
+                // REGULAR
                 Produk::create([
                     'jenis_sablon_id' => $jenis->id,
-                    'ukuran_id' => $ukuran->id,
+                    'ukuran_id' => $uk->id,
                     'tipe_layanan' => 'regular',
-                    'harga' => $baseHarga + $tambahanUkuran,
+                    'harga' => $base + $add,
                     'estimasi_waktu' => 48,
-                    'deskripsi' => 'Layanan regular dengan estimasi pengerjaan 2 hari kerja. Cocok untuk pesanan yang tidak terlalu mendesak dengan harga terjangkau.',
+                    'deskripsi' => "Sablon ukuran {$uk->nama} untuk tipe regular.",
+                    'is_active' => 1,
                 ]);
 
+                // EXPRESS
                 Produk::create([
                     'jenis_sablon_id' => $jenis->id,
-                    'ukuran_id' => $ukuran->id,
+                    'ukuran_id' => $uk->id,
                     'tipe_layanan' => 'express',
-                    'harga' => ($baseHarga + $tambahanUkuran) * 1.5,
+                    'harga' => ($base + $add) * 1.5,
                     'estimasi_waktu' => 24,
-                    'deskripsi' => 'Layanan express dengan estimasi pengerjaan 1 hari kerja. Prioritas lebih tinggi dalam antrian produksi untuk pesanan yang mendesak.',
+                    'deskripsi' => "Sablon ukuran {$uk->nama} untuk layanan express.",
+                    'is_active' => 1,
                 ]);
             }
         }
