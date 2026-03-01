@@ -33,7 +33,7 @@
                 <i class="lni lni-brush"></i>
             </div>
             <div>
-                <h4 class="text-lg font-black tracking-tight flex items-center gap-2">
+                <h4 class="text-lg text-white tracking-tight flex items-center gap-2">
                     Design Editor <span class="text-slate-500 font-medium">| SIPPS Interactive</span>
                 </h4>
                 <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mt-0.5">

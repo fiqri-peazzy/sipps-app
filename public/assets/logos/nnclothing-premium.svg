@@ -1,0 +1,70 @@
+<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Define Gradients -->
+  <defs>
+    <linearGradient id="premGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="premDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+    </linearGradient>
+    <filter id="premShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Main Container -->
+  <g filter="url(#premShadow)">
+    <!-- Background Circle -->
+    <circle cx="100" cy="100" r="90" fill="url(#premDark)"/>
+    <circle cx="100" cy="100" r="90" fill="none" stroke="url(#premGradient)" stroke-width="2.5" opacity="0.4"/>
+
+    <!-- T-Shirt Silhouette -->
+    <!-- Neckline -->
+    <path d="M 75 50 Q 100 40 125 50" stroke="url(#premGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Body -->
+    <path d="M 75 50 L 70 85 Q 70 110 100 120 Q 130 110 130 85 L 125 50" fill="url(#premGradient)" opacity="0.3" stroke="url(#premGradient)" stroke-width="2.5" stroke-linejoin="round"/>
+
+    <!-- Sleeves -->
+    <path d="M 75 55 Q 60 65 55 85" stroke="url(#premGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 125 55 Q 140 65 145 85" stroke="url(#premGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- NN Badge on chest -->
+    <g transform="translate(85, 70)">
+      <!-- First N -->
+      <line x1="4" y1="4" x2="4" y2="16" stroke="url(#premGradient)" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M 4 16 L 12 4" stroke="url(#premGradient)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <line x1="12" y1="4" x2="12" y2="16" stroke="url(#premGradient)" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Decorative elements -->
+    <circle cx="75" cy="130" r="2" fill="url(#premGradient)"/>
+    <circle cx="125" cy="130" r="2" fill="url(#premGradient)"/>
+  </g>
+
+  <!-- Text Section -->
+  <!-- Brand Name -->
+  <text x="220" y="75" font-family="'Inter', 'Segoe UI', sans-serif" font-size="32" font-weight="800" fill="#1f2937" letter-spacing="-0.5">
+    NNCLOTHING
+  </text>
+
+  <!-- Divider -->
+  <line x1="220" y1="88" x2="350" y2="88" stroke="url(#premGradient)" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Tagline -->
+  <text x="220" y="115" font-family="'Inter', 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#3b82f6">
+    CUSTOM APPAREL
+  </text>
+
+  <text x="220" y="135" font-family="'Inter', 'Segoe UI', sans-serif" font-size="11" font-weight="400" fill="#6b7280" letter-spacing="0.5">
+    Premium Quality • Fast Production • Creative Design
+  </text>
+
+  <!-- Badge Stars -->
+  <text x="220" y="165" font-family="'Inter', 'Segoe UI', sans-serif" font-size="10" font-weight="600" fill="#6b7280">
+    ✦ Crafted with Excellence ✦
+  </text>
+</svg>

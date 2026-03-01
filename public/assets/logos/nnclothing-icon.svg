@@ -1,0 +1,52 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Define Gradients -->
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+    </linearGradient>
+    <filter id="iconShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Main Circle Background -->
+  <circle cx="60" cy="60" r="58" fill="url(#darkGradient)" filter="url(#iconShadow)"/>
+
+  <!-- Border Ring -->
+  <circle cx="60" cy="60" r="58" fill="none" stroke="url(#iconGradient)" stroke-width="2"/>
+
+  <!-- Double N Design -->
+  <g filter="url(#iconShadow)">
+    <!-- First N -->
+    <g transform="translate(20, 30)">
+      <!-- Left vertical -->
+      <line x1="10" y1="10" x2="10" y2="40" stroke="url(#iconGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Diagonal -->
+      <path d="M 10 40 L 30 10" stroke="url(#iconGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Right vertical -->
+      <line x1="30" y1="10" x2="30" y2="40" stroke="url(#iconGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Second N -->
+    <g transform="translate(50, 30)">
+      <!-- Left vertical -->
+      <line x1="10" y1="10" x2="10" y2="40" stroke="url(#iconGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Diagonal -->
+      <path d="M 10 40 L 30 10" stroke="url(#iconGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Right vertical -->
+      <line x1="30" y1="10" x2="30" y2="40" stroke="url(#iconGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Decorative Dots -->
+  <circle cx="35" cy="80" r="2.5" fill="url(#iconGradient)"/>
+  <circle cx="85" cy="80" r="2.5" fill="url(#iconGradient)"/>
+
+  <!-- Bottom Accent Line -->
+  <line x1="30" y1="90" x2="90" y2="90" stroke="url(#iconGradient)" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
+</svg>
