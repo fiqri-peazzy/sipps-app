@@ -69,9 +69,9 @@
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 <div
-                                                    class="avatar avatar-sm bg-light-primary text-primary rounded-circle me-3">
-                                                    @if ($user->avatar)
-                                                        <img src="{{ asset('storage/' . $user->avatar) }}"
+                                                    class="avatar avatar-sm bg-light-primary text-primary rounded-circle me-3 overflow-hidden">
+                                                    @if ($user->avatar_url)
+                                                        <img src="{{ $user->avatar_url }}"
                                                             alt="avatar" class="rounded-circle"
                                                             style="width: 32px; height: 32px; object-fit: cover;">
                                                     @else

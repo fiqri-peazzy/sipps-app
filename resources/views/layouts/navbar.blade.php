@@ -69,8 +69,8 @@
                 <li class="dropdown pc-h-item header-user-profile">
                     <a class="pc-head-link head-link-primary dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown"
                         href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                        @if (Auth::user()->avatar)
-                            <img src="{{ Auth::user()->avatar }}" alt="user-image" class="user-avtar" />
+                        @if (Auth::user()->avatar_url)
+                            <img src="{{ Auth::user()->avatar_url }}" alt="user-image" class="user-avtar" />
                         @else
                             <img src="{{ asset('backend/assets/images/user/avatar-2.jpg') }}" alt="user-image"
                                 class="user-avtar" />

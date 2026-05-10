@@ -24,8 +24,12 @@
                                 <div
                                     class="h-20 w-20 rounded-3xl bg-linear-to-br from-primary to-secondary p-1 shadow-xl mb-4">
                                     <div
-                                        class="h-full w-full rounded-[1.25rem] bg-slate-900 flex items-center justify-center text-3xl font-white">
-                                        {{ substr(auth()->user()->name, 0, 1) }}
+                                        class="h-full w-full rounded-[1.25rem] bg-slate-900 flex items-center justify-center text-3xl font-white overflow-hidden">
+                                        @if (auth()->user()->avatar_url)
+                                            <img src="{{ auth()->user()->avatar_url }}" alt="avatar" class="w-full h-full object-cover">
+                                        @else
+                                            {{ substr(auth()->user()->name, 0, 1) }}
+                                        @endif
                                     </div>
                                 </div>
                                 <h5 class="text-xl text-white tracking-tight">{{ auth()->user()->name }}</h5>

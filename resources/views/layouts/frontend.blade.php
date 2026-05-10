@@ -65,8 +65,12 @@
                                 <button type="button"
                                     class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition-colors">
                                     <div
-                                        class="h-9 w-9 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm shadow-md">
-                                        {{ substr(auth()->user()->name, 0, 1) }}
+                                        class="h-9 w-9 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden">
+                                        @if (auth()->user()->avatar_url)
+                                            <img src="{{ auth()->user()->avatar_url }}" alt="avatar" class="w-full h-full object-cover">
+                                        @else
+                                            {{ substr(auth()->user()->name, 0, 1) }}
+                                        @endif
                                     </div>
                                     <i class="lni lni-chevron-down text-xs text-slate-400"></i>
                                 </button>

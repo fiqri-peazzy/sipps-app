@@ -4,7 +4,7 @@
          <div class="row">
              <div class="col-sm-6 my-1">
                  <p class="m-0">
-                     &copy; {{ date('Y') }} SIPPS - Sistem Informasi Penjadwalan Produksi Sablon
+                     &copy; {{ date('Y') }} NNCLOTHING PANEL ADMIN by Fiqriawan
                  </p>
              </div>
              <div class="col-sm-6 ms-auto my-1">

@@ -7,7 +7,7 @@
 
 @section('content')
     <!-- Hero Section with NNCLOTHING Branding -->
-    <section class="relative min-h-screen flex items-center overflow-hidden -mt-20 pt-32">
+    <section class="relative min-h-screen flex items-center overflow-hidden -mt-24 pt-32">
         <!-- Premium Gradient Background -->
         <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-primary/20"></div>
         <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/30 to-transparent"></div>
