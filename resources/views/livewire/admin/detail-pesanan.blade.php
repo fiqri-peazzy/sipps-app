@@ -133,6 +133,36 @@
                                                 </div>
                                             @endif
                                         @endforeach
+                                        
+                                        @if ($item->direct_design_file)
+                                            <div class="col-12 mt-3">
+                                                <div class="card border-info mb-0 shadow-none">
+                                                    <div class="card-header bg-info-subtle py-2">
+                                                        <h6 class="mb-0 text-info"><i class="ti ti-upload"></i> Desain Upload Langsung</h6>
+                                                    </div>
+                                                    <div class="card-body p-3 text-center">
+                                                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                                                            @php
+                                                                $files = is_array($item->direct_design_file) ? $item->direct_design_file : [$item->direct_design_file];
+                                                            @endphp
+                                                            @foreach($files as $file)
+                                                                <div class="d-flex flex-column align-items-center">
+                                                                    <img src="{{ Storage::url($file) }}" alt="Direct Design" class="img-fluid rounded mb-2 border" style="max-height: 200px; max-width: 200px; object-fit: contain;">
+                                                                    <div class="d-flex gap-1">
+                                                                        <a href="{{ Storage::url($file) }}" target="_blank" class="btn btn-xs btn-info" title="Buka Gambar">
+                                                                            <i class="ti ti-external-link"></i>
+                                                                        </a>
+                                                                        <a href="{{ Storage::url($file) }}" download class="btn btn-xs btn-outline-info" title="Download">
+                                                                            <i class="ti ti-download"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

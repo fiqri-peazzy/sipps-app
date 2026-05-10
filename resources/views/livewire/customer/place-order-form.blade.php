@@ -142,22 +142,68 @@
                             </div>
 
                             <!-- Design Actions -->
-                            <div class="mt-8 pt-8 border-t border-slate-50 flex flex-col md:flex-row items-center gap-6">
-                                <div class="flex-1">
+                            <div class="mt-8 pt-8 border-t border-slate-50">
+                                <div class="mb-4">
                                     <h5 class="text-sm font-bold text-slate-700">Kustomisasi Desain</h5>
-                                    <p class="text-xs text-slate-500">Unggah aset desain atau gunakan alat bantu editor
-                                        kami.</p>
+                                    <p class="text-xs text-slate-500">Pilih salah satu metode kustomisasi di bawah ini.</p>
                                 </div>
 
-                                <button type="button" wire:click="goToDesignEditor({{ $index }})"
-                                    class="w-full md:w-auto btn-premium bg-slate-900! rounded-2xl! flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
-                                    @if(!isset($item['produk_id']) || empty($item['produk_id'])) disabled @endif>
-                                    <i class="lni lni-brush group-hover:rotate-12 transition-transform"></i>
-                                    {{ (isset($item['design_config']) && $item['design_config']) ? 'Edit Desain Kaos' : 'Mulai Desain Kaos' }}
-                                </button>
+                                @if (isset($uploadedDesigns[$index]) && $uploadedDesigns[$index])
+                                    <div class="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="text-sm font-bold text-blue-700">Desain Berhasil Diunggah</p>
+                                            <button type="button" wire:click="removeUploadedDesign({{ $index }})" class="text-blue-700 hover:text-red-500 transition-colors p-1 bg-white rounded-lg shadow-sm border border-blue-200 text-xs px-2 flex items-center gap-1">
+                                                <i class="lni lni-trash"></i> Hapus
+                                            </button>
+                                        </div>
+                                        <div class="flex flex-wrap gap-3">
+                                            @php
+                                                $files = is_array($uploadedDesigns[$index]) ? $uploadedDesigns[$index] : [$uploadedDesigns[$index]];
+                                            @endphp
+                                            @foreach($files as $file)
+                                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-blue-100 shadow-sm">
+                                                <div class="h-10 w-10 rounded-lg overflow-hidden shrink-0">
+                                                    <img src="{{ $file->temporaryUrl() }}" class="w-full h-full object-cover">
+                                                </div>
+                                                <p class="text-[10px] text-blue-600 font-medium truncate max-w-[100px]">
+                                                    {{ $file->getClientOriginalName() }}
+                                                </p>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="flex flex-col md:flex-row gap-4">
+                                        <!-- Opsi 1: Upload Langsung -->
+                                        <label class="flex-1 cursor-pointer bg-white border-2 border-dashed border-slate-300 hover:border-primary text-slate-700 hover:text-primary hover:bg-primary/5 rounded-2xl flex flex-col items-center justify-center gap-1.5 py-3 transition-all relative"
+                                            @if(!isset($item['produk_id']) || empty($item['produk_id'])) style="opacity:0.5; pointer-events:none;" @endif>
+                                            
+                                            <div wire:loading wire:target="uploadedDesigns.{{ $index }}" class="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center z-10">
+                                                <svg class="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </div>
+
+                                            <i class="lni lni-upload text-xl"></i>
+                                            <span class="text-sm font-bold">Upload Desain Jadi</span>
+                                            <span class="text-[10px] text-slate-400 font-medium px-4 text-center">Bisa pilih lebih dari 1 gambar (PNG/JPG)</span>
+                                            <input type="file" multiple wire:model.live="uploadedDesigns.{{ $index }}" class="hidden" accept="image/png, image/jpeg, image/jpg">
+                                        </label>
+
+                                        <!-- Opsi 2: Editor Desain -->
+                                        <button type="button" wire:click="goToDesignEditor({{ $index }})"
+                                            class="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl flex flex-col items-center justify-center gap-1.5 py-3 group transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            @if(!isset($item['produk_id']) || empty($item['produk_id'])) disabled @endif>
+                                            <i class="lni lni-brush text-xl group-hover:rotate-12 transition-transform"></i>
+                                            <span class="text-sm font-bold">{{ (isset($item['design_config']) && $item['design_config']) ? 'Edit Desain Kaos' : 'Mulai Desain Kaos' }}</span>
+                                            <span class="text-[10px] text-slate-300 font-medium px-4 text-center">Gunakan Editor Online</span>
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
 
-                            @if (isset($item['design_config']) && $item['design_config'])
+                            @if (isset($item['design_config']) && $item['design_config'] && !isset($uploadedDesigns[$index]))
                                 <div
                                     class="mt-4 p-4 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-between">
                                     <div class="flex items-center gap-3">

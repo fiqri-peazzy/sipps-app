@@ -11,9 +11,12 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Livewire\WithFileUploads;
 
 class PlaceOrderForm extends Component
 {
+    use WithFileUploads;
+
     // Data
     public $jenisSablons;
     public $ukurans;
@@ -22,6 +25,7 @@ class PlaceOrderForm extends Component
     // Form Order Items
     public $orderItems = [];
     public $itemIndex = 0;
+    public $uploadedDesigns = [];
 
     // Shipping Address
     public $penerima_nama;
@@ -426,6 +430,13 @@ class PlaceOrderForm extends Component
         }
     }
 
+    public function removeUploadedDesign($index)
+    {
+        if (isset($this->uploadedDesigns[$index])) {
+            unset($this->uploadedDesigns[$index]);
+        }
+    }
+
     public function goToDesignEditor($index)
     {
         // Pastikan index ada
@@ -590,13 +601,26 @@ class PlaceOrderForm extends Component
                 'kode_pos' => $this->kode_pos,
             ]);
 
-            foreach ($this->orderItems as $item) {
+            foreach ($this->orderItems as $idx => $item) {
                 $produk = Produk::find($item['produk_id']);
                 $designConfig = $item['design_config'];
+                $directDesignFile = null;
 
-                // Pindahkan file dari temp ke permanent
-                if ($designConfig && isset($designConfig['file_metadata'])) {
-                    $designConfig = $this->moveTempFilesToPermanent($designConfig, $order->order_number);
+                // Handle direct upload
+                if (isset($this->uploadedDesigns[$idx]) && $this->uploadedDesigns[$idx]) {
+                    $paths = [];
+                    $files = is_array($this->uploadedDesigns[$idx]) ? $this->uploadedDesigns[$idx] : [$this->uploadedDesigns[$idx]];
+                    foreach ($files as $file) {
+                        $fileName = $file->hashName();
+                        $path = $file->storeAs("designs/direct_uploads/{$order->order_number}", $fileName, 'public');
+                        $paths[] = $path;
+                    }
+                    $directDesignFile = $paths;
+                } else {
+                    // Pindahkan file dari temp ke permanent jika bukan direct upload
+                    if ($designConfig && isset($designConfig['file_metadata'])) {
+                        $designConfig = $this->moveTempFilesToPermanent($designConfig, $order->order_number);
+                    }
                 }
 
                 OrderItem::create([
@@ -609,6 +633,7 @@ class PlaceOrderForm extends Component
                     'harga_satuan' => $item['harga_satuan'],
                     'subtotal' => $item['subtotal'],
                     'design_config' => $designConfig,
+                    'direct_design_file' => $directDesignFile,
                     'catatan_item' => $item['catatan_item'],
                     'deadline' => now()->addDays($produk->estimasi_hari ?? 3),
                 ]);

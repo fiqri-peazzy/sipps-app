@@ -19,6 +19,7 @@ class OrderItem extends Model
         'harga_satuan',
         'subtotal',
         'design_config', // JSON field
+        'direct_design_file',
         'catatan_item',
         'priority_score',
         'deadline',
@@ -34,6 +35,7 @@ class OrderItem extends Model
         'subtotal' => 'decimal:2',
         'deadline' => 'datetime',
         'design_config' => 'array',
+        'direct_design_file' => 'array',
         'complexity_reviewed_at' => 'datetime',
         'production_started_at' => 'datetime',
         'last_priority_calculated_at' => 'datetime',
