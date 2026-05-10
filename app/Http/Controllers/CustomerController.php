@@ -69,7 +69,7 @@ class CustomerController extends Controller
     public function showOrder(Order $order)
     {
         // Pastikan user hanya bisa melihat order mereka sendiri
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             abort(403);
         }
 
@@ -80,7 +80,7 @@ class CustomerController extends Controller
 
     public function cancelOrder(Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             abort(403);
         }
 
