@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\OrderItem;
 class OwnerController extends Controller
 {
     public function dashboard()
@@ -49,8 +49,8 @@ class OwnerController extends Controller
             ->join('jenis_sablons', 'produks.jenis_sablon_id', '=', 'jenis_sablons.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->whereIn('orders.status', ['paid', 'verified', 'in_production', 'ready_to_ship', 'shipped', 'completed'])
-            ->select('jenis_sablons.nama_sablon', DB::raw('SUM(order_items.subtotal) as total'))
-            ->groupBy('jenis_sablons.nama_sablon')
+            ->select('jenis_sablons.nama as nama_sablon', DB::raw('SUM(order_items.subtotal) as total'))
+            ->groupBy('jenis_sablons.nama')
             ->get();
 
         // Monthly comparison (current vs previous month)
@@ -81,8 +81,8 @@ class OwnerController extends Controller
         $topSellingProducts = DB::table('order_items')
             ->join('produks', 'order_items.produk_id', '=', 'produks.id')
             ->join('jenis_sablons', 'produks.jenis_sablon_id', '=', 'jenis_sablons.id')
-            ->select('jenis_sablons.nama_sablon', DB::raw('SUM(order_items.quantity) as total_qty'))
-            ->groupBy('jenis_sablons.nama_sablon')
+            ->select('jenis_sablons.nama as nama_sablon', DB::raw('SUM(order_items.quantity) as total_qty'))
+            ->groupBy('jenis_sablons.nama')
             ->orderByDesc('total_qty')
             ->take(5)
             ->get();
