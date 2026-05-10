@@ -102,7 +102,7 @@ class CustomerController extends Controller
      */
     public function returnForm(Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             abort(403, 'Unauthorized access');
         }
 

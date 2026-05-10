@@ -24,7 +24,7 @@ class PaymentController extends Controller
     public function initiatePayment(Order $order)
     {
         // Validasi: pastikan order milik user yang login
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized access',
@@ -285,7 +285,7 @@ class PaymentController extends Controller
     public function checkStatus(Order $order)
     {
         // Validasi ownership
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',

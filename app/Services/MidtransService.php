@@ -17,6 +17,11 @@ class MidtransService
         Config::$isProduction = config('services.midtrans.is_production');
         Config::$isSanitized = config('services.midtrans.is_sanitized');
         Config::$is3ds = config('services.midtrans.is_3ds');
+
+        // Workaround untuk hosting yang bermasalah dengan SSL certificate (Sandbox)
+        // Config::$curlOptions = [
+        //     CURLOPT_SSL_VERIFYPEER => false,
+        // ];
     }
 
     /**
