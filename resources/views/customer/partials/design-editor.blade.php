@@ -177,22 +177,7 @@
                         </button>
                     </div>
 
-                    <div class="h-px bg-slate-800"></div>
 
-                    <!-- Text Tool -->
-                    <div class="space-y-4">
-                        <h6
-                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                            <i class="lni lni-text-format"></i> Typography
-                        </h6>
-                        <input type="text" id="text-input" placeholder="Tulis teks disini..."
-                            class="w-full h-12 bg-slate-800 border-none rounded-xl px-4 text-sm font-bold placeholder:text-slate-600 focus:ring-2 focus:ring-primary/50 transition-all">
-                        <button type="button"
-                            class="w-full py-4 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                            id="btn-add-text">
-                            <i class="lni lni-plus"></i> Tambah Teks
-                        </button>
-                    </div>
                 </div>
             </div>
 

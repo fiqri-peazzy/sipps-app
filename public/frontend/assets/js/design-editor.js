@@ -133,11 +133,6 @@
                     self.uploadImage();
                 });
 
-            $("#btn-add-text")
-                .off("click")
-                .on("click", function () {
-                    self.addText();
-                });
 
             $("#btn-delete")
                 .off("click")
@@ -358,42 +353,7 @@
             );
         },
 
-        addText: function () {
-            const text = $("#text-input").val().trim();
 
-            if (!text) {
-                this.showAlert("Masukkan teks terlebih dahulu", "warning");
-                return;
-            }
-
-            const canvas = this.canvases[this.currentArea];
-            if (!canvas) {
-                console.error(
-                    "Canvas not found for current area:",
-                    this.currentArea,
-                );
-                return;
-            }
-
-            const fabricText = new fabric.Text(text, {
-                left: canvas.width / 2, // Center of 1200
-                top: canvas.height / 2, // Center of 600
-                originX: "center",
-                originY: "center",
-                fontSize: 48,
-                fontFamily: "Arial",
-                fill: "#000000",
-                fontWeight: "bold",
-            });
-
-            canvas.add(fabricText);
-            canvas.setActiveObject(fabricText);
-            canvas.renderAll();
-
-            const textCount = canvas.getObjects().filter(o => o.type === 'text').length;
-            this.showAlert("Teks berhasil ditambahkan (" + textCount + " Teks di area ini)", "success");
-            this.updateSummary();
-        },
 
         deleteSelected: function () {
             const canvas = this.canvases[this.currentArea];
@@ -458,11 +418,8 @@
 
                 if (count > 0) {
                     const imgCount = objects.filter(o => o.type === 'image').length;
-                    const textCount = objects.filter(o => o.type === 'text').length;
-
                     let summaryText = "";
                     if (imgCount > 0) summaryText += imgCount + " Gbr";
-                    if (textCount > 0) summaryText += (summaryText ? ", " : "") + textCount + " Teks";
 
                     $badge.text(summaryText)
                         .removeClass('text-slate-400 bg-white border-slate-100')
@@ -544,20 +501,7 @@
                                     obj,
                                 );
                             }
-                        } else if (obj.type === "text") {
-                            fileMetadata[area].push({
-                                type: "text",
-                                text: obj.text || "",
-                                fontFamily: obj.fontFamily || "Arial",
-                                fontSize: obj.fontSize || 16,
-                                fill: obj.fill || "#000000",
-                                position: {
-                                    left: Math.round(obj.left || 0),
-                                    top: Math.round(obj.top || 0),
-                                    angle: obj.angle || 0,
-                                },
-                            });
-                        }
+
                     });
                 }
             });
