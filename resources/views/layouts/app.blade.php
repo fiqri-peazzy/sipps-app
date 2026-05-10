@@ -89,6 +89,75 @@ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.3/dist/sweetalert2.min.css
     @stack('scripts')
     @livewireScripts
 
+    @auth
+    @if(auth()->user()->role === 'admin' && !session()->has('admin_order_notif_shown'))
+    @php
+        $pendingOrders = \App\Models\Order::where('status', 'paid')
+            ->with('user')
+            ->orderBy('paid_at', 'asc')
+            ->get();
+        session(['admin_order_notif_shown' => true]);
+    @endphp
+
+    @if($pendingOrders->count() > 0)
+    <div id="sipps-notif-backdrop" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.35);z-index:99990;display:flex;align-items:center;justify-content:center;">
+        <div id="sipps-notif-box" style="background:#fff;border-radius:20px;width:420px;max-width:calc(100vw - 32px);box-shadow:0 20px 60px rgba(0,0,0,0.18);overflow:hidden;">
+            <div style="padding:20px 20px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <p style="font-size:15px;font-weight:800;color:#1e293b;margin:0;">&#128276; {{ $pendingOrders->count() }} Pesanan Menunggu Konfirmasi</p>
+                    <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">Pesanan sudah dibayar dan perlu dikonfirmasi admin.</p>
+                </div>
+                <button id="sipps-notif-closebtn" type="button" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:#64748b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&times;</button>
+            </div>
+            <div style="padding:14px;max-height:320px;overflow-y:auto;">
+                @foreach($pendingOrders as $o)
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:12px;margin-bottom:8px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:700;color:#1e293b;">{{ $o->order_number }}</div>
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">{{ $o->user->name ?? '-' }} &middot; <strong>Rp {{ number_format($o->total_harga, 0, ',', '.') }}</strong></div>
+                        <div style="font-size:10px;color:#f59e0b;margin-top:2px;font-style:italic;">Menunggu {{ $o->paid_at ? $o->paid_at->diffForHumans() : '-' }}</div>
+                    </div>
+                    <a href="{{ route('admin.detail.pesanan', $o->id) }}" style="flex-shrink:0;padding:6px 14px;background:#6366f1;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">Lihat &rarr;</a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        var backdrop = document.getElementById('sipps-notif-backdrop');
+        var closeBtn = document.getElementById('sipps-notif-closebtn');
+        var box = document.getElementById('sipps-notif-box');
+        if (!backdrop) return;
+
+        function hideNotif() {
+            backdrop.style.display = 'none';
+        }
+
+        // Close button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', hideNotif);
+        }
+
+        // Click on backdrop (outside box) to close
+        backdrop.addEventListener('click', function(e) {
+            if (e.target === backdrop) {
+                hideNotif();
+            }
+        });
+
+        // Prevent clicks inside box from closing
+        if (box) {
+            box.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    })();
+    </script>
+    @endif
+    @endif
+    @endauth
+
 </body>
 
 </html>
