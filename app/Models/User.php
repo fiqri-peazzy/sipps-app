@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Order;
 
 class User extends Authenticatable
 {
@@ -40,8 +41,23 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    public function isKeuangan(): bool
+    {
+        return $this->role === 'keuangan';
+    }
+
     public function isCustomer(): bool
     {
         return $this->role === 'customer';
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

@@ -90,7 +90,7 @@ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.3/dist/sweetalert2.min.css
     @livewireScripts
 
     @auth
-    @if(auth()->user()->role === 'admin' && !session()->has('admin_order_notif_shown'))
+    @if(in_array(auth()->user()->role, ['admin', 'owner', 'keuangan']) && !session()->has('admin_order_notif_shown'))
     @php
         $pendingOrders = \App\Models\Order::where('status', 'paid')
             ->with('user')
@@ -117,7 +117,7 @@ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.3/dist/sweetalert2.min.css
                         <div style="font-size:11px;color:#64748b;margin-top:2px;">{{ $o->user->name ?? '-' }} &middot; <strong>Rp {{ number_format($o->total_harga, 0, ',', '.') }}</strong></div>
                         <div style="font-size:10px;color:#f59e0b;margin-top:2px;font-style:italic;">Menunggu {{ $o->paid_at ? $o->paid_at->diffForHumans() : '-' }}</div>
                     </div>
-                    <a href="{{ route('admin.detail.pesanan', $o->id) }}" style="flex-shrink:0;padding:6px 14px;background:#6366f1;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">Lihat &rarr;</a>
+                    <a href="{{ auth()->user()->role === 'keuangan' ? route('keuangan.detail.pesanan', $o->id) : route('admin.detail.pesanan', $o->id) }}" style="flex-shrink:0;padding:6px 14px;background:#6366f1;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">Lihat &rarr;</a>
                 </div>
                 @endforeach
             </div>

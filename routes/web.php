@@ -10,6 +10,8 @@ use App\Http\Controllers\DesignFileController;
 use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\KeuanganController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/layanan', [HomeController::class, 'layanan'])->name('layanan');
@@ -18,7 +20,7 @@ Route::post('/contact', [HomeController::class, 'contact'])->name('contact.store
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth', 'verified', 'role:admin'])
+    ->middleware(['auth', 'verified', 'role:admin,owner'])
     ->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/produk', ManajemenProduk::class)->name('produk.index');
@@ -72,6 +74,29 @@ Route::prefix('admin')
         Route::get('/order/{orderId}/item/{itemId}/design/{area}/download', [DesignFileController::class, 'downloadAreaFiles'])->name('download.design.area');
         Route::get('/order/{orderId}/item/{itemId}/design/download-all', [DesignFileController::class, 'downloadItemDesigns'])->name('download.design.item');
         Route::get('/order/{orderId}/design/download-all', [DesignFileController::class, 'downloadOrderDesigns'])->name('download.design.order');
+    });
+
+// Owner specific routes (Executive Dashboard)
+Route::prefix('owner')
+    ->name('owner.')
+    ->middleware(['auth', 'verified', 'role:owner'])
+    ->group(function () {
+        Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/analisis-keuntungan', [OwnerController::class, 'analisisKeuntungan'])->name('analisis.keuntungan');
+        Route::get('/rekap-eksekutif', [OwnerController::class, 'rekapEksekutif'])->name('rekap.eksekutif');
+    });
+
+// Keuangan routes group
+Route::prefix('keuangan')
+    ->name('keuangan.')
+    ->middleware(['auth', 'verified', 'role:keuangan'])
+    ->group(function () {
+        Route::get('/dashboard', [KeuanganController::class, 'dashboard'])->name('dashboard');
+        Route::get('/pembayaran', [KeuanganController::class, 'pembayaran'])->name('pembayaran.index');
+        Route::get('/detail-pesanan/{id}', [KeuanganController::class, 'detailPesanan'])->name('detail.pesanan');
+        Route::post('/verifikasi/{order}', [KeuanganController::class, 'verifikasi'])->name('verifikasi');
+        Route::get('/laporan', [KeuanganController::class, 'laporan'])->name('laporan.index');
+        Route::get('/laporan/export', [KeuanganController::class, 'exportExcel'])->name('laporan.export');
     });
 
 // Customer routes group

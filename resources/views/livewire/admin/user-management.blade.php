@@ -87,10 +87,10 @@
                                         <td>
                                             <select class="form-select form-select-sm w-auto"
                                                 wire:change="changeRole({{ $user->id }}, $event.target.value)">
-                                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>
-                                                    Admin</option>
-                                                <option value="customer"
-                                                    {{ $user->role == 'customer' ? 'selected' : '' }}>Customer</option>
+                                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                                <option value="owner" {{ $user->role == 'owner' ? 'selected' : '' }}>Owner</option>
+                                                <option value="keuangan" {{ $user->role == 'keuangan' ? 'selected' : '' }}>Keuangan</option>
+                                                <option value="customer" {{ $user->role == 'customer' ? 'selected' : '' }}>Customer</option>
                                             </select>
                                         </td>
                                         <td>{{ $user->phone ?? '-' }}</td>

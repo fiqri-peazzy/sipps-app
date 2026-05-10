@@ -9,14 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        if (Auth::user()->role !== $role) {
-            abort(403, 'Unauthorized access');
+        if (!in_array(Auth::user()->role, $roles)) {
+            abort(403, 'UNAUTHORIZED ACCESS');
         }
 
         return $next($request);

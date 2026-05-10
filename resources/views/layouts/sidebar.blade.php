@@ -9,6 +9,32 @@
         </div>
         <div class="navbar-content">
             <ul class="pc-navbar">
+                @if(auth()->user()->role === 'owner')
+                <li class="pc-item pc-caption">
+                    <label>Pimpinan</label>
+                    <i class="ti ti-crown"></i>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('owner.dashboard') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+                        <span class="pc-mtext">Dashboard Executive</span>
+                    </a>
+                </li>
+                <li class="pc-item {{ request()->routeIs('owner.analisis.keuntungan') ? 'active' : '' }}">
+                    <a href="{{ route('owner.analisis.keuntungan') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-chart-arrows"></i></span>
+                        <span class="pc-mtext">Analisis Keuntungan</span>
+                    </a>
+                </li>
+                <li class="pc-item {{ request()->routeIs('owner.rekap.eksekutif') ? 'active' : '' }}">
+                    <a href="{{ route('owner.rekap.eksekutif') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-report-analytics"></i></span>
+                        <span class="pc-mtext">Rekap Eksekutif</span>
+                    </a>
+                </li>
+                @endif
+
+                @if(in_array(auth()->user()->role, ['admin', 'owner']))
                 <li class="pc-item pc-caption">
                     <label>Dashboard</label>
                     <i class="ti ti-dashboard"></i>
@@ -19,7 +45,9 @@
                         <span class="pc-mtext">Dashboard Admin</span>
                     </a>
                 </li>
+                @endif
 
+                @if(in_array(auth()->user()->role, ['admin', 'owner']))
                 <li class="pc-item pc-caption">
                     <label>Manajemen Pesanan</label>
                     <i class="ti ti-shopping-cart"></i>
@@ -112,7 +140,6 @@
                     </a>
                     <ul class="pc-submenu"
                         style="{{ request()->routeIs('admin.reports.*') ? 'display: block;' : '' }}">
-                        <!-- Export Reports -->
                         <li class="pc-item {{ request()->routeIs('admin.reports.orders') ? 'active' : '' }}">
                             <a class="pc-link" href="{{ route('admin.reports.orders') }}">
                                 <i class="ti ti-file-invoice"></i> Laporan Pesanan
@@ -130,12 +157,9 @@
                                 <span class="badge bg-success badge-sm ms-2" style="font-size: 8px;">Skripsi</span>
                             </a>
                         </li>
-
                         <li class="pc-item">
                             <hr class="my-2 border-top border-secondary opacity-25">
                         </li>
-
-                        <!-- Dashboard Analytics -->
                         <li class="pc-item {{ request()->routeIs('admin.reports.dashboard') ? 'active' : '' }}">
                             <a class="pc-link" href="{{ route('admin.reports.dashboard') }}">
                                 <i class="ti ti-dashboard"></i> Dashboard Analitik
@@ -143,6 +167,32 @@
                         </li>
                     </ul>
                 </li>
+                @endif
+
+                @if(auth()->user()->role === 'keuangan')
+                <li class="pc-item pc-caption">
+                    <label>Keuangan</label>
+                    <i class="ti ti-cash"></i>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('keuangan.dashboard') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+                        <span class="pc-mtext">Dashboard Keuangan</span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('keuangan.pembayaran.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-receipt-2"></i></span>
+                        <span class="pc-mtext">Verifikasi Pembayaran</span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('keuangan.laporan.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-file-invoice"></i></span>
+                        <span class="pc-mtext">Laporan Keuangan</span>
+                    </a>
+                </li>
+                @endif
 
             </ul>
         </div>

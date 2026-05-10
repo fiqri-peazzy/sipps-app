@@ -22,6 +22,16 @@ new #[Layout('layouts.guest')] class extends Component {
             return;
         }
 
+        if (Auth::user()->isOwner()) {
+            $this->redirectIntended(default: route('owner.dashboard', absolute: false), navigate: true);
+            return;
+        }
+
+        if (Auth::user()->isKeuangan()) {
+            $this->redirectIntended(default: route('keuangan.dashboard', absolute: false), navigate: true);
+            return;
+        }
+
         $this->redirectIntended(default: route('customer.dashboard', absolute: false), navigate: true);
     }
 }; ?>

@@ -23,7 +23,7 @@ class UserManagement extends Component
     public function changeRole($userId, $newRole)
     {
         $user = User::find($userId);
-        if ($user && in_array($newRole, ['admin', 'customer'])) {
+        if ($user && in_array($newRole, ['admin', 'customer', 'owner', 'keuangan'])) {
             $user->update(['role' => $newRole]);
             session()->flash('success', "Role user {$user->name} berhasil diperbarui menjadi {$newRole}.");
         }
