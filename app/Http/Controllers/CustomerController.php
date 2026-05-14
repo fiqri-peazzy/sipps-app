@@ -78,23 +78,36 @@ class CustomerController extends Controller
         return view('customer.orders.show', compact('order'));
     }
 
-    public function cancelOrder(Order $order)
+    public function cancelOrder(Order $order, Request $request)
     {
         if ($order->user_id != Auth::id()) {
             abort(403);
         }
 
-        if ($order->status !== 'pending_payment') {
-            return back()->with('error', 'Hanya pesanan yang belum dibayar yang dapat dibatalkan.');
+        // Status yang diperbolehkan untuk dibatalkan oleh customer
+        $allowedStatus = ['pending_payment', 'paid', 'verified'];
+        
+        if (!in_array($order->status, $allowedStatus)) {
+            return back()->with('error', 'Pesanan tidak dapat dibatalkan pada tahap ini.');
         }
 
-        $order->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-            'cancel_reason' => 'Dibatalkan oleh pelanggan'
-        ]);
-
-        return redirect()->route('customer.orders.index')->with('success', 'Pesanan berhasil dibatalkan.');
+        if ($order->status === 'pending_payment') {
+            // Jika belum bayar, langsung batalkan
+            $order->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancel_reason' => 'Dibatalkan oleh pelanggan'
+            ]);
+            return redirect()->route('customer.orders.index')->with('success', 'Pesanan berhasil dibatalkan.');
+        } else {
+            // Jika sudah bayar, ajukan pembatalan (menunggu refund admin)
+            $order->update([
+                'status' => 'cancel_requested',
+                'cancelled_at' => now(),
+                'cancel_reason' => $request->reason ?? 'Dibatalkan oleh pelanggan (Menunggu Refund)'
+            ]);
+            return back()->with('success', 'Permintaan pembatalan telah diajukan. Mohon tunggu konfirmasi admin dan pengembalian dana.');
+        }
     }
 
     /**

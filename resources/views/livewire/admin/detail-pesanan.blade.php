@@ -239,6 +239,52 @@
                         @endif
                     </div>
                 </div>
+                <!-- Aksi Pembatalan (Refund) -->
+                @if ($order->status == 'cancel_requested')
+                    <div class="card mt-3">
+                        <div class="card-header bg-danger">
+                            <h5 class="text-white mb-0">Permintaan Pembatalan</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning mb-3">
+                                <i class="ti ti-info-circle"></i> Pelanggan meminta pembatalan pesanan.
+                                @if($order->cancel_reason)
+                                    <hr>
+                                    <strong>Alasan:</strong> {{ $order->cancel_reason }}
+                                @endif
+                            </div>
+                            
+                            <form wire:submit.prevent="konfirmasiRefund">
+                                <div class="mb-3">
+                                    <label class="form-label font-bold">Bukti Transfer Pengembalian Dana</label>
+                                    <input type="file" wire:model="refundProof" class="form-control @error('refundProof') is-invalid @enderror">
+                                    @error('refundProof') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    
+                                    @if ($refundProof)
+                                        <div class="mt-2 text-center">
+                                            <img src="{{ $refundProof->temporaryUrl() }}" class="img-fluid rounded border" style="max-height: 150px">
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label font-bold">Catatan Refund (Opsional)</label>
+                                    <textarea wire:model="refundNotes" class="form-control" rows="2" placeholder="Contoh: Dana telah dikembalikan ke rekening BCA xxxx"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-danger w-100" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="konfirmasiRefund">
+                                        <i class="ti ti-check"></i> Konfirmasi Refund & Batalkan
+                                    </span>
+                                    <span wire:loading wire:target="konfirmasiRefund">
+                                        <i class="ti ti-loader animate-spin"></i> Memproses...
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Aksi Verifikasi -->
                 @if ($order->status == 'paid')
                     <div class="card mt-3">

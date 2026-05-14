@@ -44,6 +44,8 @@ class Order extends Model
         'completed_at',
         'cancelled_at',
         'cancel_reason',
+        'refund_proof',
+        'refunded_at',
         'berat_total',      // Berat total pesanan (gram)
         'province_id',      // ID provinsi RajaOngkir
         'city_id',          // ID kota RajaOngkir
@@ -63,6 +65,7 @@ class Order extends Model
         'shipped_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'refunded_at' => 'datetime',
     ];
 
     // Relationships
@@ -153,6 +156,7 @@ class Order extends Model
             'shipped' => 'Sedang Dikirim',
             'completed' => 'Selesai',
             'cancelled' => 'Dibatalkan',
+            'cancel_requested' => 'Menunggu Pembatalan',
             'return_requested' => 'Ajuan Return',
             'returned' => 'Dikembalikan',
         ];
@@ -171,6 +175,7 @@ class Order extends Model
             'shipped' => 'primary',
             'completed' => 'success',
             'cancelled' => 'danger',
+            'cancel_requested' => 'danger',
             'return_requested' => 'warning',
             'returned' => 'danger',
         ];

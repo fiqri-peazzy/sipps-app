@@ -66,7 +66,7 @@
                                                  @elseif($order->status == 'shipped' || $order->status == 'ready_to_ship') 80%
                                                  @elseif($order->status == 'in_production') 60%
                                                  @elseif($order->status == 'verified') 40%
-                                                 @elseif($order->status == 'paid' || $order->status == 'return_requested') 20%
+                                                 @elseif($order->status == 'paid' || $order->status == 'cancel_requested' || $order->status == 'return_requested') 20%
                                                  @else 0% @endif">
                             </div>
                         </div>
@@ -84,7 +84,7 @@
                             $currentStatus = $order->status;
                             $reachedSteps = match ($currentStatus) {
                                 'pending_payment' => [],
-                                'paid', 'return_requested' => ['paid'],
+                                'paid', 'cancel_requested', 'return_requested' => ['paid'],
                                 'verified' => ['paid', 'verified'],
                                 'in_production' => ['paid', 'verified', 'in_production'],
                                 'ready_to_ship', 'shipped' => ['paid', 'verified', 'in_production', 'shipped'],
@@ -387,7 +387,9 @@
                             class="w-full btn-premium flex items-center justify-center gap-3 py-4!">
                             <i class="lni lni-credit-cards"></i> Bayar Sekarang
                         </button>
+                    @endif
 
+                    @if (in_array($order->status, ['pending_payment', 'paid', 'verified']))
                         <button type="button" onclick="confirmCancel()"
                             class="w-full h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center font-black text-sm hover:bg-red-100 transition-all gap-2 border border-red-100">
                             <i class="lni lni-close"></i> Batalkan Pesanan
@@ -397,15 +399,32 @@
                             method="POST" class="hidden">
                             @csrf
                         </form>
+                    @endif
 
-                        @if ($order->payment_expired_at)
-                            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-center">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Batas
-                                    Pembayaran</p>
-                                <span
-                                    class="text-xs font-bold text-amber-900">{{ $order->payment_expired_at->format('d M Y, H:i') }}</span>
-                            </div>
-                        @endif
+                    @if ($order->status == 'cancel_requested')
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-center">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Status Pembatalan</p>
+                            <span class="text-xs font-bold text-amber-900">Menunggu Konfirmasi Admin & Pengembalian Dana</span>
+                        </div>
+                    @endif
+
+                    @if ($order->status == 'cancelled' && $order->refund_proof)
+                        <div class="p-4 rounded-2xl bg-green-50 border border-green-100 text-center">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-green-600 mb-2">Dana Telah Dikembalikan</p>
+                            <a href="{{ Storage::url($order->refund_proof) }}" target="_blank"
+                                class="w-full h-12 inline-flex items-center justify-center gap-2 bg-green-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-green-700 transition-all">
+                                <i class="lni lni-image"></i> Lihat Bukti Refund
+                            </a>
+                        </div>
+                    @endif
+
+                    @if ($order->status == 'pending_payment' && $order->payment_expired_at)
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-center">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Batas
+                                Pembayaran</p>
+                            <span
+                                class="text-xs font-bold text-amber-900">{{ $order->payment_expired_at->format('d M Y, H:i') }}</span>
+                        </div>
                     @endif
 
                     @if ($order->canRequestReturn())
@@ -541,14 +560,18 @@
         });
 
         function confirmCancel() {
+            const isPaid = {{ in_array($order->status, ['paid', 'verified']) ? 'true' : 'false' }};
+            const title = isPaid ? 'Ajukan Pembatalan?' : 'Batalkan Pesanan?';
+            const text = isPaid ? "Pesanan sudah dibayar. Admin akan memverifikasi dan mengembalikan dana Anda." : "Pesanan yang dibatalkan tidak dapat dikembalikan.";
+
             Swal.fire({
-                title: 'Batalkan Pesanan?',
-                text: "Pesanan yang dibatalkan tidak dapat dikembalikan.",
+                title: title,
+                text: text,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Batalkan!',
+                confirmButtonText: isPaid ? 'Ya, Ajukan Pembatalan' : 'Ya, Batalkan!',
                 cancelButtonText: 'Tutup'
             }).then((result) => {
                 if (result.isConfirmed) {

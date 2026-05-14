@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Order;
 use App\Helpers\DesignFileHelper;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithFileUploads;
 
 class DetailPesanan extends Component
 {
@@ -14,6 +15,10 @@ class DetailPesanan extends Component
     public $selectedItem = null;
     public $selectedArea = null;
     public $showDesignModal = false;
+    public $refundProof;
+    public $refundNotes;
+
+    use WithFileUploads;
 
     protected $listeners = ['refreshDetail' => '$refresh'];
 
@@ -147,6 +152,43 @@ class DetailPesanan extends Component
             $this->dispatch('show-toast', [
                 'type' => 'error',
                 'message' => 'Gagal menolak pesanan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function konfirmasiRefund()
+    {
+        $this->validate([
+            'refundProof' => 'required|image|max:2048', // Max 2MB
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $path = $this->refundProof->store('refund-proofs', 'public');
+
+            $this->order->update([
+                'status' => 'cancelled',
+                'refund_proof' => $path,
+                'refunded_at' => now(),
+                'cancel_reason' => $this->refundNotes ?? $this->order->cancel_reason ?? 'Pesanan dibatalkan & dana dikembalikan'
+            ]);
+
+            DB::commit();
+
+            $this->loadOrder();
+            $this->dispatch('show-toast', [
+                'type' => 'success',
+                'message' => 'Konfirmasi refund berhasil. Pesanan resmi dibatalkan.'
+            ]);
+            
+            $this->reset(['refundProof', 'refundNotes']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => 'Gagal konfirmasi refund: ' . $e->getMessage()
             ]);
         }
     }

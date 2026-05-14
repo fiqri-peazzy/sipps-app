@@ -192,13 +192,13 @@
                                         </label>
 
                                         <!-- Opsi 2: Editor Desain -->
-                                        <button type="button" wire:click="goToDesignEditor({{ $index }})"
+                                        <!-- <button type="button" wire:click="goToDesignEditor({{ $index }})"
                                             class="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl flex flex-col items-center justify-center gap-1.5 py-3 group transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             @if(!isset($item['produk_id']) || empty($item['produk_id'])) disabled @endif>
                                             <i class="lni lni-brush text-xl group-hover:rotate-12 transition-transform"></i>
                                             <span class="text-sm font-bold">{{ (isset($item['design_config']) && $item['design_config']) ? 'Edit Desain Kaos' : 'Mulai Desain Kaos' }}</span>
                                             <span class="text-[10px] text-slate-300 font-medium px-4 text-center">Gunakan Editor Online</span>
-                                        </button>
+                                        </button> -->
                                     </div>
                                 @endif
                             </div>
